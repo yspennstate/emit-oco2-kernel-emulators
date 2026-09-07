@@ -15,53 +15,27 @@
 
 \begin{abstract}
 Imaging-spectroscopy retrievals call an atmospheric radiative-transfer model many times per
-spectrum, and at mission data rates learned emulators of the tabulated physics are a practical
-necessity. We construct and compare emulators of a tabulated radiative-transfer model on the
-285-band EMIT wavelength grid, mapping a six-dimensional atmospheric and viewing state to four
-spectral components --- path radiance, direct flux, diffuse flux, and spherical albedo --- from
-which radiance and surface reflectance are derived. Every model is trained, selected and scored under a fresh-seed protocol: ten random splits,
-every choice made on each split's own validation rows, one test read per family, and the
-numbers reported as means and standard deviations over the splits. An exact Mat\'ern
-regression fitted on all 18{,}884 training rows with one length scale per input reaches
-$0.095\%$ relative radiance error at reflectance $0.7$, against $0.76\%$ for a cubic polynomial
-and $0.39\%$ for a fully connected network; its learned metric recovers the physics of the
-components, giving the relative azimuth a sixteen-fold longer length scale on the flux and
-albedo maps at every split. A kernel regression of the network's residuals brings the network
-to $0.14\%$, a kernel on the network's last-layer features to $0.098\%$, and a per-component
-convex stack of the heads, fitted on validation, to $0.087\%$, the best row of the table but by
-less than the spread across splits; per-coordinate winner-take-all selection does not transfer
-from validation to test. The residual correlations between the kernel and the network ensemble
-satisfy the classical admission condition for combination on every component, and the spherical
-albedo remains the hard component for every family. We also quantify an irreducible floor in
-the reflectance metric: within the deep water-vapor absorption windows the transmitted flux
-approaches zero and the inverse sensitivity is unbounded; at exactly zero flux, reflectance is
-non-identifiable, while finite-precision cancellation near that singularity produces a measured
-floor even when the exact tabulated components are supplied. Applied without
-structural change to the OCO-2 reduced-radiance problem of the companion paper, under the
-same ten-split protocol, the construction that spends the kernel's exactness inside the
-network's representation is again the one that pays, and a control isolates it: an exact
-Mat\'ern regression on a network's frozen features beats a ridge readout refitted on the same
-features at every split, on every band and under every training loss, while the ridge readout
-does not beat the network it reads out from in the metric that network was trained for. Three networks trained under losses that weight
-the output coefficients differently divide the two reported metrics between them, and because
-the reconstruction basis is orthogonal a per-coefficient choice made on validation takes
-both: it assigns the leading coefficient to the kernel head of the weighted-coefficient network
-at every split and the rest to that of the coefficient-trained one, and it is more accurate than the release's
-stored kernel-flow emulator on both metrics on all three bands. On the member predictions of
-both campaigns we then ask which combination rule is right. Random-matrix
-estimators that clean the covariance of the predictions lose; a minimum-variance stack on
-the covariance of the errors, in the reported metric and with nonnegative weights, has no
-tuned constant, gains $4.6\%$ over the best cross-validated heuristic on EMIT and loses
-$1.3\%$ on OCO-2, and a ladder of covariance cleaners shows that the constraint, not the
-cleaning, is the estimator; a label-free choice between the constrained and least-squares
-stacks removes the corpus dependence.
-A reevaluation on the release's 976 retrieval records, against the physics model's own
-radiances, gives the reference's per-coordinate Gaussian processes roughly $2.1$ to $5.3$
-times lower error than the budget-matched networks of the earlier single-split study. An
-identity check changes the interpretation: all 976 reduced states match stored test inputs
-within $6.67\times 10^{-16}$ (974 distinct test rows, with the same nearest row in all three
-bands). This is therefore a comparison against a different radiance target at
-test-associated states, not evidence from unseen states or from an independent third pool.
+spectrum, and at mission data rates a learned emulator of the tabulated physics is a practical
+necessity. We compare neural and kernel emulators, and their couplings, on a tabulated model
+over the 285-band EMIT wavelength grid and on the OCO-2 reduced-radiance problem, under one
+protocol: ten random splits, every choice made on each split's own validation rows, one test
+read per family, and every number reported with its spread across splits. On the EMIT table,
+whose map is smooth, six-dimensional and low rank, an exact Mat\'ern regression fitted on all
+18{,}884 training rows with one length scale per input is the strongest single model at
+$0.095\%$ relative radiance error, against $0.76\%$ for a cubic polynomial and $0.39\%$ for a
+fully connected network; its fitted metric recovers the physics, giving the relative azimuth a
+sixteen-fold longer length scale on the transmittances. A kernel regression of the network's
+residuals brings the network to $0.14\%$ and a per-component convex stack reaches $0.087\%$,
+while per-coordinate selection does not transfer from validation to test. On OCO-2 the input is
+higher-dimensional and the map rougher, and the kernel pays only inside the network's
+representation: it beats a ridge readout refitted on the same frozen features at every split,
+on every band and under every training loss, while that readout does not beat the network it
+reads out from in the metric the network was trained for. The two reported metrics are divided
+between networks trained under different losses, and because the reconstruction basis is
+orthogonal a per-coefficient choice made on validation holds both, giving lower error than the
+release's stored emulator on both metrics on all three bands. We also quantify a floor in the
+reflectance metric that no emulator can cross, set by absorption windows in which the
+transmitted flux vanishes and the inversion becomes ill-posed.
 \end{abstract}
 
 \section{Introduction}
@@ -356,10 +330,12 @@ network is no longer the lowest row: the ordering by radiance error is stack, pe
 DKR, corrected ensemble, corrected network, with the first four within $0.04$ percentage points
 of one another.
 
-\paragraph{Selection and stacking.} The per-coordinate selection among the six heads, made on
-validation, does not transfer: its test radiance error ($0.19\%$) is worse than four of the
-heads it selects among, and its spread over seeds ($\pm0.02$) is among the largest in the
-table. The per-component convex stack, with weights fitted on the validation rows in the
+\paragraph{Selection and stacking.} Both combiners here draw on the same six heads --- the
+isotropic exact kernel, the network, the five-network mean, the two corrected predictors and
+the feature kernel --- and not on the per-input kernel, which is the strongest single row of
+the table. The per-coordinate selection among those six, made on validation, does not
+transfer: its test radiance error ($0.19\%$) is worse than three of the heads it selects
+among, and its spread over seeds ($\pm0.02$) is among the largest in the table. The per-component convex stack, with weights fitted on the validation rows in the
 physical relative metric, is the best aggregate row ($0.57\%$ components, $0.087\%$ radiance,
 $0.048$ reflectance points) and wins the path radiance and the albedo columns outright; its gain
 over the best single model is eight percent on the radiance and on the components, of the
@@ -583,8 +559,7 @@ and member coincide exactly. The larger-budget relative-loss ensembles add a fin
 (first row of Table~\ref{tab:ret}): they improve strong CO$_2$ on the records by forty
 percent, leave O$_2$ essentially unchanged, and are worse on weak CO$_2$ than the smaller
 ensembles they dominate under the stored test metric. This reversal shows target sensitivity
-at the same test-associated inputs; because the inputs overlap the test set, it is not evidence
-of generalization to a third distribution.
+at the same test-associated inputs.
 
 \begin{table}[t]
 \centering\small
