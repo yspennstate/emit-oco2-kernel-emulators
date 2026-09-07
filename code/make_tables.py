@@ -166,34 +166,53 @@ def oco2_ensembles(losses):
 
 # --------------------------------------------------------------- the further corpora
 def corpora():
-    order = [("advection", "Advection"), ("burgers_nu0.1", "Burgers $\\nu=0.1$"),
-             ("burgers_nu0.01", "Burgers $\\nu=0.01$"), ("burgers_nu0.001", "Burgers $\\nu=0.001$"),
-             ("trl2d", "2D turbulent radiative layer"), ("climsim", "ClimSim"),
-             ("pkanrtm", "Radiative-transfer corrections")]
-    fams = [("ridge", "cubic ridge"), ("krr", "KRR"), ("krr_kf", "KRR, learned metric"),
+    """One row per configuration. The globs are exact: the rank-1024 rerun of the turbulent
+    radiative layer and the multi-fidelity configuration of the correction-coefficient corpus are
+    separate problems from the rows they would otherwise be pooled into, and are excluded or
+    given rows of their own."""
+    order = [
+        ("Advection", "advection_s*_bench.json", None),
+        ("Burgers $\\nu=0.1$", "burgers_nu0.1_s*_bench.json", None),
+        ("Burgers $\\nu=0.01$", "burgers_nu0.01_s*_bench.json", None),
+        ("Burgers $\\nu=0.001$", "burgers_nu0.001_s*_bench.json", None),
+        ("Turbulent radiative layer", "trl2d_s*_bench.json", "_r1024_"),
+        ("Active matter", "well_active_matter_s*_bench.json", None),
+        ("Helmholtz staircase", "well_helmholtz_staircase_s*_bench.json", None),
+        ("ClimSim", "climsim_s*_bench.json", None),
+        ("RT corrections, state inputs", "pkanrtm_s*_bench.json", "_lowfi_"),
+        ("RT corrections, multi-fidelity inputs", "pkanrtm_s*_lowfi_bench.json", None),
+    ]
+    fams = [("ridge", "ridge (linear)"), ("krr", "KRR"), ("krr_kf", "KRR, learned metric"),
             ("mlp", "network"), ("mlp_ens", "network ensemble"),
             ("mlp_resid", "network + residual KRR"), ("dkr", "kernel on features"),
             ("stack", "convex stack")]
     L = ["\\begin{tabular}{lrrrr" + "c" * len(fams) + "}", "\\toprule",
-         "corpus & $n$ & $d$ & $q$ & seeds & " + " & ".join(n for _, n in fams) + " \\\\", "\\midrule"]
+         "corpus & $n$ & $d$ & $q$ & runs & " + " & ".join(n for _, n in fams) + " \\\\", "\\midrule"]
     print("\n-- the further corpora")
-    for key, name in order:
-        recs = load(os.path.join(RES, "corpora", "%s_s*.json" % key))
+    for name, pattern, drop in order:
+        files = sorted(glob.glob(os.path.join(RES, "corpora", pattern)))
+        if drop:
+            files = [f for f in files if drop not in os.path.basename(f)]
+        recs = []
+        for f in files:
+            with open(f, encoding="utf-8") as fh:
+                recs.append(json.load(fh))
         if not recs:
-            print("  MISSING", key)
+            print("  MISSING", name)
             continue
         m = recs[0]
-        cells = []
-        means = {}
+        ns = sorted({r["n"] for r in recs})
+        ncol = format(ns[0], ",") if len(ns) == 1 else "%s--%s" % (format(ns[0], ","), format(ns[-1], ","))
+        cells, means = [], {}
         for fam, _ in fams:
             vals = [r["results"][fam]["test"] for r in recs if fam in r["results"]]
             cells.append(cell(vals, 2) if vals else "--")
             if vals:
                 means[fam] = st.mean(vals)
         L.append("%s & %s & %d & %d & %d & %s \\\\" % (
-            name, format(m["n"], ","), m["d"], m["q"], len(recs), " & ".join(cells)))
+            name, ncol, m["d"], m["q"], len(recs), " & ".join(cells)))
         best = sorted(means, key=means.get)
-        print("  %-32s %2d seeds, exact kernel solve: %s, lowest %s %.2f then %s %.2f" % (
+        print("  %-38s %2d runs, exact kernel solve: %s, lowest %s %.3f then %s %.3f" % (
             name, len(recs), m.get("exact"), best[0], means[best[0]], best[1], means[best[1]]))
     L += ["\\bottomrule", "\\end{tabular}"]
     write("table_corpora.tex", L)

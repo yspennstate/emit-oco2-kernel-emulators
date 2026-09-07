@@ -32,7 +32,7 @@ The three losses are the per-sample relative error on the reduced coefficients (
 error under the weights the reconstruction applies to each coefficient (`wnum`), and the relative
 error of the reconstructed radiance itself (`radx`).
 
-## Table 3, OCO-2 ensembles
+## Table 3, the OCO-2 ensemble campaign
 
 Driver: `code/oco2_curve.py`. Sixty records, `results/oco2_ensembles/oco_<band>_s<0-9>_n18000.json`
 for the single-network protocol and `..._n18000_m3.json` for the three-member protocol. The two
@@ -40,26 +40,39 @@ campaigns share their splits, which is why their deterministic rows agree to the
 and their network rows do not: the networks were trained independently, so the rows the two
 campaigns have in common are a replication rather than a copy.
 
-## Table 4, the further corpora
+## Table 5, the further emulation configurations
 
-Drivers: `code/bench_run.py` with the loaders in `code/bench_data.py`. Records under
-`results/corpora/`, one per corpus and split, with the corpus metadata (`n`, `d`, `q`, and whether
-the kernel solve was exact or capped) in the same file. Corpora with a capped solve are marked
-`"exact": false`.
+Drivers: `code/bench_run.py` with the loaders in `code/bench_data.py` and `code/well_data.py`.
+Records under `results/corpora/`, one per configuration and run, with the metadata (`n`, `d`, `q`,
+and whether the kernel solve was exact or capped) in the same file. The solve is exact when the
+training block has at most 20,000 rows and otherwise uses 6,000 Nyström landmarks; runs with a
+capped solve are marked `"exact": false`.
+
+Two rows are easy to pool by accident and must not be. The correction-coefficient corpus has two
+configurations, from the atmospheric state alone (`pkanrtm_s*_bench.json`, d = 8) and with the
+low-fidelity 6S coefficients added as inputs (`pkanrtm_s*_lowfi_bench.json`, d = 11); they are
+different problems and have a row each. The turbulent-radiative-layer row is the three rank-256
+runs (`trl2d_s0..s2`); `trl2d_s0_r1024_bench.json` is a rank-1024 rerun of seed 0 and belongs to
+neither. `code/make_tables.py` selects these files explicitly.
+
+The reference column of this table is a ridge regression linear in whatever inputs the models
+receive, not the cubic reference of Table 1, and it is not a member of the convex stack or of the
+per-coordinate selection, whose pool is the kernels, the networks, the residual correction and
+the feature kernel.
 
 ## The weighting study
 
 The result tables are under `results/stacking/`; each was produced from the member predictions of
 the EMIT and OCO-2 campaigns without retraining anything. `code/rmt_stack.py` is the estimator
 itself: the minimum-variance stack on the error covariance in the reported metric, with an
-intercept and nonnegative weights, plus the label-free blend that chooses between it and the
-least-squares stack. The tables report gains relative to a named baseline, in per cent, per cell,
+intercept and nonnegative weights, plus the blend that chooses between it and the least-squares
+stack by cross-validation on the calibration rows alone. The tables report gains relative to a named baseline, in per cent, per cell,
 where a cell is one split and one output group.
 
 ## Rebuilding the generated tables
 
 ```sh
-python code/make_tables.py            # writes paper/table_oco2_losses.tex and paper/table_corpora.tex
+python code/make_tables.py            # writes table_oco2_losses.tex, table_oco2_seeds.tex, table_corpora.tex
 ```
 
 The script also prints the paired counts and replication figures quoted in the text, so a reader

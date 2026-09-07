@@ -13,8 +13,8 @@ tables and figures are beside it.
 
 On the EMIT table the map is smooth, six-dimensional and low rank, and an exact Matérn
 regression fitted on all 18,884 training rows with one length scale per input is the strongest
-single model: 0.095% relative radiance error against 0.76% for a cubic polynomial and 0.39% for
-a fully connected network. Its fitted metric recovers the physics — the transmittances and the
+single model: 0.095% relative radiance error against 0.76% for a cubic polynomial ridge and
+0.39% for a fully connected network. Its fitted metric recovers the physics — the transmittances and the
 spherical albedo get a relative-azimuth length scale sixteen times longer than the other
 coordinates, at every split, and the path radiance does not. A convex stack of the heads is the
 best row of the table at 0.087%.
@@ -28,12 +28,13 @@ refitting.
 
 The two reported metrics on OCO-2 — relative error on the forty reduced coefficients, and on the
 reconstructed monochromatic radiance — are not proxies for each other, and which one a model wins
-is decided by the loss it was trained under. Because the reconstruction basis is orthogonal, a
-per-coefficient choice made on validation can hold both ends: it assigns the leading coefficient
-to the kernel head of the network trained on the weighted coefficients, at every split on every
-band, and the remaining thirty-nine to the kernel head of the coefficient-trained network. The
-result is more accurate than the release's stored kernel-flow emulator on both metrics on all
-three bands.
+is decided by the loss it was trained under. The reconstruction basis is orthogonal, so a
+per-coefficient choice acts on both metrics through the same per-coefficient errors rather than
+trading one against the other; whether it improves both is then a question for measurement, and
+here it does. The choice made on validation assigns the leading coefficient to the kernel head of
+the network trained on the weighted coefficients, at every split on every band, and the remaining
+thirty-nine to the kernel head of the coefficient-trained network. The result is more accurate
+than the release's stored kernel-flow emulator on both metrics on all three bands.
 
 A separate study of how the heads should be weighted finds that random-matrix estimators which
 clean the covariance of the member predictions lose, because the leading eigenvalue of that
@@ -50,7 +51,7 @@ results/     one JSON record per run, the evidence behind every table
   emit/               EMIT campaign, seeds 101-110, all model families
   oco2_losses/        OCO-2, three training losses x {network, ridge readout, kernel head}
   oco2_ensembles/     OCO-2, single-network and three-member campaigns, ten splits per band
-  corpora/            seven further emulation corpora under one protocol
+  corpora/            ten further emulation configurations under one protocol
   stacking/           the weighting study's result tables
 docs/        how to reproduce each table
 ```
@@ -58,16 +59,17 @@ docs/        how to reproduce each table
 ## Reproducing the tables
 
 `docs/REPRODUCE.md` maps each table and each quoted number to the records that produce it.
-`code/make_tables.py` regenerates the OCO-2 and corpora tables from `results/`; it needs only
-Python with NumPy.
+`code/make_tables.py` regenerates the two OCO-2 tables and the corpora table from `results/`
+alone; it needs only the standard library.
 
 ## Data
 
 The EMIT dataset consists of tabulated radiative-transfer evaluations generated at the Jet
 Propulsion Laboratory and is not redistributed here. The OCO-2 data and the reference emulator's
-stored predictions come from the release accompanying Lamminpää et al. (2025). The seven
-additional corpora are public: the operator suite of de Hoop et al. (2022), PDEBench, The Well,
-ClimSim, and the paired correction-coefficient corpus of Mazid and Rishe (2026). The per-run
+stored predictions come from the release accompanying Lamminpää et al. (2025). The ten
+further configurations use public releases: the operator suite of de Hoop et al. (2022),
+PDEBench, The Well, ClimSim, and the paired correction-coefficient corpus of Mazid and Rishe
+(2026), which is run in both of its configurations. The per-run
 summaries in `results/` are the numbers behind every table; the raw arrays, trained weights and
 prediction dumps are available from the author on request.
 
