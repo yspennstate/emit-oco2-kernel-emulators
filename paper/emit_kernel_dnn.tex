@@ -92,7 +92,7 @@ Section~\ref{sec:oco2} repeats the construction on the OCO-2 problem of the comp
 under the same protocol, where representation rather than smoothness is the lever;
 Section~\ref{sec:stack} takes the member predictions of both campaigns and asks which rule
 for combining heads is the right one, and why; and Section~\ref{sec:corpora} tests the
-reading on seven further emulation corpora under one protocol.
+reading on ten further emulation configurations with the same family set.
 
 \section{Data and protocol}\label{sec:data}
 
@@ -803,9 +803,9 @@ The other thing OCO-2 shows is that the training loss, not the architecture, is 
 selection can exploit. Networks trained on the coefficients and networks trained through the
 reconstruction sit at opposite ends of the two reported metrics, and because the
 reconstruction basis is orthogonal a per-coefficient choice made on validation can hold both
-ends at once: one coefficient of forty, assigned to the radiance-trained head at every split
-on every band, is what separates a selection that loses the radiance metric from one that
-wins it. The single-split version of this study reached neither metric and attributed the
+ends at once: one coefficient of forty, assigned at every split on every band to the kernel
+head of the network trained on the weighted coefficients, is what separates a selection that
+loses the radiance metric from one that wins it. The single-split version of this study reached neither metric and attributed the
 failure to a member set that varied architecture within one objective; the present campaign
 was built to test that attribution and confirms it.
 
@@ -813,10 +813,11 @@ Section~\ref{sec:stack} closes the loop on the combination rules: the convex sta
 the EMIT table is the constrained minimum-variance rule in its simplest form; the
 random-matrix cleaners that seemed the natural refinement act on the wrong matrix; the
 constraint is the estimator; and on a pool that one head dominates, no combination rule is
-worth more than a percent. Section~\ref{sec:corpora} then puts the reading on seven further
-corpora, where the family ordering follows the structure as it does here, a learned metric
-rescues a kernel on the state exactly where the plain kernel fails worst, and a combination
-is the lowest row on six of the seven.
+worth more than a percent. Section~\ref{sec:corpora} then puts the reading on ten further
+configurations, where the family ordering follows the structure as it does here, a learned
+metric rescues a kernel on the state exactly where the plain kernel fails worst, and a
+combination is the lowest row on eight of the ten and the second lowest on the other two ---
+both of them problems where a single family should win and does.
 
 The albedo sets the floor. Every family is an order of magnitude worse on $Y_4$ than on the
 other components, the per-band anatomy places the error where the albedo is nearly zero, and
@@ -830,6 +831,22 @@ number of coordinates and leaves the solve unchanged. The networks cost more to 
 to query. The stack costs nothing beyond its members.
 
 The comparisons that survive are the ones whose differences exceed the seed-to-seed spread.
+
+\section*{Acknowledgements}
+
+The research presented in this paper was supported by the European Research Council (ERC) under
+the European Union's Horizon Europe research and innovation programme (grant agreement
+No.~101041711), by the Simons Foundation as part of the Collaboration on the Mathematical and
+Scientific Foundations of Deep Learning, by Heights Labs, by Convex Nexus Capital, by the Israel
+Science Foundation (grant number 2258/19), and by the Israel Science Foundation (ISF Grant
+4101/25).
+
+\section*{Declaration of competing interest}
+
+The author holds equity in Heights Labs and in Convex Nexus Capital and has a management role at
+Convex Nexus Capital; both entities supported this work and are named above. These entities and
+the public funders had no role in the study design, analysis, manuscript preparation, or
+decision to publish.
 
 \section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
 
