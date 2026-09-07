@@ -1,0 +1,9 @@
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+nmkc-build/
+__pycache__/
+*.pyc

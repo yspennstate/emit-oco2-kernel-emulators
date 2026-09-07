@@ -1,0 +1,91 @@
+{
+ "tag": "oco_o2_s8_n18000",
+ "kind": "oco2_curve",
+ "band": "o2",
+ "seed": 8,
+ "ntrain": 18000,
+ "n_val": 2000,
+ "n_test": 2000,
+ "epochs": 250,
+ "width": 384,
+ "members": 1,
+ "smoke": false,
+ "results": {
+  "kernel_flow": {
+   "reduced": 16.88909,
+   "radiance": 0.04476
+  },
+  "kernel_raw": {
+   "reduced": 40.45858,
+   "radiance": 0.22808
+  },
+  "kernel_ard": {
+   "reduced": 30.25546,
+   "radiance": 0.32789
+  },
+  "mean_flat": {
+   "reduced": 4.44639,
+   "radiance": 0.17281,
+   "val": 6.61256,
+   "minutes": 2.8
+  },
+  "dkr_flat": {
+   "reduced": 4.15496,
+   "radiance": 0.07277
+  },
+  "combined": {
+   "reduced": 4.15277,
+   "radiance": 0.07277
+  }
+ },
+ "hyper": {
+  "kernel_raw": {
+   "scale": 4.0,
+   "nugget": 1e-08,
+   "med": 6.271651489395933,
+   "val": 0.6100234496818271
+  },
+  "kernel_ard": {
+   "scale": 1.0,
+   "nugget": 1e-06,
+   "med": 7.6805754007027,
+   "val": 0.45191818910310927,
+   "w": [
+    1.97635,
+    1.9613,
+    2.00298,
+    1.39984,
+    0.58932,
+    0.05844,
+    1.4098,
+    0.85779,
+    0.05991,
+    0.78693,
+    0.63674,
+    0.04222,
+    1.46459,
+    1.09872,
+    0.07428,
+    0.26286,
+    1.80333,
+    2.00282,
+    0.04467,
+    1.46711
+   ]
+  },
+  "dkr_flat": {
+   "scale": 4.0,
+   "nugget": 1e-08,
+   "med": 25.435857656582865,
+   "val": 0.0668777632269941
+  }
+ },
+ "winners": {
+  "kernel_raw": 0,
+  "kernel_ard": 0,
+  "mean_flat": 1,
+  "dkr_flat": 39
+ },
+ "threads": 4,
+ "minutes": 7.9
+}

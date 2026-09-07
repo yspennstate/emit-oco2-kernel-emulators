@@ -1,0 +1,312 @@
+
+====================================================================================================
+EMIT  full calibration (n_cal=932)   (40 cells; gain in % vs shrink_global, positive = better than shrink_global)
+====================================================================================================
+estimator                  n     mean%   median%     wins    worst%     best%
+equal                     40   -150.61   -179.05     0/40    -279.31     -6.64
+best_single               40    -19.95    -15.11     3/40     -52.29     +6.29
+global_convex             40    -16.06    -13.46     0/40     -37.28     +0.00
+ridge_loo                 40     -5.28     -3.53     0/40     -15.45     +0.00
+shrink_global             40     +0.00     +0.00     0/40      +0.00     +0.00
+ols                       40     -5.07     -3.53     3/40     -22.06     +6.16
+wmat_gd_w                 40     -4.50     -1.92     7/40     -20.82     +6.45
+wmat_hard_w               40     -4.84     -1.90     5/40     -22.60     +6.01
+js_global                 40     -5.06     -3.52     3/40     -22.00     +6.16
+eb_global                 40     -4.28     -2.07     6/40     -20.73     +6.45
+spiked_error              40    -11.57    -12.74     0/40     -22.43     -2.12
+rie_error                 40     -3.44     -1.73    15/40     -18.65     +7.04
+rie_error_uc              40    -30.88    -10.49     6/40    -230.09     +6.89
+rie_shrink_global         40     +2.17     +1.53    32/40      -1.17     +9.68
+rie_uc_shrink_global      40     -3.04     -0.84    13/40     -53.38     +9.53
+rie_js_global             40    -30.87    -10.49     6/40    -230.09     +6.89
+rie_eb_global             40    -30.33    -10.05     6/40    -231.55     +6.89
+js_hc_euclid              40    -13.81    -11.75     1/40     -35.95     +6.16
+js_hc_white               40     -7.72     -5.00     4/40     -37.28     +6.60
+eb_hc_global              40   -139.76    -25.46     1/40   -1191.51     +2.49
+rie_js_hc_white           40    -29.53     -9.96     7/40    -181.00     +7.04
+rie_eb_hc_global          40   -333.70    -46.32     0/40   -2934.20     -1.94
+wols_rel                  40    -65.36    -55.60     0/40    -166.38     -1.19
+wols_rel_rie              40     +2.65     +2.42    31/40      -4.30    +11.77
+wols_rel_shrink_global    40    -14.99    -12.90     3/40     -37.28     +0.44
+wols_rel_rie_shrink_global    40     +4.94     +3.87    37/40      -1.72    +15.14
+wsimplex_rel              40    -88.26    -99.89     5/40    -214.36     +1.39
+wols_rel_rie_nn           40     +4.62     +4.16    33/40      -4.91    +20.98
+wmat_gd_s                 40 -11026.25  -2715.31     0/40  -71398.05     -5.94
+wmat_rank1_oracle         40     -5.07     -3.53     3/40     -22.06     +6.16
+
+====================================================================================================
+EMIT  full calibration vs OLS   (40 cells; gain in % vs ols, positive = better than ols)
+====================================================================================================
+estimator                  n     mean%   median%     wins    worst%     best%
+equal                     40   -138.51   -156.00     0/40    -249.53     -4.32
+best_single               40    -14.74     -8.80     6/40     -51.96    +14.74
+global_convex             40    -11.06     -4.41    13/40     -36.99    +12.15
+ridge_loo                 40     -0.30     +0.00     8/40      -7.50     +6.17
+shrink_global             40     +4.50     +3.41    37/40      -6.56    +18.07
+ols                       40     +0.00     +0.00     0/40      +0.00     +0.00
+wmat_gd_w                 40     +0.51     +0.31    25/40      -4.59     +6.07
+wmat_hard_w               40     +0.21     +0.00    14/40      -4.26     +3.86
+js_global                 40     +0.01     +0.00    12/40      +0.00     +0.09
+eb_global                 40     +0.72     +0.34    28/40      -3.32     +7.21
+spiked_error              40     -6.35     -6.08     4/40     -18.04     +2.87
+rie_error                 40     +1.54     +1.03    31/40      -2.13     +5.47
+rie_error_uc              40    -23.42     -1.41    14/40    -170.57     +3.48
+rie_shrink_global         40     +6.64     +5.39    40/40      +0.81    +19.30
+rie_uc_shrink_global      40     +1.77     +2.24    31/40     -39.55    +15.21
+rie_js_global             40    -23.42     -1.41    14/40    -170.57     +3.48
+rie_eb_global             40    -22.90     -1.10    15/40    -171.76     +4.31
+js_hc_euclid              40     -8.75     -2.80    12/40     -35.65    +12.15
+js_hc_white               40     -2.70     +0.43    32/40     -36.99     +3.73
+eb_hc_global              40   -129.71    -24.86     9/40   -1177.05     +7.13
+rie_js_hc_white           40    -22.37     -1.30    15/40    -145.37     +5.64
+rie_eb_hc_global          40   -304.78    -42.59     1/40   -2927.61     +7.13
+wols_rel                  40    -58.83    -51.48     5/40    -165.81     +1.31
+wols_rel_rie              40     +7.02     +4.81    36/40      -2.82    +20.57
+wols_rel_shrink_global    40    -10.03     -2.66    19/40     -36.99    +12.15
+wols_rel_rie_shrink_global    40     +9.16     +6.36    39/40      -0.28    +24.37
+wsimplex_rel              40    -80.09    -88.12    10/40    -200.95     +5.04
+wols_rel_rie_nn           40     +8.81     +7.41    34/40      -3.73    +28.36
+wmat_gd_s                 40 -10229.50  -2462.36     0/40  -64576.68     -6.94
+wmat_rank1_oracle         40     +0.00     +0.00     0/40      +0.00     +0.00
+  shrink amount: CV 0.45/0.45 | JS 0.00/0.00 | RIE+CV 0.41/0.40 | RIE+JS 0.00/0.00 ; GD rank chosen (whitened): 14.9/16
+
+====================================================================================================
+OCO  full calibration (n_cal=800)   (30 cells; gain in % vs shrink_global, positive = better than shrink_global)
+====================================================================================================
+estimator                  n     mean%   median%     wins    worst%     best%
+equal                     30    -84.53    -59.24     0/30    -183.91    -27.55
+best_single               30     -2.27     -2.01     0/30      -4.52     -0.67
+global_convex             30     -1.49     -1.62     0/30      -2.41     -0.66
+ridge_loo                 30     -0.88     -0.87     0/30      -1.30     -0.36
+shrink_global             30     +0.00     +0.00     0/30      +0.00     +0.00
+ols                       30     -0.94     -0.91     0/30      -1.30     -0.43
+wmat_gd_w                 30     -0.83     -0.79     0/30      -1.21     -0.62
+wmat_hard_w               30     -1.12     -1.08     0/30      -1.66     -0.86
+js_global                 30     -0.94     -0.91     0/30      -1.29     -0.43
+eb_global                 30     -0.65     -0.64     0/30      -1.03     -0.30
+spiked_error              30     -2.67     -2.89     0/30      -4.06     -1.36
+rie_error                 30     -1.35     -1.15     0/30      -2.53     -0.33
+rie_error_uc              30     -6.40     -1.22     0/30     -77.57     -0.25
+rie_shrink_global         30     -0.58     -0.48     3/30      -1.27     +0.04
+rie_uc_shrink_global      30     -0.55     -0.29     4/30      -5.58     +0.10
+rie_js_global             30     -6.40     -1.22     0/30     -77.54     -0.25
+rie_eb_global             30     -6.12     -0.88     0/30     -76.41     -0.19
+js_hc_euclid              30     -0.98     -0.76     2/30      -2.41     +0.02
+js_hc_white               30     -0.90     -0.76     0/30      -2.41     -0.26
+eb_hc_global              30     -0.83     -0.85     0/30      -1.06     -0.59
+rie_js_hc_white           30     -5.11     -0.80     0/30     -66.26     -0.38
+rie_eb_hc_global          30     -6.54     -1.03     0/30     -80.51     -0.50
+wols_rel                  30     -0.91     -0.91     0/30      -1.46     -0.18
+wols_rel_rie              30     -1.31     -1.11     0/30      -2.63     -0.16
+wols_rel_shrink_global    30     +0.05     +0.06    21/30      -0.12     +0.18
+wols_rel_rie_shrink_global    30     -0.52     -0.43     4/30      -1.21     +0.17
+wsimplex_rel              30     -1.33     -1.32     0/30      -1.91     -0.74
+wols_rel_rie_nn           30     -1.28     -1.09     0/30      -2.18     -0.42
+wmat_gd_s                 30   -159.62   -155.08     0/30    -279.05    -70.90
+wmat_rank1_oracle         30     -0.94     -0.91     0/30      -1.30     -0.43
+
+====================================================================================================
+OCO  full calibration vs OLS   (30 cells; gain in % vs ols, positive = better than ols)
+====================================================================================================
+estimator                  n     mean%   median%     wins    worst%     best%
+equal                     30    -82.84    -57.48     0/30    -181.97    -26.55
+best_single               30     -1.32     -0.84     1/30      -3.68     +0.43
+global_convex             30     -0.55     -0.48     6/30      -1.66     +0.44
+ridge_loo                 30     +0.06     +0.05    19/30      +0.00     +0.24
+shrink_global             30     +0.93     +0.90    30/30      +0.43     +1.28
+ols                       30     +0.00     +0.00     0/30      +0.00     +0.00
+wmat_gd_w                 30     +0.11     +0.10    23/30      -0.21     +0.46
+wmat_hard_w               30     -0.18     -0.19     3/30      -0.50     +0.11
+js_global                 30     +0.00     +0.00    25/30      +0.00     +0.01
+eb_global                 30     +0.29     +0.27    30/30      +0.05     +0.54
+spiked_error              30     -1.71     -1.74     0/30      -3.38     -0.49
+rie_error                 30     -0.41     -0.35    10/30      -1.34     +0.34
+rie_error_uc              30     -5.42     -0.13    12/30     -76.17     +0.37
+rie_shrink_global         30     +0.36     +0.34    23/30      -0.18     +1.18
+rie_uc_shrink_global      30     +0.39     +0.69    25/30      -4.75     +1.23
+rie_js_global             30     -5.42     -0.13    12/30     -76.14     +0.37
+rie_eb_global             30     -5.14     +0.16    17/30     -75.02     +0.57
+js_hc_euclid              30     -0.04     +0.06    16/30      -1.66     +1.21
+js_hc_white               30     +0.04     +0.06    21/30      -1.59     +0.90
+eb_hc_global              30     +0.11     +0.15    21/30      -0.28     +0.44
+rie_js_hc_white           30     -4.13     +0.07    18/30     -64.95     +0.75
+rie_eb_hc_global          30     -5.55     +0.04    17/30     -79.08     +0.41
+wols_rel                  30     +0.02     -0.04    13/30      -0.29     +0.55
+wols_rel_rie              30     -0.37     -0.32    10/30      -1.44     +0.69
+wols_rel_shrink_global    30     +0.98     +0.97    30/30      +0.50     +1.30
+wols_rel_rie_shrink_global    30     +0.42     +0.39    26/30      -0.13     +1.31
+wsimplex_rel              30     -0.39     -0.42     4/30      -1.10     +0.23
+wols_rel_rie_nn           30     -0.33     -0.27     7/30      -1.12     +0.57
+wmat_gd_s                 30   -157.23   -152.64     0/30    -275.12    -69.30
+wmat_rank1_oracle         30     +0.00     +0.00     0/30      +0.00     +0.00
+  shrink amount: CV 0.46/0.50 | JS 0.00/0.00 | RIE+CV 0.54/0.60 | RIE+JS 0.00/0.00 ; GD rank chosen (whitened): 12.8/13
+
+====================================================================================================
+EMIT  SMALL calibration n_cal=60 (mean of 3 draws)   (40 cells; gain in % vs ols, positive = better than ols)
+====================================================================================================
+estimator                  n     mean%   median%     wins    worst%     best%
+equal                     40    -84.73   -120.64    13/40    -185.30    +47.88
+best_single               40     +9.80     +5.85    23/40     -19.48    +80.03
+global_convex             40    +10.54     +7.20    22/40     -24.02    +76.35
+ridge_loo                 40     +7.47     +3.27    25/40     -17.92    +63.38
+shrink_global             40    +17.13    +12.48    38/40      -1.94    +77.68
+ols                       40     +0.00     +0.00     0/40      +0.00     +0.00
+wmat_gd_w                 40     +6.15     +3.00    33/40      -4.71    +25.08
+wmat_hard_w               40     +3.62     +0.22    22/40      -5.64    +22.54
+js_global                 40     +0.59     +0.00    11/40      +0.00     +4.28
+spiked_error              40     -5.10     -6.17    11/40     -22.10    +20.71
+rie_error                 40    +10.77     +4.99    36/40      -3.00    +59.50
+rie_shrink_global         40    +18.92    +12.93    39/40      -0.53    +77.63
+wmat_gd_s                 40 -10300.60  -4212.06     0/40  -66324.48     -5.35
+  gap to FULL-calibration shrink_global (%% worse; 0 = matches it):
+     ols                  mean +56.90%  median +31.48%
+     shrink_global        mean +13.98%  median +11.28%
+     rie_error            mean +27.92%  median +21.25%
+     rie_shrink_global    mean +11.79%  median  +9.86%
+     js_global            mean +56.07%  median +31.48%
+
+====================================================================================================
+OCO  SMALL calibration n_cal=60 (mean of 3 draws)   (30 cells; gain in % vs ols, positive = better than ols)
+====================================================================================================
+estimator                  n     mean%   median%     wins    worst%     best%
+equal                     30    -50.68    -29.24     0/30    -131.38     -6.02
+best_single               30    +16.24    +16.04    30/30     +14.16    +18.59
+global_convex             30    +16.60    +16.44    30/30     +14.17    +18.77
+ridge_loo                 30     +9.14     +9.76    30/30      +5.37    +12.12
+shrink_global             30    +16.60    +16.66    30/30     +13.95    +18.89
+ols                       30     +0.00     +0.00     0/30      +0.00     +0.00
+wmat_gd_w                 30     +6.94     +7.09    30/30      +4.99     +8.40
+wmat_hard_w               30     +2.15     +2.10    30/30      +0.65     +3.44
+js_global                 30     +0.25     +0.14    30/30      +0.08     +0.59
+spiked_error              30     +4.27     +4.24    30/30      +1.43     +7.61
+rie_error                 30     +5.30     +5.29    30/30      +3.35     +7.63
+rie_shrink_global         30    +16.57    +16.61    30/30     +14.03    +18.73
+wmat_gd_s                 30   -408.81   -392.55     0/30    -534.80   -278.67
+  gap to FULL-calibration shrink_global (%% worse; 0 = matches it):
+     ols                  mean +22.12%  median +22.64%
+     shrink_global        mean  +1.82%  median  +1.76%
+     rie_error            mean +15.66%  median +17.11%
+     rie_shrink_global    mean  +1.86%  median  +1.93%
+     js_global            mean +21.82%  median +22.38%
+
+====================================================================================================
+EMIT  SMALL calibration n_cal=120 (mean of 3 draws)   (40 cells; gain in % vs ols, positive = better than ols)
+====================================================================================================
+estimator                  n     mean%   median%     wins    worst%     best%
+equal                     40   -115.90   -140.81    10/40    -211.22    +17.41
+best_single               40     -3.45     -2.25    19/40     -40.38    +25.45
+global_convex             40     -1.60     -2.56    18/40     -27.51    +25.50
+ridge_loo                 40     +1.41     +0.07    20/40      -9.82    +11.75
+shrink_global             40     +9.06     +7.83    34/40      -5.80    +25.56
+ols                       40     +0.00     +0.00     0/40      +0.00     +0.00
+wmat_gd_w                 40     +3.34     +1.66    29/40      -6.52    +17.40
+wmat_hard_w               40     +2.12     -0.06    19/40      -6.37    +17.02
+js_global                 40     +0.18     +0.00    11/40      +0.00     +1.40
+spiked_error              40     -6.90     -6.35     4/40     -21.69     +3.50
+rie_error                 40     +5.46     +2.95    35/40      -1.66    +16.99
+rie_shrink_global         40    +11.35    +10.89    40/40      +0.46    +25.78
+wmat_gd_s                 40  -9592.68  -4677.47     0/40  -44298.71     -2.67
+  gap to FULL-calibration shrink_global (%% worse; 0 = matches it):
+     ols                  mean +18.69%  median +18.02%
+     shrink_global        mean  +7.10%  median  +5.68%
+     rie_error            mean +11.75%  median  +8.37%
+     rie_shrink_global    mean  +4.44%  median  +4.82%
+     js_global            mean +18.46%  median +18.02%
+
+====================================================================================================
+OCO  SMALL calibration n_cal=120 (mean of 3 draws)   (30 cells; gain in % vs ols, positive = better than ols)
+====================================================================================================
+estimator                  n     mean%   median%     wins    worst%     best%
+equal                     30    -68.40    -45.15     0/30    -159.20    -15.99
+best_single               30     +6.63     +7.02    30/30      +4.32     +8.28
+global_convex             30     +7.19     +7.20    30/30      +6.28     +8.07
+ridge_loo                 30     +3.11     +3.32    30/30      +1.13     +5.14
+shrink_global             30     +7.54     +7.54    30/30      +6.55     +8.26
+ols                       30     +0.00     +0.00     0/30      +0.00     +0.00
+wmat_gd_w                 30     +3.05     +2.98    30/30      +2.13     +4.08
+wmat_hard_w               30     +0.77     +0.86    27/30      -0.36     +1.67
+js_global                 30     +0.08     +0.04    30/30      +0.02     +0.20
+spiked_error              30     +0.51     +1.05    20/30      -2.22     +2.19
+rie_error                 30     +1.57     +1.73    30/30      +0.23     +3.08
+rie_shrink_global         30     +7.32     +7.25    30/30      +6.39     +8.05
+wmat_gd_s                 30   -341.91   -322.43     0/30    -518.80   -186.76
+  gap to FULL-calibration shrink_global (%% worse; 0 = matches it):
+     ols                  mean  +9.55%  median  +9.61%
+     shrink_global        mean  +1.29%  median  +1.18%
+     rie_error            mean  +7.83%  median  +7.65%
+     rie_shrink_global    mean  +1.53%  median  +1.67%
+     js_global            mean  +9.46%  median  +9.54%
+
+====================================================================================================
+EMIT  SMALL calibration n_cal=240 (mean of 3 draws)   (40 cells; gain in % vs ols, positive = better than ols)
+====================================================================================================
+estimator                  n     mean%   median%     wins    worst%     best%
+equal                     40   -124.84   -153.50     9/40    -235.16     +8.49
+best_single               40     -8.47     -6.46    16/40     -47.16    +44.23
+global_convex             40     -6.30     -5.16    16/40     -36.10    +32.07
+ridge_loo                 40     +0.38     +0.00    16/40     -11.18    +27.45
+shrink_global             40     +6.71     +5.67    28/40      -4.29    +38.98
+ols                       40     +0.00     +0.00     0/40      +0.00     +0.00
+wmat_gd_w                 40     +1.97     +1.03    26/40      -3.90    +11.97
+wmat_hard_w               40     +1.09     +0.00    19/40      -4.11     +9.98
+js_global                 40     +0.05     +0.00    13/40      +0.00     +0.40
+spiked_error              40     -6.71     -6.27     2/40     -21.32     +7.59
+rie_error                 40     +4.24     +2.47    37/40      -0.36    +17.71
+rie_shrink_global         40     +9.90     +9.11    40/40      +0.54    +40.83
+wmat_gd_s                 40  -9328.26  -4725.57     0/40  -38100.66     -9.17
+  gap to FULL-calibration shrink_global (%% worse; 0 = matches it):
+     ols                  mean +13.63%  median +11.29%
+     shrink_global        mean  +4.67%  median  +4.18%
+     rie_error            mean  +8.38%  median  +4.67%
+     rie_shrink_global    mean  +1.16%  median  +1.23%
+     js_global            mean +13.58%  median +11.21%
+
+====================================================================================================
+OCO  SMALL calibration n_cal=240 (mean of 3 draws)   (30 cells; gain in % vs ols, positive = better than ols)
+====================================================================================================
+estimator                  n     mean%   median%     wins    worst%     best%
+equal                     30    -77.53    -52.08     0/30    -173.95    -23.22
+best_single               30     +1.64     +2.34    24/30      -0.96     +2.95
+global_convex             30     +2.36     +2.62    30/30      +1.08     +3.19
+ridge_loo                 30     +0.98     +1.01    30/30      +0.32     +1.66
+shrink_global             30     +3.16     +3.04    30/30      +2.24     +4.03
+ols                       30     +0.00     +0.00     0/30      +0.00     +0.00
+wmat_gd_w                 30     +1.19     +1.14    30/30      +0.36     +2.05
+wmat_hard_w               30     +0.12     +0.17    22/30      -0.63     +0.67
+js_global                 30     +0.02     +0.01    30/30      +0.00     +0.05
+spiked_error              30     -0.90     -0.42    11/30      -3.29     +0.58
+rie_error                 30     +0.14     +0.37    20/30      -0.85     +0.88
+rie_shrink_global         30     +2.79     +2.74    30/30      +2.00     +3.32
+wmat_gd_s                 30   -245.47   -236.02     0/30    -382.75   -150.69
+  gap to FULL-calibration shrink_global (%% worse; 0 = matches it):
+     ols                  mean  +3.98%  median  +3.76%
+     shrink_global        mean  +0.69%  median  +0.80%
+     rie_error            mean  +3.85%  median  +3.22%
+     rie_shrink_global    mean  +1.09%  median  +1.02%
+     js_global            mean  +3.97%  median  +3.75%
+
+====================================================================================================
+RADIANCE (the physical metric) - gain vs shrink_global, %
+====================================================================================================
+-- EMIT (10 rows)
+   ols                    mean  +4.66%  median  +5.10%  wins 9/10
+   rie_error              mean  +6.41%  median  +6.61%  wins 10/10
+   rie_error_uc           mean -27.77%  median  -2.55%  wins 4/10
+   rie_shrink_global      mean  +4.45%  median  +4.58%  wins 10/10
+   rie_uc_shrink_global   mean -12.51%  median -12.08%  wins 1/10
+   rie_js_global          mean -27.77%  median  -2.55%  wins 4/10
+   js_global              mean  +4.66%  median  +5.10%  wins 9/10
+   wmat_gd_w              mean  +4.67%  median  +4.78%  wins 8/10
+   best_single            mean -32.37%  median -29.48%  wins 0/10
+   global_convex          mean -25.08%  median -23.20%  wins 0/10
+-- OCO (30 rows)
+   ols                    mean +31.82%  median +33.38%  wins 30/30
+   rie_error              mean +31.23%  median +33.25%  wins 30/30
+   rie_error_uc           mean +32.06%  median +35.91%  wins 30/30
+   rie_shrink_global      mean  +3.86%  median  +5.89%  wins 18/30
+   rie_uc_shrink_global   mean  -4.43%  median  -0.39%  wins 15/30
+   rie_js_global          mean +32.07%  median +35.89%  wins 30/30
+   js_global              mean +31.82%  median +33.38%  wins 30/30
+   wmat_gd_w              mean +31.81%  median +33.37%  wins 30/30
+   best_single            mean -78.35%  median -70.96%  wins 0/30
+   global_convex          mean -48.17%  median -45.98%  wins 0/30

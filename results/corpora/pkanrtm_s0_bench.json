@@ -1,0 +1,176 @@
+{
+ "tag": "pkanrtm_s0_bench",
+ "kind": "bench",
+ "corpus": "pkanrtm",
+ "seed": 0,
+ "n": 487790,
+ "d": 8,
+ "q": 3,
+ "exact": false,
+ "epochs": 120,
+ "width": 384,
+ "smoke": false,
+ "results": {
+  "ridge": {
+   "val": 71.62363922211304,
+   "test": 72.17948914453959,
+   "test_rmse": 0.12015808680809811,
+   "test_smape_pct": 42.05139034255875,
+   "test_nrmse_mean": 0.7008990644950831
+  },
+  "krr": {
+   "val": 63.073282509805175,
+   "test": 63.429018694447606,
+   "test_rmse": 0.11073575196792478,
+   "test_smape_pct": 24.34876624198326,
+   "test_nrmse_mean": 0.4513351598699073
+  },
+  "krr_kf": {
+   "val": 4.6927450699686,
+   "test": 4.65084684621075,
+   "test_rmse": 0.018368725586327756,
+   "test_smape_pct": 9.712691706669792,
+   "test_nrmse_mean": 0.1401034726727339
+  },
+  "lowfi_only": {
+   "val": 37.318616503006645,
+   "test": 37.497173136288,
+   "test_rmse": 0.0964370708119223,
+   "test_smape_pct": 31.86610829225588,
+   "test_nrmse_mean": 0.5753169211694922
+  },
+  "lowfi_resid": {
+   "val": 29.818869727334057,
+   "test": 29.717691629081607,
+   "test_rmse": 0.07852169232589537,
+   "test_smape_pct": 31.54141190827591,
+   "test_nrmse_mean": 0.4800022466860346
+  },
+  "mlp": {
+   "val": 3.6172005794219095,
+   "test": 3.5093095170402226,
+   "test_rmse": 0.016590713976996904,
+   "test_smape_pct": 7.369681395538197,
+   "test_nrmse_mean": 0.11235800224739406
+  },
+  "mlp_ens": {
+   "val": 3.217636656228269,
+   "test": 3.0946024064751105,
+   "test_rmse": 0.016266217596831264,
+   "test_smape_pct": 6.391469475287622,
+   "test_nrmse_mean": 0.1094588055639338
+  },
+  "mlp_resid": {
+   "val": 3.19457808488062,
+   "test": 3.0706042391003545,
+   "test_rmse": 0.01620578114175282,
+   "test_smape_pct": 6.160411583647683,
+   "test_nrmse_mean": 0.10903291763219157
+  },
+  "dkr": {
+   "val": 3.531086763869088,
+   "test": 3.4200930858183245,
+   "test_rmse": 0.016705801032748855,
+   "test_smape_pct": 6.134172030409113,
+   "test_nrmse_mean": 0.11153355324216675
+  },
+  "select": {
+   "val": 3.19457808488062,
+   "test": 3.0706042391003545,
+   "test_rmse": 0.01620578114175282,
+   "test_smape_pct": 6.160411583647683,
+   "test_nrmse_mean": 0.10903291763219157
+  },
+  "stack": {
+   "val": 3.160382277133954,
+   "test": 3.034576938285646,
+   "test_rmse": 0.01621012692274424,
+   "test_smape_pct": 5.965370415082924,
+   "test_nrmse_mean": 0.10904827450429617
+  }
+ },
+ "hyper": {
+  "ridge": {},
+  "krr": {
+   "scale": 7.814961457296327,
+   "nugget": 1e-08,
+   "med": 3.9074807286481636,
+   "val_sub": 0.46408077628437916,
+   "exact": false
+  },
+  "krr_kf": {
+   "scale": 12.93245841398579,
+   "nugget": 1e-08,
+   "med": 12.93245841398579,
+   "val_sub": 0.04681314627010209,
+   "exact": false,
+   "ell_rel": {
+    "wvl_nm": 0.0363,
+    "sza_deg": 1.9904,
+    "vza_deg": 2.2584,
+    "raa_deg": 2.0517,
+    "aod550": 1.4545,
+    "cwv_cm": 0.534,
+    "o3_cm": 2.14,
+    "elev_km": 1.7949
+   }
+  },
+  "lowfi_only": {},
+  "lowfi_resid": {
+   "scale": 3.9074807286481636,
+   "nugget": 1e-06,
+   "med": 3.9074807286481636,
+   "val_sub": 0.32166198786092925,
+   "exact": false
+  },
+  "mlp": {
+   "epochs": 48
+  },
+  "mlp_ens": {},
+  "mlp_resid": {
+   "scale": 7.814961457296327,
+   "nugget": 0.01,
+   "med": 3.9074807286481636,
+   "val_sub": 0.03199781865510545,
+   "exact": false
+  },
+  "dkr": {
+   "scale": 51.97740779636176,
+   "nugget": 1e-06,
+   "med": 25.98870389818088,
+   "val_sub": 0.04115339447169076,
+   "exact": false
+  },
+  "select": {
+   "picks": {
+    "krr": 0,
+    "krr_kf": 0,
+    "lowfi_resid": 0,
+    "mlp": 0,
+    "mlp_ens": 0,
+    "mlp_resid": 3,
+    "dkr": 0
+   }
+  },
+  "stack": {
+   "weights": {
+    "krr": 0.0028,
+    "krr_kf": 0.0018,
+    "lowfi_resid": 0.0,
+    "mlp": 0.0,
+    "mlp_ens": 0.0485,
+    "mlp_resid": 0.8226,
+    "dkr": 0.1243
+   }
+  }
+ },
+ "extra": {
+  "err_floor": 0.05,
+  "frac_below_floor_te": 0.01800826608935249,
+  "extra_metrics_lowfi": {
+   "rmse_6s": 0.09643707081215157,
+   "rel_floor_6s": 0.37497173136226225
+  }
+ },
+ "minutes": 75.7
+}

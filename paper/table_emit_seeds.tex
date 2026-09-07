@@ -1,0 +1,19 @@
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{4}{c}{component rel.\ $L^2$ [\%]} & radiance & reflectance \\
+\cmidrule(lr){2-5}
+model & $Y_1$ & $Y_2$ & $Y_3$ & $Y_4$ & rel.\ $L^2$ [\%] & med.\ $|\hat\rho-\rho|$ [\%] \\
+\midrule
+Cubic ridge & 1.16$\pm$0.02 & 2.18$\pm$0.04 & 1.11$\pm$0.03 & 2.98$\pm$0.06 & 0.760$\pm$0.011 & 0.471$\pm$0.010 \\
+Mat\'ern KRR, 4000-point fit & 0.17$\pm$0.01 & 0.61$\pm$0.04 & 0.29$\pm$0.02 & 2.44$\pm$0.87 & 0.332$\pm$0.029 & 0.178$\pm$0.030 \\
+Mat\'ern KRR, exact on all rows & 0.08$\pm$0.01 & 0.42$\pm$0.03 & 0.20$\pm$0.00 & 2.62$\pm$0.18 & 0.239$\pm$0.016 & 0.141$\pm$0.018 \\
+Mat\'ern KRR, per-input scales & 0.08$\pm$0.01 & 0.16$\pm$0.02 & 0.08$\pm$0.01 & 2.18$\pm$0.16 & 0.095$\pm$0.009 & 0.036$\pm$0.004 \\
+FC-DNN (3$\times$512) & 0.48$\pm$0.02 & 0.97$\pm$0.04 & 0.41$\pm$0.02 & 3.02$\pm$0.18 & 0.387$\pm$0.012 & 0.245$\pm$0.008 \\
+Five-network mean & 0.37$\pm$0.01 & 0.67$\pm$0.03 & 0.28$\pm$0.01 & 2.51$\pm$0.09 & 0.251$\pm$0.006 & 0.163$\pm$0.003 \\
+DNN + residual KRR & 0.10$\pm$0.00 & 0.30$\pm$0.02 & 0.16$\pm$0.01 & 2.43$\pm$0.08 & 0.141$\pm$0.006 & 0.089$\pm$0.008 \\
+Ensemble + residual KRR & 0.08$\pm$0.00 & 0.27$\pm$0.03 & 0.13$\pm$0.00 & 2.42$\pm$0.17 & 0.123$\pm$0.007 & 0.080$\pm$0.008 \\
+Kernel on network features & 0.18$\pm$0.01 & 0.17$\pm$0.01 & 0.10$\pm$0.01 & 1.99$\pm$0.08 & 0.098$\pm$0.007 & 0.054$\pm$0.004 \\
+Per-coordinate selection & 0.19$\pm$0.01 & 0.44$\pm$0.10 & 0.13$\pm$0.02 & 2.25$\pm$0.18 & 0.193$\pm$0.022 & 0.123$\pm$0.023 \\
+Convex stack & 0.07$\pm$0.00 & 0.16$\pm$0.01 & 0.09$\pm$0.00 & 1.94$\pm$0.06 & 0.087$\pm$0.006 & 0.048$\pm$0.003 \\
+\bottomrule
+\end{tabular}

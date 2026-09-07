@@ -1,0 +1,18 @@
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{4}{c}{component rel.\ $L^2$ [\%]} & radiance & reflectance \\
+\cmidrule(lr){2-5}
+model & $Y_1$ & $Y_2$ & $Y_3$ & $Y_4$ & rel.\ $L^2$ [\%] & med.\ $|\hat\rho-\rho|$ [\%] \\
+\midrule
+Linear ridge & 4.77 & 22.98 & 15.84 & 5.34 & 5.923 & 4.178 \\
+Cubic ridge & 1.16 & 2.20 & 1.14 & 3.05 & 0.757 & 0.471 \\
+$k$-NN & 2.88 & 8.25 & 4.79 & 4.57 & 2.839 & 1.586 \\
+Random forest & 3.31 & 3.06 & 1.69 & 2.03 & 1.497 & 0.870 \\
+Extra trees & 2.92 & 1.93 & 1.27 & 1.95 & 1.010 & 0.526 \\
+Mat\'ern KRR & 0.16 & 0.74 & 0.32 & 5.05 & 0.413 & 0.259 \\
+FC-DNN (3$\times$512) & 0.49 & 0.98 & 0.39 & 3.06 & 0.384 & 0.243 \\
+DNN + residual KRR & 0.17 & 0.57 & 0.23 & 3.04 & 0.252 & 0.149 \\
+DKR (kernel on features) & 0.36 & 0.48 & 0.27 & 3.27 & 0.394 & 0.104 \\
+Per-coordinate selection & 0.36 & 0.69 & 0.22 & 2.81 & 0.278 & 0.172 \\
+\bottomrule
+\end{tabular}

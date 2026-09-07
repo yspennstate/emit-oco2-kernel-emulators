@@ -1,0 +1,15 @@
+\begin{tabular}{lccc}
+\toprule
+ & \multicolumn{3}{c}{monochromatic radiance rel.\ $L^2$ [\%], mean over 976 records} \\
+\cmidrule(lr){2-4}
+ & O$_2$ & weak CO$_2$ & strong CO$_2$ \\
+\midrule
+relative-loss network, larger budget & 0.2430 & 0.3846 & 0.2371 \\
+relative-loss network & 0.2325 & 0.3155 & 0.3964 \\
+mean-squared-loss network & 0.3792 & 0.5909 & 0.4950 \\
+radiance-weighted network & 0.6055 & 0.7929 & 1.0294 \\
+per-coordinate validation selection & 0.5489 & 0.7732 & 0.3964 \\
+reference GP, 40 coefficients & 0.0453 & 0.0594 & 0.1148 \\
+rank-40 projection floor & 0.0005 & 0.0009 & 0.0052 \\
+\bottomrule
+\end{tabular}

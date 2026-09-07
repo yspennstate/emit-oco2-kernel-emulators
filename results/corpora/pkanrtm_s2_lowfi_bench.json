@@ -1,0 +1,179 @@
+{
+ "tag": "pkanrtm_s2_lowfi_bench",
+ "kind": "bench",
+ "corpus": "pkanrtm",
+ "seed": 2,
+ "n": 487773,
+ "d": 11,
+ "q": 3,
+ "exact": false,
+ "epochs": 120,
+ "width": 384,
+ "smoke": false,
+ "results": {
+  "ridge": {
+   "val": 33.450936338353124,
+   "test": 33.86760585918675,
+   "test_rmse": 0.07480355416515266,
+   "test_smape_pct": 29.123070399022062,
+   "test_nrmse_mean": 0.411618549865627
+  },
+  "krr": {
+   "val": 12.24406910973996,
+   "test": 12.248795555698322,
+   "test_rmse": 0.03321419529705974,
+   "test_smape_pct": 11.300413363007317,
+   "test_nrmse_mean": 0.18781999114037365
+  },
+  "krr_kf": {
+   "val": 4.433794368176883,
+   "test": 4.413867402699951,
+   "test_rmse": 0.01820990201523196,
+   "test_smape_pct": 9.04394205518436,
+   "test_nrmse_mean": 0.14440589475005197
+  },
+  "lowfi_only": {
+   "val": 36.97917476500756,
+   "test": 37.31227690163753,
+   "test_rmse": 0.09602828592118197,
+   "test_smape_pct": 31.826745180152344,
+   "test_nrmse_mean": 0.5791817156656273
+  },
+  "lowfi_resid": {
+   "val": 12.239675388257638,
+   "test": 12.248282518974692,
+   "test_rmse": 0.033226078125586554,
+   "test_smape_pct": 11.253902544175222,
+   "test_nrmse_mean": 0.1878084178079157
+  },
+  "mlp": {
+   "val": 2.8101874003332763,
+   "test": 2.7368082935463183,
+   "test_rmse": 0.0144649176950691,
+   "test_smape_pct": 6.600600406799677,
+   "test_nrmse_mean": 0.10697478836186729
+  },
+  "mlp_ens": {
+   "val": 2.5494876233329697,
+   "test": 2.467972963913577,
+   "test_rmse": 0.013886952172264842,
+   "test_smape_pct": 5.562947763634364,
+   "test_nrmse_mean": 0.10143789234765384
+  },
+  "mlp_resid": {
+   "val": 2.5172756571770263,
+   "test": 2.4345167566154893,
+   "test_rmse": 0.01385389263183527,
+   "test_smape_pct": 5.1176535872327085,
+   "test_nrmse_mean": 0.10116344504708878
+  },
+  "dkr": {
+   "val": 2.8666014532067354,
+   "test": 2.7860842157108094,
+   "test_rmse": 0.014070822495221454,
+   "test_smape_pct": 6.134551784789824,
+   "test_nrmse_mean": 0.10374908156990233
+  },
+  "select": {
+   "val": 2.5172756571770263,
+   "test": 2.4345167566154893,
+   "test_rmse": 0.01385389263183527,
+   "test_smape_pct": 5.1176535872327085,
+   "test_nrmse_mean": 0.10116344504708878
+  },
+  "stack": {
+   "val": 2.498566154104031,
+   "test": 2.414374030281443,
+   "test_rmse": 0.013807352480294598,
+   "test_smape_pct": 5.0446847950218014,
+   "test_nrmse_mean": 0.10100113476407173
+  }
+ },
+ "hyper": {
+  "ridge": {},
+  "krr": {
+   "scale": 4.5107091715125245,
+   "nugget": 1e-06,
+   "med": 4.5107091715125245,
+   "val_sub": 0.1389863694152713,
+   "exact": false
+  },
+  "krr_kf": {
+   "scale": 19.158714004918302,
+   "nugget": 1e-08,
+   "med": 38.317428009836604,
+   "val_sub": 0.03816361278472504,
+   "exact": false,
+   "ell_rel": {
+    "wvl_nm": 0.0123,
+    "sza_deg": 2.3841,
+    "vza_deg": 2.7808,
+    "raa_deg": 3.052,
+    "aod550": 2.5074,
+    "cwv_cm": 0.2697,
+    "o3_cm": 4.451,
+    "elev_km": 3.013,
+    "6s_rho_path": 0.6078,
+    "6s_T_total": 0.7078,
+    "6s_spher_alb": 1.0338
+   }
+  },
+  "lowfi_only": {},
+  "lowfi_resid": {
+   "scale": 4.5107091715125245,
+   "nugget": 1e-06,
+   "med": 4.5107091715125245,
+   "val_sub": 0.1386615680812115,
+   "exact": false
+  },
+  "mlp": {
+   "epochs": 55
+  },
+  "mlp_ens": {},
+  "mlp_resid": {
+   "scale": 2.2553545857562622,
+   "nugget": 0.01,
+   "med": 4.5107091715125245,
+   "val_sub": 0.02522253430747948,
+   "exact": false
+  },
+  "dkr": {
+   "scale": 107.9083864965922,
+   "nugget": 1e-06,
+   "med": 26.97709662414805,
+   "val_sub": 0.02980927705103351,
+   "exact": false
+  },
+  "select": {
+   "picks": {
+    "krr": 0,
+    "krr_kf": 0,
+    "lowfi_resid": 0,
+    "mlp": 0,
+    "mlp_ens": 0,
+    "mlp_resid": 3,
+    "dkr": 0
+   }
+  },
+  "stack": {
+   "weights": {
+    "krr": 0.0,
+    "krr_kf": 0.0,
+    "lowfi_resid": 0.0,
+    "mlp": 0.0266,
+    "mlp_ens": 0.0,
+    "mlp_resid": 0.8123,
+    "dkr": 0.1611
+   }
+  }
+ },
+ "extra": {
+  "err_floor": 0.05,
+  "frac_below_floor_te": 0.01818181818181818,
+  "extra_metrics_lowfi": {
+   "rmse_6s": 0.09602828592140818,
+   "rel_floor_6s": 0.37312276901579083
+  }
+ },
+ "minutes": 83.1
+}

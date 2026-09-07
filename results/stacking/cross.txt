@@ -1,0 +1,63 @@
+common cells: 70
+====================================================================================================
+EMIT n=60 (40 cells, same draws): gain % of the long-only family vs the pool's baselines
+====================================================================================================
+long-only vs ->          shrink  rie_shr      ols wins/shr
+raw_nn                    +4.60    +2.81   +22.10    29/40    (median vs shrink +6.02, worst -19.1)
+lw_nn                     +5.27    +3.48   +22.55    29/40    (median vs shrink +6.70, worst -18.3)
+rie_nn                    +3.80    +1.99   +21.78    34/40    (median vs shrink +5.52, worst -29.8)
+ner_nn                    +5.12    +3.31   +22.00    32/40    (median vs shrink +6.44, worst -17.0)
+====================================================================================================
+EMIT n=120 (40 cells, same draws): gain % of the long-only family vs the pool's baselines
+====================================================================================================
+long-only vs ->          shrink  rie_shr      ols wins/shr
+raw_nn                    +5.10    +2.73   +13.89    38/40    (median vs shrink +5.34, worst -10.8)
+lw_nn                     +5.40    +3.04   +14.16    38/40    (median vs shrink +6.07, worst -10.8)
+rie_nn                    +5.13    +2.75   +13.86    38/40    (median vs shrink +5.29, worst -10.6)
+ner_nn                    +5.68    +3.33   +14.38    38/40    (median vs shrink +6.14, worst -11.8)
+====================================================================================================
+EMIT n=240 (40 cells, same draws): gain % of the long-only family vs the pool's baselines
+====================================================================================================
+long-only vs ->          shrink  rie_shr      ols wins/shr
+raw_nn                    +4.91    +1.68   +11.35    35/40    (median vs shrink +3.79, worst -4.1)
+lw_nn                     +5.12    +1.90   +11.55    35/40    (median vs shrink +4.07, worst -3.8)
+rie_nn                    +4.83    +1.61   +11.37    35/40    (median vs shrink +4.22, worst -6.6)
+ner_nn                    +4.70    +1.50   +11.28    34/40    (median vs shrink +4.18, worst -20.3)
+====================================================================================================
+OCO n=60 (30 cells, same draws): gain % of the long-only family vs the pool's baselines
+====================================================================================================
+long-only vs ->          shrink  rie_shr      ols wins/shr
+raw_nn                    -4.35    -4.31   +12.98     0/30    (median vs shrink -4.14, worst -6.6)
+lw_nn                     -4.85    -4.81   +12.57     0/30    (median vs shrink -4.32, worst -7.2)
+rie_nn                   -11.53   -11.49    +7.01     0/30    (median vs shrink -10.77, worst -15.1)
+ner_nn                    -6.06    -6.02   +11.56     0/30    (median vs shrink -5.50, worst -8.1)
+====================================================================================================
+OCO n=120 (30 cells, same draws): gain % of the long-only family vs the pool's baselines
+====================================================================================================
+long-only vs ->          shrink  rie_shr      ols wins/shr
+raw_nn                    -2.19    -1.95    +5.52     0/30    (median vs shrink -2.41, worst -3.1)
+lw_nn                     -2.36    -2.12    +5.35     0/30    (median vs shrink -2.46, worst -3.4)
+rie_nn                    -5.00    -4.76    +2.91     0/30    (median vs shrink -5.02, worst -6.9)
+ner_nn                    -2.70    -2.46    +5.04     0/30    (median vs shrink -2.57, worst -3.7)
+====================================================================================================
+OCO n=240 (30 cells, same draws): gain % of the long-only family vs the pool's baselines
+====================================================================================================
+long-only vs ->          shrink  rie_shr      ols wins/shr
+raw_nn                    -1.28    -0.89    +1.92     0/30    (median vs shrink -1.20, worst -2.3)
+lw_nn                     -1.36    -0.97    +1.85     0/30    (median vs shrink -1.22, worst -2.4)
+rie_nn                    -2.38    -1.98    +0.86     0/30    (median vs shrink -2.25, worst -3.9)
+ner_nn                    -1.52    -1.13    +1.69     0/30    (median vs shrink -1.31, worst -2.6)
+====================================================================================================
+EMIT full calibration (40 cells): the post-ladder estimators vs the pool's baselines
+====================================================================================================
+raw_nn         vs shrink_global  +4.65 (median  +3.90, 33/40 wins, worst -5.5) | vs ols  +8.82
+lw2020_nn      vs shrink_global  +4.69 (median  +3.94, 33/40 wins, worst -5.5) | vs ols  +8.86
+rie_f005_nn    vs shrink_global  +4.62 (median  +4.16, 33/40 wins, worst -4.9) | vs ols  +8.81
+nercome_nn     vs shrink_global  +3.86 (median  +4.27, 31/40 wins, worst -7.5) | vs ols  +8.16
+====================================================================================================
+OCO full calibration (30 cells): the post-ladder estimators vs the pool's baselines
+====================================================================================================
+raw_nn         vs shrink_global  -1.12 (median  -0.96, 0/30 wins, worst -1.9) | vs ols  -0.18
+lw2020_nn      vs shrink_global  -1.13 (median  -0.96, 0/30 wins, worst -1.9) | vs ols  -0.18
+rie_f005_nn    vs shrink_global  -1.28 (median  -1.09, 0/30 wins, worst -2.2) | vs ols  -0.33
+nercome_nn     vs shrink_global  -1.18 (median  -1.05, 0/30 wins, worst -1.9) | vs ols  -0.24

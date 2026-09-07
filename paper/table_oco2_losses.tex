@@ -1,0 +1,23 @@
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{3}{c}{reduced coefficients rel.\ $L^2$ [\%]} & \multicolumn{3}{c}{radiance rel.\ $L^2$ [\%]} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+model & O$_2$ & weak CO$_2$ & strong CO$_2$ & O$_2$ & weak CO$_2$ & strong CO$_2$ \\
+\midrule
+reference emulator, stored predictions & 16.89 & 24.06 & 16.14 & 0.0448 & 0.0599 & 0.1147 \\
+\multicolumn{7}{l}{\emph{trained on the reduced coefficients}} \\
+network & 4.43$\pm$0.05 & 16.44$\pm$0.06 & 8.23$\pm$0.02 & 0.1949$\pm$0.0139 & 0.2260$\pm$0.0120 & 0.1990$\pm$0.0147 \\
+\quad ridge readout on its features & 4.71$\pm$0.07 & 16.51$\pm$0.06 & 8.33$\pm$0.03 & 0.2276$\pm$0.0143 & 0.2523$\pm$0.0167 & 0.2359$\pm$0.0318 \\
+\quad Mat\'ern kernel on its features & 4.11$\pm$0.05 & 16.28$\pm$0.06 & 8.08$\pm$0.01 & 0.0793$\pm$0.0072 & 0.1159$\pm$0.0065 & 0.1093$\pm$0.0065 \\
+\multicolumn{7}{l}{\emph{trained on the weighted coefficients}} \\
+network & 49.33$\pm$0.40 & 62.57$\pm$0.56 & 36.46$\pm$0.65 & 0.0439$\pm$0.0031 & 0.0738$\pm$0.0057 & 0.0751$\pm$0.0025 \\
+\quad ridge readout on its features & 45.71$\pm$0.61 & 61.32$\pm$0.43 & 40.10$\pm$0.91 & 0.0521$\pm$0.0043 & 0.0842$\pm$0.0067 & 0.0866$\pm$0.0039 \\
+\quad Mat\'ern kernel on its features & 21.72$\pm$0.52 & 48.67$\pm$0.45 & 15.47$\pm$0.47 & 0.0316$\pm$0.0019 & 0.0533$\pm$0.0054 & 0.0631$\pm$0.0037 \\
+\multicolumn{7}{l}{\emph{trained on the reconstructed radiance}} \\
+network & 59.05$\pm$0.87 & 67.49$\pm$0.41 & 46.76$\pm$0.79 & 0.0575$\pm$0.0057 & 0.0649$\pm$0.0127 & 0.0927$\pm$0.0084 \\
+\quad ridge readout on its features & 45.59$\pm$1.13 & 61.01$\pm$0.90 & 40.13$\pm$1.07 & 0.0602$\pm$0.0063 & 0.0690$\pm$0.0115 & 0.0951$\pm$0.0078 \\
+\quad Mat\'ern kernel on its features & 20.47$\pm$0.61 & 48.23$\pm$0.31 & 15.49$\pm$0.66 & 0.0379$\pm$0.0037 & 0.0486$\pm$0.0053 & 0.0766$\pm$0.0051 \\
+\midrule
+per-coordinate selection over the six heads & 4.12$\pm$0.05 & 16.28$\pm$0.06 & 8.08$\pm$0.01 & 0.0291$\pm$0.0020 & 0.0526$\pm$0.0053 & 0.0586$\pm$0.0039 \\
+\bottomrule
+\end{tabular}

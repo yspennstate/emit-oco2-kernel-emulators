@@ -1,0 +1,48 @@
+====================================================================================================
+EMIT full calibration   (16 cells; gain % vs base = long-only raw, positive = better)
+====================================================================================================
+arm             n    mean%  median%     wins   worst%    best%
+global         16   -23.68   -25.31     0/16    -40.34    -3.21
+js_per         16    -0.74    -0.03     7/16     -6.24    +2.12
+js_pool        16    -0.06    +0.12    10/16     -2.65    +1.71
+cv             16    +0.46    +0.19    11/16     -0.39    +1.71
+   s_pool       mean 0.170  median 0.170  zero on 0/16
+   s_cv         mean 0.119  median 0.100  zero on 3/16
+   s_oracle_ev  mean 0.106  median 0.100  zero on 4/16
+   cells where CV gains > 0.05%: 11; there js_pool recovers 61% of the CV gain (sum), median cell 94%
+====================================================================================================
+EMIT small calibration n=60   (16 cells; gain % vs base = long-only raw, positive = better)
+====================================================================================================
+arm             n    mean%  median%     wins   worst%    best%
+global         16   -18.38   -17.76     1/16    -40.27    +6.61
+js_per         16    -0.13    +0.58     8/16     -6.48    +3.22
+js_pool        16    -0.44    -0.37     6/16     -3.86    +1.58
+cv             16    +0.89    +0.62    12/16     -1.70    +6.65
+   s_pool       mean 0.267  median 0.252  zero on 0/16
+   s_cv         mean 0.267  median 0.217  zero on 0/16
+   s_oracle_ev  mean 0.225  median 0.150  zero on 0/16
+   cells where CV gains > 0.05%: 12; there js_pool recovers -22% of the CV gain (sum), median cell 12%
+====================================================================================================
+EMIT small calibration n=120   (16 cells; gain % vs base = long-only raw, positive = better)
+====================================================================================================
+arm             n    mean%  median%     wins   worst%    best%
+global         16   -20.17   -23.87     1/16    -36.88    +1.63
+js_per         16    -0.04    +0.54    11/16     -4.31    +1.90
+js_pool        16    -0.10    +0.27     9/16     -5.25    +1.46
+cv             16    +0.65    +0.55    12/16     -0.43    +2.60
+   s_pool       mean 0.216  median 0.202  zero on 0/16
+   s_cv         mean 0.188  median 0.150  zero on 0/16
+   s_oracle_ev  mean 0.187  median 0.167  zero on 1/16
+   cells where CV gains > 0.05%: 12; there js_pool recovers 13% of the CV gain (sum), median cell 75%
+====================================================================================================
+EMIT small calibration n=240   (16 cells; gain % vs base = long-only raw, positive = better)
+====================================================================================================
+arm             n    mean%  median%     wins   worst%    best%
+global         16   -21.71   -23.66     0/16    -38.70    -2.05
+js_per         16    -1.71    -1.13     6/16     -6.92    +1.62
+js_pool        16    -0.72    -0.17     6/16     -4.15    +0.54
+cv             16    +0.31    +0.36    11/16     -0.74    +1.74
+   s_pool       mean 0.224  median 0.220  zero on 0/16
+   s_cv         mean 0.175  median 0.150  zero on 0/16
+   s_oracle_ev  mean 0.133  median 0.133  zero on 3/16
+   cells where CV gains > 0.05%: 11; there js_pool recovers -80% of the CV gain (sum), median cell 33%
