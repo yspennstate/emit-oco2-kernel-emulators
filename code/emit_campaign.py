@@ -532,6 +532,8 @@ tmp = OUT_ROOT / (tag + ".tmp")
 json.dump(out, open(tmp, "w"), indent=1)
 os.replace(tmp, OUT_ROOT / (tag + ".json"))
 pdir = OUT_ROOT / "preds"; pdir.mkdir(exist_ok=True)
+# Preserve the precision used in eval_predictions. Rounding to float32 can materially
+# change a near-singular reflectance inverse; old JSON results are not recomputed here.
 np.savez_compressed(pdir / (tag + ".npz"), idx_te=idx_te,
-                    **{f"{f}_{c}": fam_te[f][c].astype(np.float32) for f in fam_te for c in COMPONENTS})
+                    **{f"{f}_{c}": fam_te[f][c].astype(np.float64) for f in fam_te for c in COMPONENTS})
 print(f"DONE {tag} in {out['minutes']} min", flush=True)

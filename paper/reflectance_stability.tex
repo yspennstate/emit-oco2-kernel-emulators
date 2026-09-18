@@ -1,0 +1,81 @@
+\subsection{Finite-perturbation control of the inversion}\label{sec:stability}
+
+The derivatives in \eqref{eq:sens} describe local conditioning. The following elementary
+identities give a finite-error test and distinguish forward accuracy from inversion stability.
+For one sample and band, write $a=Y_1$, $t=Y_2+Y_3$, $s=Y_4$ and
+$L=a+\rho t/(1-\rho s)$. Set
+$e_a=\widehat a-a$, $e_t=\widehat t-t$, $e_s=\widehat s-s$.
+
+\begin{proposition}[Conditional radiance and reflectance stability]\label{prop:stability}
+Suppose $0\le\rho\le\rho_{\max}$, $t>0$ and $q=1-\rho s>0$. If also
+$\widehat q=1-\rho\widehat s>0$, the forward error satisfies the exact identity
+\begin{equation}\label{eq:forward-error}
+ \widehat L-L=e_a+\frac{\rho e_t}{\widehat q}
+                  +\frac{\rho^2 t e_s}{q\widehat q}.
+\end{equation}
+In particular, if $q,\widehat q\ge\kappa>0$,
+\[
+ |\widehat L-L|\le |e_a|+\rho_{\max}|e_t|/\kappa
+                         +\rho_{\max}^2|t e_s|/\kappa^2.
+\]
+For inversion at the true radiance, put
+$u=L-a=\rho t/q$, $D=t/q$, and
+$\widehat D=\widehat t+\widehat s(L-\widehat a)$. Whenever $\widehat D\ne0$,
+\begin{equation}\label{eq:inverse-error}
+ \widehat\rho-\rho=
+ -\frac{(1-\rho\widehat s)e_a+\rho e_t+\rho u e_s}{\widehat D},
+ \qquad
+ \widehat D-D=e_t+u e_s-\widehat s e_a.
+\end{equation}
+If
+$B=|e_t|+|u e_s|+|\widehat s e_a|\le\eta D$ for some $0\le\eta<1$, then
+$\widehat D\ge(1-\eta)D>0$ and
+\begin{equation}\label{eq:inverse-bound}
+ |\widehat\rho-\rho|\le
+ \frac{|1-\rho\widehat s|\,|e_a|+\rho|e_t|+\rho|u e_s|}{(1-\eta)D}.
+\end{equation}
+\end{proposition}
+\begin{proof}
+Subtract the two forward maps and use
+$1/\widehat q-1/q=\rho e_s/(q\widehat q)$ to obtain
+\eqref{eq:forward-error}. Since $u=\rho D$,
+$\widehat D=D+e_t+u e_s-\widehat s e_a$ and
+$\widehat\rho-\rho=(u-e_a-\rho\widehat D)/\widehat D$, which gives
+\eqref{eq:inverse-error}. The triangle inequality yields
+$|\widehat D-D|\le B$ and then \eqref{eq:inverse-bound}.
+\end{proof}
+
+When $\widehat q\ne0$, the same calculation gives the exact forward--inverse link
+\begin{equation}\label{eq:forward-inverse-link}
+ \widehat\rho-\rho=-\frac{\widehat q}{\widehat D}(\widehat L-L).
+\end{equation}
+Consequently, on a common set where $|\widehat q|\le Q$ and
+$|\widehat D|\ge\delta>0$, the corresponding unweighted $L^2$ errors obey
+$\|\widehat\rho-\rho\|_2\le(Q/\delta)\|\widehat L-L\|_2$.
+Without the denominator condition there is no uniform implication from small spectral
+relative radiance error to small reflectance error. For example, take two bands with
+$a=s=0$, $t=(1,\varepsilon)$ and $0<\rho<1$. A predictor with
+$\widehat t=t$, $\widehat s=0$ and $\widehat a=(0,c\varepsilon)$, where $0<c<\rho$,
+has relative spectral radiance error
+$c\varepsilon/(\rho\sqrt{1+\varepsilon^2})\to0$ but retrieves
+$(\rho,\rho-c)$, so its reflectance RMSE remains $c/\sqrt2$. Every denominator is
+positive for $\varepsilon>0$ and both retrieved reflectances remain physical. This is a
+finite synthetic example, not an additional EMIT experiment.
+
+The forward bound need not deteriorate when $t$ tends to zero, whereas the inverse bound
+requires error control relative to $D=t/q$. Thus a small spectral radiance error does not
+certify stable reflectance recovery. At $t=0$, $L=a$ is independent of $\rho$ wherever the
+forward formula is defined, so reflectance is unidentifiable from this band. The identities
+are exact-arithmetic statements; floating-point cancellation in $L-a$ can further affect an
+implemented inverse.
+
+A retrieval assessment should therefore specify a common application passband and a
+conditioning threshold before comparing predictors, report the retained fraction, and count
+invalid inversions instead of hiding them by zero filling or clipping. The utility
+\path{code/conditioned_reflectance.py} implements this diagnostic with a threshold relative
+to a positive flux scale determined on training data and a common truth-based evaluation mask.
+The latter is available in a simulation benchmark, not automatically in a real retrieval.
+Prediction failures on that mask are reported separately. This diagnostic is supplied for
+reruns with the original arrays; conditioned EMIT results cannot be reconstructed from the
+public aggregate metrics and are not claimed here. The all-band tail analysis in
+Section~\ref{sec:paired-tails} uses only quantities already stored in the public run records.

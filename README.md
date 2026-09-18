@@ -1,105 +1,102 @@
 # Neural means and kernel corrections for radiative-transfer emulators
 
-Code, per-run records and manuscript for a study of neural networks combined with exact kernel
-regression on two atmospheric radiative-transfer emulation problems: a tabulated model on the
-285-band EMIT wavelength grid, and the OCO-2 reduced-radiance problem of Lamminpää et al. The
-question throughout is which of the two model families a given emulation problem favours, and
-whether coupling them keeps the advantage of each.
+Manuscript, model drivers and stored evidence for an empirical comparison on a
+six-dimensional radiative-transfer table over the 285-band EMIT grid, with OCO-2
+and other emulation configurations as contrasts.
 
-The manuscript is [`paper/emit_kernel_dnn.pdf`](paper/emit_kernel_dnn.pdf); its LaTeX sources,
-tables and figures are beside it.
+**Paper:** [compiled PDF](paper/emit_kernel_dnn.pdf),
+[LaTeX source](paper/emit_kernel_dnn.tex), [short abstract](paper/abstract.txt).
+The September 18 revision corrects the theoretical interpretation and adds a
+paired analysis of radiance gains and reflectance tails. It does not report a
+new training campaign or validated operational retrieval.
 
-## What the study finds
+## Main findings
 
-On the EMIT table the map is smooth, six-dimensional and low rank, and an exact Matérn
-regression fitted on all 18,884 training rows with one length scale per input is the strongest
-single model: 0.095% relative radiance error against 0.76% for a cubic polynomial ridge and
-0.39% for a fully connected network. Its fitted metric recovers the physics — the transmittances and the
-spherical albedo get a relative-azimuth length scale sixteen times longer than the other
-coordinates, at every split, and the path radiance does not. A convex stack of the heads is the
-best row of the table at 0.087%.
+Across ten stored EMIT splits, with 18,884 training rows and validation-based
+selection, the input-scaled Matérn kernel has 0.095% mean relative radiance error,
+compared with 0.760% for cubic regression and 0.387% for the neural network.
+Residual correction reduces the network error to 0.141%. A kernel on the
+width-2000 network's features reaches 0.079%; its convex stack reaches 0.078%.
+The width comparison also changes the permitted training duration and does not
+establish an intrinsic advantage of width independently of optimization.
 
-Varying the training size, the output rank and the network width at the same ten splits sharpens
-that reading. The cubic reaches a bias floor by a thousand rows and does not move again over a
-factor of thirty-eight in data, while every other family decays at close to the square root of the
-sample size on the three smooth components and not at all on the spherical albedo, which is the one
-component no metric rescues. A wider network is a worse emulator and a better coordinate system at
-the same time: from 512 to 2,000 units its own error rises while an exact kernel on its last-layer
-features improves, and a kernel on the concatenated features of three members improves again. The
-residual correction's behaviour follows from an identity rather than from tuning — the error of the
-corrected predictor is the kernel regression's residual on the network's residual, so the
-correction inherits the kernel's rate, sits at the kernel's level, and removes from the network's
-training residual exactly its projection on the leading eigenvectors of the Gram matrix. That last
-point is also why the correction adds nothing on the rougher OCO-2 problem.
+The smallest radiance number is not an unqualified retrieval winner. Across the
+same ten splits the wide feature kernel has a mean within-split 95th-percentile
+absolute reflectance error of 7.57 percentage points; the wide stack has 22.71.
+The stack has a worse tail at every split, while its mean radiance gain is only
+0.000584 percentage points. These are all-band inverse evaluations, including
+ill-conditioned absorption entries, not passband-qualified operational errors.
+The manuscript reports coverage limitations instead of hiding these tails behind
+a small median.
 
-On OCO-2 the input is higher-dimensional and the map rougher, a kernel on the state trails the
-network by an order of magnitude, and the useful construction is the kernel fitted inside the
-network's representation. A ridge readout refitted on the same frozen features is the control:
-the kernel head beats it at all ten splits on every band and under every training loss, while
-the ridge readout is worse than the network it reads out from. The gain is the kernel, not the
-refitting.
+The mathematical section gives the frozen-kernel residual identity, an exact
+Hilbert-space error-alignment criterion, the correct principal-component
+implementation, and a finite-error conditional bound for reflectance inversion.
+These are algebraic results with stated hypotheses. They do not prove universal
+learning rates or guarantee that residual correction improves either parent.
 
-The two reported metrics on OCO-2 — relative error on the forty reduced coefficients, and on the
-reconstructed monochromatic radiance — are not proxies for each other, and which one a model wins
-is decided by the loss it was trained under. The reconstruction basis is orthogonal, so a
-per-coefficient choice acts on both metrics through the same per-coefficient errors rather than
-trading one against the other; whether it improves both is then a question for measurement, and
-here it does. The choice made on validation assigns the leading coefficient to the kernel head of
-the network trained on the weighted coefficients, at every split on every band, and the remaining
-thirty-nine to the kernel head of the coefficient-trained network. The result is more accurate
-than the release's stored kernel-flow emulator on both metrics on all three bands.
+## Reproduce the public-record analysis
 
-A separate study of how the heads should be weighted finds that random-matrix estimators which
-clean the covariance of the member predictions lose, because the leading eigenvalue of that
-matrix is the shared signal; the object to clean is the covariance of the member errors, and
-once the stack is written as a minimum-variance portfolio on it with nonnegative weights, the
-constraint rather than the cleaning is what does the work.
+Python 3.11 or later and NumPy are sufficient for the new analysis and tests:
+
+```sh
+python -m pip install -r requirements-revision.txt
+python -m unittest discover -s code -p 'test_publication_revision.py' -v
+python code/make_revision_tables.py
+python code/make_tables.py
+latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
+```
+
+The last command also requires a TeX installation and latexmk. The GitHub
+manuscript workflow performs the checks and build; its artifacts contain the
+source and stored evidence. The mathematical tests use finite synthetic designs,
+not the missing raw EMIT arrays.
+
+## Evidence and limits
+
+The main width-512 campaign and the width-2000 pipeline each have all ten per-seed
+JSON records. `code/make_revision_tables.py` checks their configuration, equality
+of recorded data hashes, and common deterministic rows, regenerates the two main
+EMIT tables, and produces the paired/tail tables plus a source-hashed summary in
+`results/revision_20260918/reanalysis.json`. Equality of recorded data hashes is
+not independent verification of the raw arrays.
+
+Some secondary learning-curve, width and retuning experiments have aggregate
+summaries but incomplete individual archives. They are identified explicitly in
+[REPRODUCE.md](docs/REPRODUCE.md); missing records are not reconstructed from
+averages. The raw EMIT arrays, trained weights and per-sample predictions are not
+in this repository. Dataset generation details and redistribution permission
+remain necessary for independent full-campaign reproduction.
+
+A new [conditioning diagnostic](code/conditioned_reflectance.py) can evaluate
+prespecified common passband/flux masks when the original arrays and predictions
+are supplied. It reports retained coverage and denominator failures separately.
+It has been tested on synthetic cases, but no masked EMIT results are claimed.
+Older prediction dumps were saved as float32 after float64 scoring; the revised
+campaign preserves float64 for future exports, and the diagnostic rejects older
+float32 dumps unless explicitly allowed as a different precision experiment.
+
+Ten overlapping random splits from the same explored table provide descriptive
+replication, not ten independent external confirmations. OCO-2 and the further
+corpora delimit the empirical comparison; they do not establish operational EMIT
+retrieval performance or a universal winner across model families.
 
 ## Layout
 
 ```
-paper/       LaTeX sources, tables, figures and the compiled manuscript
-code/        the drivers that produced every number
-results/     one JSON record per run, the evidence behind every table
-  emit/               EMIT campaign, seeds 101-110, all model families
-  oco2_losses/        OCO-2, three training losses x {network, ridge readout, kernel head}
-  oco2_ensembles/     OCO-2, single-network and three-member campaigns, ten splits per band
-  corpora/            ten further emulation configurations under one protocol
-  stacking/           the weighting study's result tables
-  scaling/            training size, output rank, network width and kernel metric
-    per_seed/           one record per seed and rung, with its configuration
-docs/        how to reproduce each table
+paper/       manuscript, included mathematical sections and generated tables
+code/        original model drivers, table generators and new diagnostics/tests
+results/     original per-run/aggregate records and source-hashed reanalysis
+figures/     the original manuscript figures
+docs/        reproduction map and September 18 revision record
 ```
 
-## Reproducing the tables
+## Companion and data attribution
 
-`docs/REPRODUCE.md` maps each table and each quoted number to the records that produce it.
-`code/make_tables.py` regenerates the two OCO-2 tables and the corpora table from `results/`
-alone; it needs only the standard library.
-
-## Data
-
-The EMIT dataset consists of tabulated radiative-transfer evaluations generated at the Jet
-Propulsion Laboratory and is not redistributed here. The OCO-2 data and the reference emulator's
-stored predictions come from the release accompanying Lamminpää et al. (2025). The ten
-further configurations use public releases: the operator suite of de Hoop et al. (2022),
-PDEBench, The Well, ClimSim, and the paired correction-coefficient corpus of Mazid and Rishe
-(2026), which is run in both of its configurations. The per-run
-summaries in `results/` are the numbers behind every table; the raw arrays, trained weights and
-prediction dumps are available from the author on request.
-
-## Companion work
-
-The method and its taxonomy are developed in
-[neural-means-kernel-corrections](https://github.com/yspennstate/neural-means-kernel-corrections),
-which studies the same construction on structural mechanics and on OCO-2.
-
-## Citing
-
-Please cite the manuscript together with the sources of the data: Lamminpää, Susiluoto, Hobbs,
-McDuffie, Braverman and Owhadi (2025) for the OCO-2 emulation problem, and the releases named
-above for the additional corpora.
-
-## License
-
-MIT, see [LICENSE](LICENSE).
+The coupling method and companion experiments are in
+[neural-means-kernel-corrections](https://github.com/yspennstate/neural-means-kernel-corrections).
+The supplied study attributes the EMIT arrays to the Jet Propulsion Laboratory.
+OCO-2 data and reference predictions come from Lamminpää et al. (2025); further
+corpora use the releases cited in the manuscript. Cite these data sources along
+with the manuscript. Code is provided under the [MIT license](LICENSE); that
+license does not confer rights to raw data that are not distributed here.
