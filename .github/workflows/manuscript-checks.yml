@@ -57,7 +57,7 @@ jobs:
             echo 'Manuscript has unresolved references or overflowing text.'
             exit 1
           fi
-      - name: Publish this requested revision
+      - name: Publish requested manuscript
         if: steps.revision.outputs.applied == 'true'
         shell: bash
         run: |
@@ -66,7 +66,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git rm revisions/20260918-payload-1.b64 revisions/20260918-payload-2.b64 revisions/20260918-payload-3.b64 revisions/apply_publication_revision.py
           git add README.md requirements-revision.txt code/*.py docs/*.md paper/*.tex paper/abstract.txt paper/emit_kernel_dnn.pdf results/revision_20260918/reanalysis.json
-          git commit -m 'Revise EMIT manuscript: correct kernel claims, prove stability identities, expose retrieval tails'
+          git commit -m 'Edit standalone EMIT manuscript, document AI contributions and specify benchmark metric'
           git push origin HEAD:main
           echo "Published commit: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
       - name: Record build provenance
