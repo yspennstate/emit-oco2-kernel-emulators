@@ -15,19 +15,21 @@
 \maketitle
 
 \begin{abstract}
-We compare neural networks, exact Mat\'ern kernel regression, and their combinations on a
-six-dimensional radiative-transfer table over the 285-band EMIT grid. Across ten random splits
-with validation-based selection and 18{,}884 training samples, input-scaled kernels achieve
-$0.095\%$ mean relative radiance error, compared with $0.76\%$ for cubic regression and
-$0.39\%$ for a neural network. Residual correction reduces the network error to $0.14\%$;
-kernels on wider-network features and their convex stacks reach $0.079\%$ and $0.078\%$.
-This small stacking gain does not extend to reflectance tails: the wide stack has a larger
-95th-percentile inversion error at every split. Learning-curve, output-rank, and width
-experiments expose sensitivity to the representation and tuning protocol. We give exact
-residual and error-comparison identities and a conditional stability bound for reflectance
-inversion, without asserting universal learning rates. Contrasting OCO-2 results delimit the
-coupling's scope. The findings concern interpolation of tabulated physics, not validated
-operational retrieval.
+We compare neural networks, exact Mat\'ern kernel regression and their couplings on a
+six-dimensional radiative-transfer table over the 285-band EMIT grid, under one protocol of ten
+random splits with every choice made on a split's own validation rows. An input-scaled kernel
+fitted on all 18{,}884 training rows reaches $0.095\%$ mean relative radiance error, against
+$0.76\%$ for cubic regression and $0.39\%$ for a network, and its fitted length scales recover
+the physics, giving the relative azimuth a far longer scale on the transmittances. A kernel
+regression of the network's residuals brings the network to $0.14\%$, and an identity writes the
+corrected predictor's error as the kernel regression's residual on the network's residual, which
+does not by itself order it against either parent.
+The lowest radiance figures do not survive the reflectance tail. At the 95th percentile of
+inversion error the input-scaled kernel reads 31 points and the convex stack 23, against 7.6 for
+a kernel on a wider network's features, and paired across splits the stack's gain over that
+kernel is $0.0006 \pm 0.0026$ points. On OCO-2, where the input is higher-dimensional and the map
+rougher, none of these constructions transfers. The subject throughout is interpolation of a
+tabulated model, not operational retrieval.
 \end{abstract}
 
 \section{Introduction}
