@@ -8,7 +8,7 @@ the low-fidelity prediction that can serve as a mean.
 
   climsim(seed, ntrain)          LEAP ClimSim subsampled low-res: 124 inputs -> 128 tendencies; train rows
                                  subsampled from the 10.1M, validation from val_*, test from scoring_*
-  pkanrtm(seed, ntrain, lowfi)   paired 6S / libRadtran Sentinel-2 coefficients: 9 state inputs + band
+  pkanrtm(seed, ntrain, lowfi)   paired 6S / libRadtran Sentinel-2 coefficients: 7 state inputs + band
                                  wavelength -> (rho_path, T_total, spher_alb) of libRadtran; lowfi=1 adds the
                                  6S coefficients of the same state as inputs (physics-mean / multi-fidelity)
   trl2d(seed, ntrain)            The Well turbulent radiative layer 2D: one-step map state_t -> state_{t+1}

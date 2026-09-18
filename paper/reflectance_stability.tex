@@ -59,8 +59,7 @@ $\widehat t=t$, $\widehat s=0$ and $\widehat a=(0,c\varepsilon)$, where $0<c<\rh
 has relative spectral radiance error
 $c\varepsilon/(\rho\sqrt{1+\varepsilon^2})\to0$ but retrieves
 $(\rho,\rho-c)$, so its reflectance RMSE remains $c/\sqrt2$. Every denominator is
-positive for $\varepsilon>0$ and both retrieved reflectances remain physical. This is a
-finite synthetic example, not an additional EMIT experiment.
+positive for $\varepsilon>0$ and both retrieved reflectances remain physical. This example isolates the loss of inversion stability as the second-band flux vanishes.
 
 The forward bound need not deteriorate when $t$ tends to zero, whereas the inverse bound
 requires error control relative to $D=t/q$. Thus a small spectral radiance error does not
@@ -69,13 +68,10 @@ forward formula is defined, so reflectance is unidentifiable from this band. The
 are exact-arithmetic statements; floating-point cancellation in $L-a$ can further affect an
 implemented inverse.
 
-A retrieval assessment should therefore specify a common application passband and a
-conditioning threshold before comparing predictors, report the retained fraction, and count
-invalid inversions instead of hiding them by zero filling or clipping. The utility
-\path{code/conditioned_reflectance.py} implements this diagnostic with a threshold relative
-to a positive flux scale determined on training data and a common truth-based evaluation mask.
-The latter is available in a simulation benchmark, not automatically in a real retrieval.
-Prediction failures on that mask are reported separately. This diagnostic is supplied for
-reruns with the original arrays; conditioned EMIT results cannot be reconstructed from the
-public aggregate metrics and are not claimed here. The all-band tail analysis in
-Section~\ref{sec:paired-tails} uses only quantities already stored in the public run records.
+For empirical comparison, a common application passband and conditioning threshold should
+be fixed before model evaluation. The utility \path{code/conditioned_reflectance.py}
+uses a positive flux scale determined on training data and a common truth-based mask,
+which is available in simulation benchmarks. It reports retained coverage, non-finite
+inversions and denominator failures separately. Masked errors require sample-level arrays
+and cannot be recovered from aggregate summaries. The EMIT comparisons in
+Section~\ref{sec:paired-tails} therefore use the all-band statistics.

@@ -2,9 +2,8 @@
 
 This document distinguishes three operations: regenerating numbers from archived
 metrics, checking mathematical/diagnostic code on synthetic inputs, and rerunning
-a training campaign from raw data. Only the first two were executed for the
-September 18, 2026 revision. The main manuscript's table labels are used below
-because inserted tables change their printed numbers.
+a training campaign from raw data. The commands below perform the first two operations. Rerunning training requires
+the raw input arrays. Tables are identified by their LaTeX labels.
 
 ## 1. Public-record analysis and manuscript build
 
@@ -18,7 +17,7 @@ python code/make_tables.py
 latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
 ```
 
-The new analysis/test environment is pinned in `requirements-revision.txt`.
+The analysis/test environment is pinned in `requirements-revision.txt`.
 `latexmk` and a TeX distribution with the manuscript's standard packages are
 required for the PDF. The original training environment was not recorded in a
 lockfile; do not treat the revision requirements as that environment.
@@ -171,3 +170,13 @@ in old archives cannot be restored by casting them back to float64.
 **No common-mask EMIT results or full-campaign reruns are claimed in this
 revision.** Independent blocked/untouched evaluation, physical passband error
 budgets, and runtime comparisons remain necessary for operational conclusions.
+
+## Correction-coefficient benchmark metric
+
+`code/bench_data.py:pkanrtm` selects seven state coordinates and wavelength:
+`wvl_nm`, `sza_deg`, `vza_deg`, `raa_deg`, `aod550`, `cwv_cm`, `o3_cm`,
+`elev_km`. Its input dimension is eight, or eleven after adding the three 6S
+coefficients. The reported relative-error denominator is
+`maximum(norm(Y_true, axis=1), 0.05)`. The same floor is used for validation
+selection and the kernel-flow objective. Thus the two correction-coefficient
+rows are floored relative errors, not unmodified relative L2 errors.

@@ -1,10 +1,8 @@
-\section{Residual correction: identities, comparisons and limits}\label{sec:identity}
+\section{Residual correction and error alignment}\label{sec:identity}
 
-The learning curves motivate a distinction between an identity for a fitted predictor and a
-claim about its out-of-sample rate. The former can be established without distributional
-assumptions; the latter requires assumptions not measured by these experiments. We first fix
-all fitted quantities, including any data-dependent kernel hyperparameters, and work with one
-output coordinate. The identities extend coordinatewise to vector outputs.
+Fix the training design, neural mean and selected kernel hyperparameters. The following
+identities hold without sampling assumptions. We first work with one output coordinate;
+the vector-valued statements follow coordinatewise.
 
 \subsection{A frozen regression operator}
 Fix a design $X_n=(x_1,\ldots,x_n)$, a positive-semidefinite kernel with Gram matrix $K$, and
@@ -46,7 +44,7 @@ $Sf$.
 Subtract $h+S(f-h)$ from $f$ to obtain \eqref{eq:residual-exact}. On the design,
 $I-K(K+\lambda I)^{-1}=\lambda(K+\lambda I)^{-1}$, which proves
 \eqref{eq:design-residual} and its spectral form. Apply the assumed uniform inequality to
-$g=f-h$ for \eqref{eq:inherit}. The final distinction is demonstrated below.
+$g=f-h$ for \eqref{eq:inherit}. The examples below distinguish this bound from actual error comparisons.
 \end{proof}
 
 \paragraph{Why the bounds do not order the errors.}
@@ -55,8 +53,7 @@ $R=\operatorname{diag}(1/2,1/100)$ and $C_n=1/2$ is its Euclidean operator norm.
 $f=(1,0)$ and $f-h=(0,2)$, the residual norm is twice the target norm, yet
 $\|R(f-h)\|=0.02<0.50=\|Rf\|$. Conversely, with $f=(0,1)$ and $f-h=(1/2,0)$, the
 residual norm is smaller, but $\|R(f-h)\|=0.25>0.01=\|Rf\|$. These examples also show why
-a more accurate neural mean need not yield a more accurate corrected predictor: the
-orientation of the remaining error matters.
+source-norm accuracy alone does not order corrected prediction errors.
 
 \subsection{An exact criterion for improvement}
 The relevant comparison can be made exactly in any Hilbert error metric. This includes a
@@ -86,17 +83,17 @@ $[0,1]$ to obtain \eqref{eq:shrink-mean}. For distinct operators,
 $f-h-S_1(f-h)=(I-S_0)f-[(S_1-S_0)f+(I-S_1)h]$, after which the same expansion applies.
 \end{proof}
 
-The criterion is a diagnostic, not an oracle available at prediction time. Replacing its inner
+The criterion depends on the unknown target error. Replacing its inner
 products by validation errors gives a validation-optimal interpolation, not a guarantee on new
 data. The reported experiments use separately tuned direct and residual kernels, so their
-comparison must use the final, two-operator form rather than silently identifying the operators.
+comparison must use the final, two-operator form with their actual selected operators.
 Neither the criterion nor the training-design contraction establishes that correction will
 beat both parents at every sample size.
 
 \subsection{What the principal-component implementation computes}
 The campaign trains a network on all standardized bands but projects its predictions into
 the retained principal-component basis before correction. Thus its corrected predictor is
-not, literally, the unprojected network plus a kernel residual. To state the implementation
+based on the projected network mean. To state the implementation
 precisely, let $f$ and $h$ now denote the target and network output after the common fitted
 standardization and PCA centering. Let $\Pi$ be the orthogonal projection onto the retained
 spectral coordinates. In these centered coordinates, the implemented prediction is
@@ -115,21 +112,15 @@ regression and explains why output rank is a genuine part of the model specifica
 does not by itself prove the observed optimum near rank 32. Comparisons with the unprojected
 network include the effect of projection as well as residual fitting.
 
-\paragraph{Rates and interpretation.}
-Standard kernel learning-rate results impose source, spectrum, sampling and regularization
-conditions \cite{cdv,sutherland,fs}. If a bound uniform over the relevant residual class holds
-with $C_n=O(n^{-\alpha})$ and one \emph{separately establishes}
-$\|f-h_n\|_{\mathcal S}=O(n^{-\beta})$, then \eqref{eq:inherit} gives an upper bound
-$O(n^{-(\alpha+\beta)})$. It gives neither equality of rates nor a lower bound. Empirical
-network loss does not establish convergence in $\mathcal S$, and a bound for a fixed target
-cannot automatically be applied to an adaptively fitted residual or a selected kernel. The
-required smoothness norms and uniform events are not measured here. Accordingly the slopes
-in Table~\ref{tab:slopes} are finite-range empirical slopes, not estimates of a proved
-asymptotic exponent. Smoother or better-aligned residuals are possible interpretations of the
-successful corrections; they are not conclusions forced by the algebra.
+\paragraph{Conditional rate bound.}
+Kernel learning-rate results impose source, spectral, sampling and regularization conditions
+\cite{cdv,sutherland,fs}. If a uniform residual bound holds with $C_n=O(n^{-\alpha})$
+and $\|f-h_n\|_{\mathcal S}=O(n^{-\beta})$, then \eqref{eq:inherit} gives
+$\|f-\widehat f_c\|_{L^2(P)}=O(n^{-(\alpha+\beta)})$. The source-norm bound and the
+uniformity required for a data-dependent residual are additional hypotheses. They do not
+follow from empirical network loss. The experiments measure finite-range error slopes,
+not these source norms or an asymptotic rate.
 
-The tests in \path{code/test_publication_revision.py} check the residual identities,
-regularizer convention, semidefinite boundary case, alignment formula, counterexamples and
-projected implementation on explicit and randomized finite designs. These numerical checks
-support the implementation of the displayed formulas; the proofs above supply their
-mathematical justification.
+The code checks the residual identities, regularizer convention, semidefinite boundary,
+alignment formula, counterexamples and projected implementation on explicit and randomized
+finite designs.

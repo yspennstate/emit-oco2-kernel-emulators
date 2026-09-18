@@ -1,43 +1,38 @@
 # Neural means and kernel corrections for radiative-transfer emulators
 
-Manuscript, model drivers and stored evidence for an empirical comparison on a
-six-dimensional radiative-transfer table over the 285-band EMIT grid, with OCO-2
-and other emulation configurations as contrasts.
+Manuscript, code and recorded results for a comparison of neural networks, exact
+kernel regression and their combinations on a six-dimensional radiative-transfer
+table over the 285-band EMIT wavelength grid.
 
-**Paper:** [compiled PDF](paper/emit_kernel_dnn.pdf),
-[LaTeX source](paper/emit_kernel_dnn.tex), [short abstract](paper/abstract.txt).
-The September 18 revision corrects the theoretical interpretation and adds a
-paired analysis of radiance gains and reflectance tails. It does not report a
-new training campaign or validated operational retrieval.
+[Paper (PDF)](paper/emit_kernel_dnn.pdf) · [LaTeX source](paper/emit_kernel_dnn.tex) ·
+[Abstract](paper/abstract.txt) · [Reproduction instructions](docs/REPRODUCE.md)
 
-## Main findings
+## Findings
 
-Across ten stored EMIT splits, with 18,884 training rows and validation-based
+Across ten EMIT splits, each with 18,884 training rows and validation-based
 selection, the input-scaled Matérn kernel has 0.095% mean relative radiance error,
 compared with 0.760% for cubic regression and 0.387% for the neural network.
 Residual correction reduces the network error to 0.141%. A kernel on the
 width-2000 network's features reaches 0.079%; its convex stack reaches 0.078%.
-The width comparison also changes the permitted training duration and does not
-establish an intrinsic advantage of width independently of optimization.
 
-The smallest radiance number is not an unqualified retrieval winner. Across the
-same ten splits the wide feature kernel has a mean within-split 95th-percentile
-absolute reflectance error of 7.57 percentage points; the wide stack has 22.71.
-The stack has a worse tail at every split, while its mean radiance gain is only
-0.000584 percentage points. These are all-band inverse evaluations, including
-ill-conditioned absorption entries, not passband-qualified operational errors.
-The manuscript reports coverage limitations instead of hiding these tails behind
-a small median.
+The forward and inverse rankings differ. The wide feature kernel has a mean
+within-split 95th-percentile absolute reflectance error of 7.57 percentage points,
+compared with 22.71 for its convex stack. The stack has a larger tail at every
+split, despite a mean radiance gain of 0.000584 percentage points. The inverse
+metrics include all bands and their ill-conditioned absorption entries.
 
-The mathematical section gives the frozen-kernel residual identity, an exact
-Hilbert-space error-alignment criterion, the correct principal-component
-implementation, and a finite-error conditional bound for reflectance inversion.
-These are algebraic results with stated hypotheses. They do not prove universal
-learning rates or guarantee that residual correction improves either parent.
+The mathematical analysis gives exact residual-error identities, a Hilbert-space
+alignment criterion, the principal-component error decomposition, and conditional
+finite-error bounds for reflectance inversion. The empirical comparisons include
+learning curves, rank and width experiments, OCO-2, and ten additional emulation
+configurations. The correction-coefficient corpus uses eight state/wavelength
+inputs (eleven with low-fidelity coefficients) and a 0.05 denominator floor in
+its relative-error metric.
 
-## Reproduce the public-record analysis
+## Reproduction
 
-Python 3.11 or later and NumPy are sufficient for the new analysis and tests:
+Python 3.11, the analysis requirements and a TeX installation are needed for the
+checks, table generation and PDF build:
 
 ```sh
 python -m pip install -r requirements-revision.txt
@@ -47,56 +42,35 @@ python code/make_tables.py
 latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
 ```
 
-The last command also requires a TeX installation and latexmk. The GitHub
-manuscript workflow performs the checks and build; its artifacts contain the
-source and stored evidence. The mathematical tests use finite synthetic designs,
-not the missing raw EMIT arrays.
+These commands check the finite identities and regenerate tables from the public
+run summaries. They do not retrain the models. The GitHub workflow runs the same
+checks and archives the compiled paper, sources and build provenance.
 
-## Evidence and limits
+## Data and scope
 
-The main width-512 campaign and the width-2000 pipeline each have all ten per-seed
-JSON records. `code/make_revision_tables.py` checks their configuration, equality
-of recorded data hashes, and common deterministic rows, regenerates the two main
-EMIT tables, and produces the paired/tail tables plus a source-hashed summary in
-`results/revision_20260918/reanalysis.json`. Equality of recorded data hashes is
-not independent verification of the raw arrays.
+The main and wide EMIT comparisons each have ten per-split records. Some secondary
+experiments have complete aggregate summaries but incomplete individual archives;
+[the reproduction manifest](docs/REPRODUCE.md) lists them. Raw EMIT arrays, trained
+weights and per-sample predictions are not distributed in this repository.
+Simulator-generation details and data access are required for full reproduction.
 
-Some secondary learning-curve, width and retuning experiments have aggregate
-summaries but incomplete individual archives. They are identified explicitly in
-[REPRODUCE.md](docs/REPRODUCE.md); missing records are not reconstructed from
-averages. The raw EMIT arrays, trained weights and per-sample predictions are not
-in this repository. Dataset generation details and redistribution permission
-remain necessary for independent full-campaign reproduction.
+Model development and evaluation used the same finite table. The overlapping
+partitions describe split sensitivity, not independent external validation. The
+conditioned-reflectance diagnostic reports common-mask coverage and failures when
+sample-level arrays are provided. The reported EMIT results are all-band errors;
+no operational retrieval or matched-throughput benchmark is supplied.
 
-A new [conditioning diagnostic](code/conditioned_reflectance.py) can evaluate
-prespecified common passband/flux masks when the original arrays and predictions
-are supplied. It reports retained coverage and denominator failures separately.
-It has been tested on synthetic cases, but no masked EMIT results are claimed.
-Older prediction dumps were saved as float32 after float64 scoring; the revised
-campaign preserves float64 for future exports, and the diagnostic rejects older
-float32 dumps unless explicitly allowed as a different precision experiment.
+## Contributions and sources
 
-Ten overlapping random splits from the same explored table provide descriptive
-replication, not ten independent external confirmations. OCO-2 and the further
-corpora delimit the empirical comparison; they do not establish operational EMIT
-retrieval performance or a universal winner across model families.
+Claude Code (Anthropic) and Codex (OpenAI) implemented and ran the experiments,
+diagnostics and figures and drafted the manuscript. ChatGPT (OpenAI) developed the
+residual-error and inversion-stability analyses, checked the finite identities,
+analysed the recorded results, implemented conditioning diagnostics and tests,
+and edited the manuscript. Funding and competing interests are stated in the paper.
 
-## Layout
-
-```
-paper/       manuscript, included mathematical sections and generated tables
-code/        original model drivers, table generators and new diagnostics/tests
-results/     original per-run/aggregate records and source-hashed reanalysis
-figures/     the original manuscript figures
-docs/        reproduction map and September 18 revision record
-```
-
-## Companion and data attribution
-
-The coupling method and companion experiments are in
+The method and companion experiments are in
 [neural-means-kernel-corrections](https://github.com/yspennstate/neural-means-kernel-corrections).
-The supplied study attributes the EMIT arrays to the Jet Propulsion Laboratory.
-OCO-2 data and reference predictions come from Lamminpää et al. (2025); further
-corpora use the releases cited in the manuscript. Cite these data sources along
-with the manuscript. Code is provided under the [MIT license](LICENSE); that
-license does not confer rights to raw data that are not distributed here.
+The EMIT arrays are attributed to the Jet Propulsion Laboratory. The OCO-2 data
+and reference predictions come from Lamminpää et al. (2025); the other data sources
+are cited in the manuscript. The [MIT license](LICENSE) covers the repository
+code, not rights to data absent from the repository.
