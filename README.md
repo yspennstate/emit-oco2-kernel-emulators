@@ -19,6 +19,19 @@ spherical albedo get a relative-azimuth length scale sixteen times longer than t
 coordinates, at every split, and the path radiance does not. A convex stack of the heads is the
 best row of the table at 0.087%.
 
+Varying the training size, the output rank and the network width at the same ten splits sharpens
+that reading. The cubic reaches a bias floor by a thousand rows and does not move again over a
+factor of thirty-eight in data, while every other family decays at close to the square root of the
+sample size on the three smooth components and not at all on the spherical albedo, which is the one
+component no metric rescues. A wider network is a worse emulator and a better coordinate system at
+the same time: from 512 to 2,000 units its own error rises while an exact kernel on its last-layer
+features improves, and a kernel on the concatenated features of three members improves again. The
+residual correction's behaviour follows from an identity rather than from tuning — the error of the
+corrected predictor is the kernel regression's residual on the network's residual, so the
+correction inherits the kernel's rate, sits at the kernel's level, and removes from the network's
+training residual exactly its projection on the leading eigenvectors of the Gram matrix. That last
+point is also why the correction adds nothing on the rougher OCO-2 problem.
+
 On OCO-2 the input is higher-dimensional and the map rougher, a kernel on the state trails the
 network by an order of magnitude, and the useful construction is the kernel fitted inside the
 network's representation. A ridge readout refitted on the same frozen features is the control:
@@ -53,6 +66,8 @@ results/     one JSON record per run, the evidence behind every table
   oco2_ensembles/     OCO-2, single-network and three-member campaigns, ten splits per band
   corpora/            ten further emulation configurations under one protocol
   stacking/           the weighting study's result tables
+  scaling/            training size, output rank, network width and kernel metric
+    per_seed/           one record per seed and rung, with its configuration
 docs/        how to reproduce each table
 ```
 

@@ -1,0 +1,15 @@
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{4}{c}{component rel.\ $L^2$ [\%]} & radiance & reflectance \\
+\cmidrule(lr){2-5}
+kernel & $Y_1$ & $Y_2$ & $Y_3$ & $Y_4$ & rel.\ $L^2$ [\%] & med.\ $|\hat\rho-\rho|$ [\%] \\
+\midrule
+isotropic, tuned on 6{,}000 rows & 0.08$\pm$0.01 & 0.42$\pm$0.03 & 0.20$\pm$0.00 & 2.62$\pm$0.18 & 0.239$\pm$0.016 & 0.141$\pm$0.018 \\
+isotropic, tuned on every row & 0.08$\pm$0.00 & 0.36$\pm$0.02 & 0.17$\pm$0.01 & 2.58$\pm$0.14 & 0.210$\pm$0.008 & 0.107$\pm$0.006 \\
+per-input search, tuned on 6{,}000 rows & 0.08$\pm$0.01 & 0.16$\pm$0.02 & 0.08$\pm$0.01 & 2.18$\pm$0.16 & 0.095$\pm$0.009 & 0.036$\pm$0.004 \\
+per-input search, re-tuned on every row & 0.08$\pm$0.00 & 0.16$\pm$0.02 & 0.08$\pm$0.01 & 2.09$\pm$0.12 & 0.096$\pm$0.009 & 0.036$\pm$0.004 \\
+per-input from the cubic's gradients, $p=1$ & 0.34$\pm$0.01 & 0.19$\pm$0.02 & 0.14$\pm$0.01 & 2.17$\pm$0.14 & 0.159$\pm$0.007 & 0.078$\pm$0.004 \\
+per-input from the cubic's gradients, $p=1/2$ & 0.11$\pm$0.00 & 0.19$\pm$0.02 & 0.09$\pm$0.01 & 2.27$\pm$0.15 & 0.125$\pm$0.008 & 0.055$\pm$0.004 \\
+per-input from the cubic's gradients, $p=1/4$ & 0.08$\pm$0.00 & 0.25$\pm$0.02 & 0.14$\pm$0.01 & 2.38$\pm$0.20 & 0.157$\pm$0.015 & 0.077$\pm$0.013 \\
+\bottomrule
+\end{tabular}

@@ -1,7 +1,8 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1.1in]{geometry}
-\usepackage{amsmath, amssymb}
+\usepackage{amsmath, amssymb, amsthm}
 \usepackage{graphicx}
+\newtheorem{proposition}{Proposition}
 \usepackage{booktabs}
 \usepackage[hidelinks]{hyperref}
 \graphicspath{{../figures/}}
@@ -17,29 +18,36 @@
 Imaging-spectroscopy retrievals call an atmospheric radiative-transfer model many times per
 spectrum, and at mission data rates a learned emulator of the tabulated physics is a practical
 necessity. We compare neural and kernel emulators, and their couplings, on a tabulated model
-over the 285-band EMIT wavelength grid and on the OCO-2 reduced-radiance problem, under one
-protocol: ten random splits, every choice made on each split's own validation rows, one test
-read per family, and every number reported with its spread across splits. On the EMIT table,
-whose map is smooth, six-dimensional and low rank, an exact Mat\'ern regression fitted on all
-18{,}884 training rows with one length scale per input is the strongest single model at
-$0.095\%$ relative radiance error, against $0.76\%$ for a cubic polynomial and $0.39\%$ for a
-fully connected network; its fitted metric recovers the physics, giving the relative azimuth a
-sixteen-fold longer length scale on the transmittances. A kernel regression of the network's
-residuals brings the network to $0.14\%$ and a per-component convex stack reaches $0.087\%$,
-while per-coordinate selection does not transfer from validation to test. On OCO-2 the input is
-higher-dimensional and the map rougher, and the kernel helps only inside the network's
-representation: it beats a ridge readout refitted on the same frozen features at every split,
-on every band and under every training loss, while that readout does not beat the network it
-reads out from in the metric the network was trained for. The two reported metrics are divided
-between networks trained under different losses, and because the reconstruction basis is
-orthogonal a per-coefficient choice acts on both metrics through the same per-coefficient
-errors; the choice made on validation here holds both, giving lower error than the release's
-stored emulator on both metrics on all three bands. We also measure what the
-reflectance metric returns for exact inputs: in the deep absorption windows the transmitted
-flux approaches zero, the inversion is ill-conditioned and at exactly zero flux
-non-identifiable, so the exact tabulated components put through it already give a
-root-mean-square error of half a reflectance percentage point. That number describes the
-evaluation at those entries; it is not a lower bound that every emulator must pay.
+over the 285-band EMIT wavelength grid under one protocol: ten random splits, every choice made
+on each split's own validation rows, one test read per family, and every number reported with
+its spread across splits. The map is smooth, six-dimensional and low rank, and an exact
+Mat\'ern regression fitted on all 18{,}884 training rows with one length scale per input is the
+strongest single model at $0.095\%$ relative radiance error, against $0.76\%$ for a cubic
+polynomial and $0.39\%$ for a fully connected network; its fitted metric recovers the physics,
+giving the relative azimuth a sixteen- to thirty-two-fold longer length scale on the
+transmittances. A kernel
+regression of the network's residuals brings the network to $0.14\%$ and a per-component convex
+stack reaches $0.087\%$, while per-coordinate selection does not transfer from validation to
+test. Learning curves from 500 rows to the full block put every family except the cubic at close
+to $n^{-1/2}$ on the three smooth components and at zero on the spherical albedo, and the
+corrected network below both of its parents at every split from 2{,}000 rows on; an identity for
+the residual correction, whose error is the kernel regression's residual on the network's
+residual, says why its curve takes the network's exponent and the kernel's level, and why the
+path radiance is the exception. The flattening of the kernel's curve at the largest size is an
+artefact of choosing its hyperparameters on a subsample of the solve, which over-smooths; tuning
+on every row removes it. A metric read off a cubic surrogate's gradients, with its exponent chosen
+on validation, closes four fifths of the distance from the isotropic kernel to the searched one for
+one cubic fit and six finite differences. The kernel is indifferent to the output rank above 32
+coefficients while the correction has an optimum near it. A network four times wider is a worse
+emulator and a better representation: an exact kernel on its features beats the per-input kernel
+at every split, and a convex stack built on it is the lowest row of the study at $0.078\%$. We also measure what the reflectance metric returns for exact inputs: in the deep
+absorption windows the transmitted flux approaches zero, the inversion is ill-conditioned and at
+exactly zero flux non-identifiable, so the exact tabulated components put through it already
+give a root-mean-square error of half a reflectance percentage point. That number describes the
+evaluation at those entries; it is not a lower bound that every emulator must pay. On the OCO-2
+problem of the companion paper, where the input is higher-dimensional and the map rougher, none
+of the constructions that win here transfers, and the kernel pays only inside the network's
+representation.
 \end{abstract}
 
 \section{Introduction}
@@ -93,10 +101,15 @@ which the transmitted flux approaches zero: there the sensitivity of the inversi
 radiance and the two flux components is unbounded, and at exactly zero flux the physical
 reflectance is not identifiable at all. We measure what the metric returns for exact inputs and
 summarize reflectance through a statistic the divergence cannot dominate.
-Section~\ref{sec:oco2} repeats the construction on the OCO-2 problem of the companion paper
-under the same protocol, where representation rather than smoothness decides the comparison;
-Section~\ref{sec:stack} takes the member predictions of both campaigns and asks which rule for
-combining heads is the right one, and why; and Section~\ref{sec:corpora} applies the same
+Section~\ref{sec:scaling} adds what a single training size cannot show: learning curves from
+500 rows to the full block, refits at other output ranks, a ladder of network widths, and the two
+questions those curves raise --- where the kernel's hyperparameters should be chosen, since the
+protocol used here turns out to cost it a measurable amount, and whether its metric can be read off
+the data instead of searched for.
+Section~\ref{sec:identity} gives the identity behind the residual correction, which says what the
+corrected network can inherit from each of its parents and accounts for the shape of every curve.
+Section~\ref{sec:oco2} records where the constructions that win here do not transfer, on the
+OCO-2 problem of the companion paper \cite{nmkc}, and Section~\ref{sec:corpora} applies the same
 family set to ten further emulation configurations.
 
 \section{Data and protocol}\label{sec:data}
@@ -277,18 +290,21 @@ network, the ensemble, the two corrected predictors and the feature kernel, and 
 test prediction from the winners. (iv) \emph{Convex stack}: per component, a convex combination
 of the same six heads with weights fitted on the validation points in the physical relative
 metric, in the manner of stacked generalization \cite{wolpert} and stacked regression
-\cite{breiman}. Section~\ref{sec:stack} examines what the right weighting rule is for pools
-of this kind.
+\cite{breiman}. The choice of weighting rule for pools of this kind, and its relation to
+constrained minimum-variance weighting, is studied separately and is not part of this
+comparison.
 
-\paragraph{What is not evaluated.} Learning curves at nested training sizes, refits at other
-output ranks, and wider or longer-trained networks were not evaluated, and no number from them
-enters the comparison.
+\paragraph{What is evaluated at other budgets.} Section~\ref{sec:scaling} repeats the isotropic
+exact kernel, the network, its residual correction and the feature kernel at nested training
+sizes, at other output ranks and at a wider network; the table of Section~\ref{sec:results} is
+the full-size, rank-64, width-512 cell of that grid.
 
 \section{Results}\label{sec:results}
 
 \begin{table}[t]
 \centering\small
-\input{table_emit_seeds}
+
+\resizebox{\textwidth}{!}{\input{table_emit_seeds}}
 \caption{Test errors under the protocol of Section~\ref{sec:data}, mean $\pm$ standard deviation
 over the ten splits. Component columns are mean relative $L^2$ errors; the radiance column
 evaluates \eqref{eq:fwd} at $\rho = 0.7$; the last column is the median absolute reflectance
@@ -311,7 +327,7 @@ below hold seed by seed; where they do not, the text says so.
 $0.76\%$ on the radiance: the map is smooth, and a polynomial in six variables recovers it to
 two percent. The earlier construction of the kernel regression, a Mat\'ern-$5/2$ on a
 4{,}000-point subset, divides both numbers by more than two at seven of the ten splits
-($0.74\%$ and $0.32\%$); at the other three its albedo fit collapses ($3.3$--$4.3\%$ against
+($0.74\%$ and $0.31\%$); at the other three its albedo fit collapses ($3.3$--$4.3\%$ against
 $1.9\%$), which is what a fit capped at a random subset can do, and its ten-split mean
 ($0.88\%$, $0.33\%$) carries that fragility.
 
@@ -328,9 +344,11 @@ the per-input kernel reaches $0.63\%$ on the components and $0.095\%$ on the
 radiance, with the best reflectance column of the table ($0.036$ percentage points), and its
 albedo column ($2.2\%$) sits between the two isotropic solves. The learned metric is the physics of the
 components: for the two flux components and the spherical albedo the coordinate search gives
-the relative azimuth a length scale sixteen times longer than the others --- at every one of
-the ten seeds for the two flux components, and at nine of the ten for the albedo, whose search
-leaves the azimuth unscaled at the tenth --- and the view zenith two to sixteen times longer,
+the relative azimuth a length scale sixteen to thirty-two times longer than the others --- a
+median of sixteen on the direct flux and the albedo and of thirty-two on the diffuse flux, at
+every one of the ten seeds for the two flux components and at nine of the ten for the albedo,
+whose search leaves the azimuth unscaled at the tenth --- and the view zenith two to sixteen
+times longer,
 while for the path radiance, which
 does depend on the viewing geometry, the metric stays nearly isotropic. Transmittances and the
 spherical albedo do not depend on azimuth, and the kernel finds that out from the validation
@@ -349,8 +367,9 @@ at seven of the ten seeds) and behind the exact kernel with per-input scales at 
 network's residuals on the standardized inputs takes the single network from $0.39\%$ to
 $0.14\%$ on the radiance and the five-network mean from $0.25\%$ to $0.12\%$; the kernel fitted
 in the network's last-layer features (DKR) reaches $0.61\%$ and $0.098\%$, indistinguishable
-from the per-input kernel on the components and on the radiance and a little behind it on the
-reflectance median. The correction therefore does exactly what it did on the single split ---
+from the per-input kernel on the components and on the radiance --- $0.098$ against $0.095$, the
+lower at six seeds of ten --- but half again worse on the reflectance median, $0.054$ against
+$0.036$ points, and worse there at every one of the ten. The correction therefore does exactly what it did on the single split ---
 it hands the network the kernel's accuracy on the smooth components while keeping the network's
 own representation --- but with the kernel now allowed its own input metric the corrected
 network is no longer the lowest row: the ordering by radiance error is stack, per-input kernel,
@@ -399,346 +418,396 @@ zero, so relative error is large for every model there, and the component is har
 of signal-to-noise rather than of model class. The stack's $1.94\%$ is the best number any
 construction reaches at this training size.
 
-\section{A second emulation problem: OCO-2}\label{sec:oco2}
+\section{Learning curves, output rank and network width}\label{sec:scaling}
 
-The same construction was applied, without structural change, to the OCO-2
-radiative-transfer emulation problem of Lamminp\"a\"a et al.~\cite{lamminpaa}: per spectral
-band (O$_2$, weak CO$_2$, strong CO$_2$), a reduced atmospheric state of twenty or
-twenty-four coordinates maps to forty reduced radiance coefficients, with the release's
-20{,}000 training and 2{,}000 test points, and errors reported both on the standardized
-reduced coefficients and on the reconstructed monochromatic radiance. The protocol is the one
-of Section~\ref{sec:data}: ten splits of the training block into 18{,}000 training and
-2{,}000 validation rows, every choice on validation, one test read per family, and the fixed
-test block scored identically for every row. The reference is the release's own kernel-flow
-emulator, whose stored test predictions are rescored under the same two metrics on the same
-2{,}000 points, so that the reference row and every other row are produced by one evaluation
-routine on one set of cases. An earlier version of this study quoted reference figures that
-the stored predictions do not reproduce under any convention we tried; the rows below compare
-against the rescored predictions only.
-
-This problem sits at the opposite end of the structural spectrum from the EMIT table. The
-input is higher-dimensional, the map is rougher, and a kernel on the state trails the network
-by an order of magnitude on the reduced coefficients: the isotropic Mat\'ern reaches $41\%$,
-$59\%$ and $43\%$ on the three bands and the relevance-scaled metric $30\%$, $52\%$ and
-$29\%$, against $4.4\%$, $16.4\%$ and $8.2\%$ for the network. Representation carries the
-problem, so the construction to test here is the one that spends the kernel's exactness
-inside a learned representation rather than on the state.
-
-\subsection{What the kernel adds to a representation}\label{sec:oco2-heads}
-
-Table~\ref{tab:oco2losses} separates that question from two others it is easily confused
-with. Each of three networks is trained under a different loss --- the per-sample relative
-error on the reduced coefficients, the same error under the weights the reconstruction
-applies to each coefficient, and the relative error of the reconstructed radiance itself ---
-and each is then read out in three ways: the network's own output head, a ridge regression
-refitted on its frozen last-layer features, and an exact Mat\'ern regression on those same
-features. The ridge row is the control. If the kernel's gain over the network were a matter
-of refitting a readout on a good representation, the ridge row would match the kernel row;
-if the representation were doing all the work, the ridge row would match the network.
-
-Neither happens. The kernel head beats the ridge readout on the reduced coefficients at all
-ten splits, on every band and under every loss, by $0.60 \pm 0.07$ points on O$_2$ under the
-reduced loss and by twenty-four points under the weighted loss; the paired bootstrap interval
-of that difference lies entirely below zero at every split. The ridge readout, meanwhile, is
-worse than the network it reads out from wherever the network was trained for the metric
-being scored --- $4.71\%$ against $4.43\%$ on O$_2$, at all ten splits --- and better than it
-in five of the six blocks where the network was trained for a different metric, which is what a
-refitted linear readout should do. The exception is the weighted-loss network on strong
-CO$_2$, where the readout is worse at all ten splits. What the kernel head adds is therefore not attributable to refitting a
-readout on a good representation, and not to the representation alone.
+Table~\ref{tab:results} is one cell of a larger design: one training size, one output rank, one
+network width. This section varies each in turn, at the same ten seeds, with the same
+validation-based selection and one test read per family, for the isotropic exact kernel, the
+network, its residual correction and the kernel on its features; the cubic ridge is carried as the
+smoothness reference. The per-input kernel and the ensembles are run at full size only.
 
 \begin{table}[t]
 \centering\small
-\resizebox{\textwidth}{!}{\input{table_oco2_losses}}
-\caption{OCO-2 test errors by training loss and readout, mean $\pm$ standard deviation over
-ten splits, on the release's 2{,}000 test points. Each block is one network trained under the
-named loss, read out by its own head, by a ridge regression refitted on its frozen last-layer
-features, and by an exact Mat\'ern regression on the same features. The per-coordinate
-selection chooses among the six network and kernel rows, coefficient by coefficient, on
-validation. The reference row is the release's kernel-flow emulator rescored on the same
-points; it carries no spread because it does not depend on the split.}
-\label{tab:oco2losses}
+
+\resizebox{\textwidth}{!}{\input{table_emit_curves}}
+\caption{Learning curves: radiance relative $L^2$ error [\%] against the number of training rows,
+mean $\pm$ standard deviation over the ten splits. Each rung uses the first $n$ rows of the seed's
+training block; the validation and test blocks are those of Table~\ref{tab:results}, so the top
+rung is that table. The per-input kernel repeats its coordinate search at every rung. Component
+columns are in Figure~\ref{fig:curves} and in the per-seed records.}
+\label{tab:curves}
 \end{table}
 
-\subsection{Which metric the emulator is trained in}\label{sec:oco2-metric}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{emit_curves.png}
+\caption{Learning curves on log--log axes for the radiance and for three of the four components,
+mean and standard deviation over ten splits. The cubic ridge is flat from the first rung; the
+kernel, the network, the corrected network and the feature kernel fall at close to $n^{-1/2}$ on
+the smooth components and not at all on the spherical albedo. The albedo's spread at $1{,}000$
+and $2{,}000$ rows comes from single splits whose albedo fit collapses, the failure
+Section~\ref{sec:results} describes for a kernel capped at a random subset; the medians across
+splits are flat.}
+\label{fig:curves}
+\end{figure}
 
-The three losses divide the two metrics between them, and neither metric is a proxy for the
-other. Trained on the reduced coefficients, the kernel head reaches $4.11\%$, $16.28\%$ and
-$8.08\%$ there and $0.079\%$, $0.116\%$ and $0.109\%$ on the radiance; trained on the
-weighted coefficients it reaches $0.032\%$, $0.053\%$ and $0.063\%$ on the radiance and two
-to five times worse on the coefficients ($5.3$ times on O$_2$, $3.0$ on weak CO$_2$, $1.9$ on
-strong CO$_2$). The reconstruction basis is orthogonal --- the
-projection rows satisfy $PP^{\top} = I$ to machine precision on all three bands --- so the
-squared radiance error is a weighted sum of per-coefficient squared errors whose weights span
-several decades and concentrate on the leading few coordinates, while the reduced metric
-weights all forty alike after standardization. A model trained on the coefficients spends its
-accuracy on the tail, which decides that metric; a model trained through the reconstruction
-spends it on the head.
-
-Orthogonality makes a per-coefficient choice well posed for both metrics at once: with
-$PP^{\top} = I$, each metric is a positively weighted sum of the same per-coefficient squared
-errors and the two differ only in their weights, so choosing a head coefficient by coefficient
-acts on both through one set of quantities instead of trading one against the other. It does not
-by itself guarantee that either metric improves. The reported errors are means of per-sample
-relative norms rather than single weighted sums; the choice is made on 2{,}000 validation rows;
-and whether one head is best at a given coefficient under both weightings is a property of these
-models on this data, not of the basis. That both metrics improve here is measured, not implied.
-The selection made on validation over the six heads assigns the leading coefficient to the kernel head of the
-weighted-coefficient network at every split on every band, and every remaining coefficient to
-the kernel head of the coefficient-trained network, with five of the four hundred slots going
-to that network itself on O$_2$ and on weak CO$_2$ and none on strong CO$_2$. The
-radiance-trained family, whose loss is the reconstruction itself, is never selected at any of
-the twelve hundred slots: the weighting the reconstruction induces is a better training signal
-here than the reconstruction error. One coefficient of forty decides the radiance metric. The
-result is $4.12\%$, $16.28\%$ and $8.08\%$ on the coefficients and $0.029\%$, $0.053\%$ and
-$0.059\%$ on the radiance, against the stored emulator's $16.89\%$, $24.06\%$ and $16.14\%$
-and $0.045\%$, $0.060\%$ and $0.115\%$: lower on both metrics on all three bands. Paired on
-the same test points, the selection beats the emulator on the coefficients at all ten splits
-on every band, and on the radiance at all ten on O$_2$ and strong CO$_2$ and at nine of ten
-on weak CO$_2$; the paired bootstrap interval of the difference lies entirely below zero at
-every split except two on weak CO$_2$.
-
-The earlier single-split version of this study reached neither metric and gave a reason: its
-member set varied architecture and kernelization within one training objective, and no
-per-coordinate selection can produce an error profile that none of its members has. That
-reading predicted the present result, and the enlargement it called for --- objectives
-spanning the reported metrics --- is what Table~\ref{tab:oco2losses} supplies. The productive
-axis on this problem is the loss, not the architecture.
-
-\subsection{Ensembles}\label{sec:oco2-ens}
-
-A second campaign on the same ten splits trains three networks per band under the reduced
-loss and combines them (Table~\ref{tab:oco2}). Their mean improves the single network
-slightly; an exact Mat\'ern regression on the members' concatenated features is the best of
-the retrained rows on both metrics and on every band, at $3.81\%$, $16.11\%$ and $7.94\%$ on
-the coefficients and $0.053\%$, $0.070\%$ and $0.075\%$ on the radiance, and beats both the
-single-member kernel head and the plain three-network mean at all ten splits under both
-metrics. This pool is not the one that overtakes the reference on both metrics: with every
-member trained on the coefficients, the stored emulator is still ahead on the radiance metric
-on O$_2$ and weak CO$_2$, which is the point Section~\ref{sec:oco2-metric} makes with the
-losses varied. Averaging the members' own kernel heads instead of fitting one kernel on their joint
-features is slightly behind everywhere, so part of the gain belongs to the joint feature
-space and not to the averaging alone. The per-coordinate selection within this pool has
-nothing to choose: it assigns the concatenated-feature kernel to 384, 390 and 397 of the four
-hundred coordinate slots, matching it on the radiance metric and on weak CO$_2$ and trailing
-it by $0.02$ points on the O$_2$ and strong CO$_2$ coefficient columns.
-
-The two campaigns share their splits but trained their networks independently, which makes
-the rows they have in common a replication. Taking the larger of the two rows on each band,
-the single network and its kernel head agree between the campaigns to $0.006$, $0.008$ and
-$0.010$ points in the mean, with a largest per-split difference of $0.26$ points.
+\paragraph{Learning curves.} Each rung uses the first $n$ rows of the seed's training block,
+$n = 500$, $1{,}000$, $2{,}000$, $4{,}000$, $8{,}000$ and the full $18{,}884$, with the
+validation and test blocks unchanged, so the rungs of one seed are nested and the full
+block is the top rung (Table~\ref{tab:curves}, Figure~\ref{fig:curves}).
+Three things are visible. First, the cubic is flat: from $0.85\%$ to $0.76\%$ over a factor of
+38 in data, a bias floor reached by a thousand rows. Second, on the three smooth components every
+other family decays at close to $n^{-1/2}$ (Table~\ref{tab:slopes}): the least-squares slopes of
+$\log$ error against $\log n$ over the six rungs lie between $-0.38$ and $-0.61$ for the kernel,
+the network, the corrected network and the feature kernel on $Y_1$, $Y_2$ and $Y_3$, while on the
+albedo every slope lies between $-0.09$ and $+0.01$: the component whose values sit near zero over
+much of the grid is not data-limited at any size in this range, which is what the per-band
+anatomy of Section~\ref{sec:results} suggested.
 
 \begin{table}[t]
 \centering\small
-\resizebox{\textwidth}{!}{\input{table_oco2_seeds}}
-\caption{OCO-2 test errors for the three-member campaign, mean $\pm$ standard deviation over
-the same ten splits, all networks trained under the reduced-coefficient loss. The reference
-row is shared with Table~\ref{tab:oco2losses} and is recomputed here from this campaign's own
-records; the two kernels on the state appear only here, and are the figures Section~\ref{sec:oco2}
-quotes for a kernel fitted on the raw state.}
-\label{tab:oco2}
-\end{table}
+\resizebox{\textwidth}{!}{\input{table_emit_slopes}}
+\caption{Learning-curve exponents: the least-squares slope of $\log$ error against $\log n$ over
+the six rungs of Table~\ref{tab:curves}, and the slope of the last step alone, from $8{,}000$ to
+$18{,}884$ rows, per family and component.}
+\label{tab:slopes}
+\end{table} For regression of a target in the Sobolev class $H^s$ on a
+six-dimensional domain the rate of the root-mean-square error is $n^{-s/(2s+6)}$, which approaches
+$n^{-1/2}$ as $s$ grows \cite{cdv, fs}; the table is noiseless, so faster decay is not excluded by
+that theory, but slopes between $-0.4$ and $-0.6$ are what a target smooth enough that dimension no
+longer sets the rate looks like. Third, the kernel's curve bends at the top. Its slope over the
+first five rungs is $-0.59$, $-0.44$ and $-0.47$ on the smooth components, and its last step,
+from $8{,}000$ to $18{,}884$ rows, is $-0.38$, $-0.19$ and $-0.17$, while the network's last step
+is as steep as its average ($-0.59$, $-0.60$ and $-0.55$; Table~\ref{tab:slopes}). Part of this is the tuning protocol:
+the kernel's smoothness, scale and nugget are chosen on a $6{,}000$-row subsample at every rung,
+so above $6{,}000$ rows the hyperparameters are those of a smaller problem, and
+Section~\ref{sec:retune} measures what tuning with every row in the solve recovers: all of it on
+the radiance, most of it on the components. The
+consequence for the comparison is that the ratio of the network's radiance error to the kernel's
+falls from $3.1$ at $500$ rows to $1.6$ at the full block, or to $1.8$ with the kernel tuned on
+every row. The kernel's margin over the network
+on this table is a margin at this training size; whether it would survive ten times the data
+depends on where the kernel's curve settles, which the bend leaves open.
 
-\subsection{Two constructions that do not transfer}\label{sec:oco2-neg}
+Fourth, and this is the one a single training size cannot show: against the isotropic kernel the
+per-input metric buys a rate and not a constant. Its coordinate search, repeated at every rung,
+gives a slope of $-0.399$ on the radiance against the isotropic kernel's $-0.279$, and the ratio
+between them falls from $0.65$ at $500$ rows to $0.40$ at the full block, with one step against
+that direction ($0.50$ at $1{,}000$ rows, $0.51$ at $2{,}000$) and a fall at every other. Learning
+six numbers on validation is therefore not a fixed discount on a smooth problem: it is worth more
+the more data there is to spend on the coordinates, which is what removing an irrelevant direction
+should do, since the effective dimension left behind is what sets the rate. Against the kernel on
+network features the margin closes as the data grows. The per-input metric has the lower mean at
+all six rungs, but the split-by-split count runs $10$, $9$, $10$, $7$, $5$ and $6$ wins of ten
+from $500$ rows to the full block, and the gap itself narrows from $0.415$ against $0.456$ at
+$500$ rows to $0.095$ against $0.098$ at the top; the feature kernel's own slope, $-0.435$, is the
+steeper of the two. A metric searched on six validated numbers is the better buy on small data,
+and a representation learned from the data catches it up. On the albedo the
+per-input slope is $+0.01$: the one component no metric rescues.
 
-The residual correction, the EMIT table's second-best construction, adds nothing on any OCO-2
-band, as \cite{nmkc} also found on this problem. On a rough map the residual of a trained
-network has no smooth part left for an exact kernel on the state to fit, and the exactness is
-better spent inside the representation. The coordinate search that gives a kernel on the
-state its own length scales, which is the strongest such construction on the EMIT table, is
-also not the strongest here: in a single run outside the ten-split protocol (O$_2$, one split,
-the same 18{,}000 rows), per-input scales fitted by empirical Bayes take the isotropic
-kernel from $40.6\%$ to $17.3\%$ on the coefficients and from $0.235\%$ to $0.113\%$ on the
-radiance, against $27$--$28\%$ for a kernel-flow metric \cite{owhadiyoo}, for a Mahalanobis metric
-under the same flow, and for the gradient outer product of the recursive feature machine
-\cite{rfm}, and $38.6\%$ for an additive kernel. One run at one split is an indication and not
-a result; what it indicates is that a learned metric closes part of the gap on the state, and
-that none of the four metrics tried brings a kernel on the state within a factor of four of a
-kernel on the network's features.
-
-\subsection{Reevaluation on the retrieval records}\label{sec:retstates}
-
-The rows of this subsection come from the earlier single-split version of the OCO-2 study:
-three families of networks trained per band under different losses, their per-coordinate
-validation selection, and a larger-budget relative-loss ensemble, all evaluated once. They
-are retained because the finding about the records themselves does not depend on the
-protocol, and they are reported as what they are.
-
-The reference's data release carries 976 retrieval records, each with an atmospheric state,
-the full-physics monochromatic radiance at that state, the rank-40 reconstruction of that
-radiance in the release's basis, and the prediction of the release's Gaussian-process emulator
-at the same forty coefficients. A direct identity check finds that every one of the 976 reduced
-states matches a stored test input within $6.67\times 10^{-16}$; the records map to 974 distinct
-test rows, and the nearest test-row index is the same in all three bands. The records are thus
-not disjoint from the stored test set and cannot serve as a new or independent evaluation pool.
-They do provide a different target --- the full-physics radiance attached to those states. The
-state reduction was replayed independently from the release's two dimensional-reduction files
-and the \texttt{x\_in} and \texttt{geo\_in} fields of all 976 records; the replay code and its
-digests are archived with the per-run records. That replay establishes the input identity
-stated above; it does not replay the
-emulator-error rows. Those rows are the recorded aggregates of the earlier run, and the raw
-arrays, trained weights and prediction dumps that would be needed to retrain the three network
-families or to rescore their individual predictions were not retained.
-
-Table~\ref{tab:ret} reports the results on this test-associated reevaluation. The ordering of
-the training objectives under the full-physics target is similar: the relative-loss ensembles
-have the lowest error among the retrained network families on every band, ahead of
-mean-squared training, with the
-radiance-weighted nets far behind. The reference's per-coordinate Gaussian processes stay
-$2.1$ to $5.3$ times ahead of the best network family on these records, while
-the rank-40 floor sits one to two orders of magnitude below every emulator, so the reduction
-is nowhere the binding constraint. And the fragility of thin validation picks is a measured
-phenomenon under this alternate target: the selection carries the weighted
-head's leading-coordinate pick on O$_2$ and weak CO$_2$, and across the 976 records
-that one coordinate leaves the selection a factor $2.4$ behind its own best member, while on
-strong CO$_2$, where validation chose the relative-loss head at every coordinate, selection
-and member coincide exactly. The larger-budget relative-loss ensembles add a final datum
-(first row of Table~\ref{tab:ret}): they improve strong CO$_2$ on the records by forty
-percent, leave O$_2$ essentially unchanged, and are worse on weak CO$_2$ than the smaller
-ensembles they dominate under the stored test metric. This reversal shows target sensitivity
-at the same test-associated inputs.
+The corrected network is below both of its parents on the radiance at every one of the ten
+splits from $2{,}000$ rows on, and at no split at $500$ or $1{,}000$ rows, where its error sits
+between the network's and the kernel's. On $Y_2$ and $Y_3$ it is below both at every split at the
+two largest sizes; on $Y_1$ it never is, the isotropic kernel alone being the better head at every
+size ($0.084\%$ against $0.099\%$ at the full block). Its exponent is close to the network's and
+its level is set by the kernel's. Section~\ref{sec:identity} says why, and why $Y_1$ is the
+exception.
 
 \begin{table}[t]
 \centering\small
-\IfFileExists{table_ret.tex}{\input{table_ret}}{}
-\caption{Mean relative $L^2$ error on the monochromatic radiance over the 976 retrieval
-records of the reference's release, whose reduced inputs coincide with 974 distinct stored
-test rows. This is a reevaluation against the records' full-physics radiances, not an
-independent holdout. Rows give the three retrained network families, the
-per-coordinate selection fixed on the table's validation split, the release's own
-Gaussian-process emulator at forty coefficients, and the rank-40 projection floor. The identity
-mapping is independently replayed; the emulator-error rows are recorded aggregates and are not
-numerically reproduced here.}
-\label{tab:ret}
+
+\resizebox{\textwidth}{!}{\input{table_emit_rank}}
+\caption{Output-rank ablation: radiance relative $L^2$ error [\%] when the kernels and corrections
+regress the leading $r$ principal coefficients, mean $\pm$ standard deviation over five splits.
+The second column is the fraction of the standardized variance the basis leaves out for the
+slowest-decaying component, the spherical albedo; at rank 285 it is zero. The network regresses
+the 285 bands directly and is the same predictor in every row.}
+\label{tab:rank}
 \end{table}
 
-\section{Weighting the heads: a minimum-variance stack}\label{sec:stack}
+\paragraph{Output rank.} The kernels and corrections regress the leading $r$ principal
+coefficients of the standardized component; the network regresses the 285 bands and is the same
+predictor at every rank. Table~\ref{tab:rank} refits at $r = 16$, $32$, $128$ and $285$ at five of
+the seeds beside the rank-64 rows of those seeds. The kernel is indifferent to the rank above
+32: its radiance error reads $0.243$, $0.242$, $0.242$ and $0.242$ at $32$, $64$, $128$ and $285$,
+and $0.270$ at $16$, where the truncation leaves $7.5\times10^{-4}$ of the albedo's variance
+outside the basis. The kernel on features behaves the same way. The residual correction does not:
+it is best at $32$ ($0.139$), a little worse at $64$ ($0.143$), and worse again at $128$ and $285$
+($0.150$ and $0.172$). The difference is in what the two regressions fit. The kernel regresses
+the component itself, whose tail coefficients are small and smooth functions of the state, and
+carrying them costs nothing. The correction regresses the network's residual, whose tail
+coefficients are the network's own errors along directions that hold $10^{-6}$ of the variance,
+and a kernel regression of those directions adds a term the $2{,}098$ validation rows select
+but the test block does not reward. A rank at the point where the retained variance stops moving,
+32 to 64 on this table, is the right setting for the correction, and the rank-64 setting of
+Table~\ref{tab:results} is on the safe side of it.
 
-The convex stack was the best row of the EMIT table and the per-coordinate selection the
-most fragile, and both are linear combinations of the same heads fitted on the same
-validation rows. This section asks what the right combination rule is, on the member
-predictions already produced by the two campaigns and without retraining anything. The pool
-on EMIT is the 23 heads available per split and component --- the kernels, the networks, the
-corrections, the feature kernels, and the learned-kernel and regularized-network variants
-of the campaign --- at the ten splits and four components, forty cells; the pool on OCO-2 is
-the 18 heads per split and band, thirty cells. The weights of this section are not fitted on
-the validation rows the tables above use. Each split's test block is divided instead, 932
-calibration rows on EMIT and 800 on OCO-2 against the remainder, the weights are fitted on the
-calibration part and every number below is scored on the rest. The comparison between rules is
-therefore internally consistent, but the levels are not comparable with the test errors of
-Tables~\ref{tab:results} and \ref{tab:oco2}, and no rule studied here is a rule the earlier
-tables could have used. Every rule is scored in the physical relative metric of the corresponding table, and every
-number below is the change in that error relative to a named baseline, averaged over cells, with
-the number of cells on which the rule is better.
+\begin{table}[t]
+\centering\small
+\resizebox{\textwidth}{!}{\input{table_emit_widepipe}}
+\caption{The pipeline of Section~\ref{sec:methods} run with a $3\times2000$ network in place of
+the $3\times512$ one, at the same ten splits: the network (one member, up to 500 epochs under the
+same optimizer, learning rate and early stopping), its residual correction, the exact kernel on
+its last-layer features, and the per-coordinate selection and convex stack over the wide
+pipeline's heads (the isotropic kernel, the network, its correction and its feature kernel),
+beside the corresponding rows of Table~\ref{tab:results}; mean $\pm$ standard deviation over the
+ten splits.}
+\label{tab:wide}
+\end{table}
 
-The rules differ only in how the weights are obtained; the object they estimate is fixed. For
-one output coordinate, write $e_i \in \mathbb{R}^{M}$ for the members' errors on calibration
-case $i$ and $s_i = \|y_i\|^{-2}$ for the weight the reported per-sample relative metric puts
-on that case. With $\Sigma = \sum_i s_i (e_i - \mu)(e_i - \mu)^{\top} / n$ the weighted error
-covariance and $\mu$ the weighted mean error, the estimator of the next paragraphs is
-\begin{equation}\label{eq:stackobj}
-\hat w \;=\; \arg\min_{w \ge 0,\; \mathbf{1}^{\top} w = 1} \; w^{\top} \Sigma\, w,
-\qquad \hat b = -\hat w^{\top}\mu ,
+\paragraph{A wider network.} A network of three hidden layers of $2{,}000$ units, trained for up
+to 500 epochs under the same optimizer, learning rate and early stopping as the $512$-unit network,
+was run at all ten seeds with the rest of the pipeline built on it (Table~\ref{tab:wide}). It is
+a worse emulator at every seed, $0.75\%$ against $0.39\%$ on the radiance, and its early stopping
+fired between $42$ and $210$ epochs of the $500$ allowed: at this learning rate and batch size the
+wider network overfits the $18{,}884$ rows before it fits them, and a wider network is not the way
+to close the network's gap to the kernel on this table. Its representation is better. The exact
+kernel on its last-layer features reaches $0.079\%$ on the radiance against $0.098\%$ on the
+$512$-unit features, below the per-input kernel's $0.095\%$ at all ten seeds and below the convex
+stack of Table~\ref{tab:results} at nine of them, and on the two flux components, at $0.13\%$ and
+$0.08\%$, it is at or below every row of that table. The convex stack over the wide pipeline's
+heads, which puts $0.88$ to $0.96$ of its weight on that feature kernel, is the lowest row of the
+study at $0.078\%$ on the radiance and $0.043$ reflectance points, below the stack of
+Table~\ref{tab:results} at nine of the ten seeds; the per-coordinate selection over the same
+heads does not transfer here either. The residual correction of the wider network is a little
+worse than that of the narrower one, as a correction of a worse predictor should be
+(Section~\ref{sec:identity}). A $3\times1000$ rung at the same ten seeds sits between the
+two: the network at $0.72\%$, the kernel on its features at $0.088\%$ against $0.098\%$ at
+width $512$ and $0.079\%$ at width $2{,}000$. From $512$ to $2{,}000$ the network's own
+error rises with width while the error of a kernel on its features falls: what a wider
+network learns on this table is a better coordinate system, not a better map. At $4{,}000$
+units, run at two seeds, the network is worse again at $0.95\%$ and the kernel on its
+features turns back up to $0.097\%$, so the gain in the representation does not continue
+past $2{,}000$.
+
+If that reading is right, several networks should give a better coordinate system than one. A
+three-member version of the same wide pipeline, run at three seeds, lets the exact kernel see the
+concatenated last-layer features of all three members at once, $6{,}000$ coordinates rather than
+$2{,}000$. It reads $0.074\%$ on the radiance against $0.083\%$ for the kernel on a single member's
+features in the same lanes, lower at all three seeds, and $0.043$ against $0.051$ reflectance
+points, again at all three. That puts one exact solve level on the radiance with the convex stack of
+six heads fitted in those same lanes ($0.074\%$ against $0.074\%$ on the mean, though the stack is
+the lower at two of the three seeds and on the reflectance median at all three). A combination of
+six predictors and a single kernel in a wider feature space buy about the same thing here, which is
+the plainest evidence in this study that what limits the kernel on this table is the coordinate
+system it is given and not the solve. Three seeds is an indication; the construction is run at the
+width of Table~\ref{tab:results} to test it properly.
+
+\subsection{Tuning with every row in the solve, and a metric read off the data}\label{sec:retune}
+
+Two further constructions test the two readings above: that the bend at the top of the kernel's
+curve is its tuning protocol, and that the metric the coordinate search finds is the physics of
+the components. Both were run at all ten seeds (Table~\ref{tab:retune}).
+
+\begin{table}[t]
+\centering\small
+\resizebox{\textwidth}{!}{\input{table_emit_retune}}
+\caption{Where the kernel's hyperparameters are chosen, and how its metric is obtained, at the
+full training block and the same ten splits. The first pair tunes smoothness, scale and nugget
+on a $6{,}000$-row subsample and on every training row; the last three rows replace the coordinate
+search by a metric read off the cubic surrogate's gradients, at three exponents. Selecting the
+exponent on validation, per seed, chooses $p=1/2$ at all ten, so that row would duplicate the
+$p=1/2$ row and is not printed; the per-seed choices are in the stored numbers. Mean $\pm$ standard
+deviation over the ten splits.}
+\label{tab:retune}
+\end{table}
+
+\paragraph{Tuning with every row in the solve.} The kernel families of
+Section~\ref{sec:methods} choose smoothness, scale and nugget by the validation error of a solve
+on a $6{,}000$-row subsample, and refit the winner on all $18{,}884$ rows. Doing the tuning
+solve on every row instead lowers the isotropic kernel's radiance error from $0.239\%$ to
+$0.210\%$ and its reflectance median from $0.142$ to $0.107$ points, better at nine of the ten
+splits, the ratio averaging $0.882$ and never above $1.001$. The mechanism is visible in the
+chosen scales: over the forty component-seed cells the full block picks a shorter length scale than
+the subsample in $26$, the same in $12$, and a longer one in $2$. A tuning set a third of the size
+of the solve supports a longer length scale than the solve does, so the subsample protocol
+over-smooths, and it over-smooths more the larger the gap between the two.
+
+That is the bend. Below $6{,}000$ rows the tuning subsample \emph{is} the whole training block and
+the rungs are already full-block tuned; at $8{,}000$ rows it is three quarters of it; only the top
+rung is a third. Applying the measured ratio to the top rung of Table~\ref{tab:curves} takes the
+kernel's last step on the radiance from $-0.183$ to $-0.334$, against a slope of $-0.305$ over the
+five lower rungs: the flattening at the top disappears, and the curve becomes a straight line in
+$\log n$ over a factor of $38$ in data. On the two flux components the same correction takes the
+last step from $-0.187$ and $-0.171$ to $-0.352$ and $-0.358$ against averages of $-0.437$ and
+$-0.468$, so there most of the bend is the protocol and a little of it is not. The consequence for
+the comparison of Section~\ref{sec:results} is that the kernel's margin over the network at the
+full block is wider than Table~\ref{tab:curves} shows: $1.8$ times rather than $1.6$, and the
+kernel is not slowing down at the sizes this table reaches.
+
+The same re-tuning does nothing for the per-input kernel: $0.096\%$ against $0.095\%$, better at
+four of the ten splits, ratio $1.005$. Its coordinate search already selects a scale of once the
+median distance at the metric it finds, which is what the full-block tune selects too. Rescaling
+the coordinates removes the over-smoothing that the isotropic kernel suffers, so the per-input
+kernel of Table~\ref{tab:results} was never paying the tuning cost, and its number stands as
+reported.
+
+\paragraph{A metric read off the data.} The coordinate search costs a sweep over the six inputs at
+five multipliers, twice, per component and per seed. The alternative sets the metric before any
+kernel is fitted: the multiplier of coordinate $j$ is the root-mean-square gradient of the fitted
+cubic surrogate along $j$ over the training rows, raised to a power $p$, normalized to geometric
+mean one and clipped to the search's own range $[1/16, 4]$, so a coordinate the map barely responds
+to gets a long length scale and $p$ sets how hard the metric leans on that reading. It costs one
+cubic fit and six finite differences.
+
+Taken proportionally, at $p=1$, it captures rather more than half the gap: on the radiance it reads
+$0.159\%$, below the isotropic kernel at every one of the ten splits by a factor $0.669$ on average
+and above the searched metric at every one of them by a factor $1.680$. But $p$ is a free number,
+and the ladder is not monotone. The square root reads $0.125\%$ and the fourth root $0.157\%$, so
+the best exponent is interior, and choosing it the way every other hyperparameter in this study is
+chosen --- the lowest mean validation error over the four components, per seed, with the test block
+untouched --- selects $p=1/2$ at all ten seeds. At that exponent the metric closes $79\%$ of the
+distance from the isotropic kernel to the searched one on the radiance and $82\%$ on the
+reflectance median, for one cubic fit, six finite differences and a choice among three numbers.
+
+The per-band reading says why the exponent matters and what the search still buys. The four
+components do not want the same one: $Y_2$ and $Y_3$ are best at $1/2$, the albedo at $1$
+($2.18\%$ against $2.27\%$), and the path radiance at $1/4$. $Y_1$ is where the damage is, and it
+is worth seeing why. On that component the isotropic kernel already reads $0.084\%$ and the
+searched metric $0.085\%$: there is no anisotropy to find. The proportional metric nonetheless
+reads $0.34\%$ there, four times worse than doing nothing, because the surrogate's gradient along a
+coordinate measures how fast the map moves with it and not how much predictive information it
+carries, and on the one component that depends on the viewing geometry those two disagree. Softening
+the exponent to $1/4$ takes $Y_1$ back to $0.085\%$, exactly the searched metric's value, at the
+cost of $Y_2$ and $Y_3$. So a metric read from first-order sensitivity, with its exponent validated
+like any other hyperparameter, is most of what the coordinate search buys at a small fraction of its
+cost. What the search still buys is the freedom to be anisotropic differently for each component,
+which one global exponent cannot be.
+
+\section{What the residual correction inherits}\label{sec:identity}
+
+The curves of Section~\ref{sec:scaling} show a corrected network whose error decays at the
+network's exponent and sits at the kernel's level, below both parents on the flux components and
+the radiance from a few thousand rows on, and above the kernel alone on the path radiance at every
+size. One identity accounts for all of it.
+
+Fix a training design $X_n = \{x_1,\dots,x_n\}$, a kernel $k$ with Gram matrix $K$ on the design,
+and a nugget $\lambda > 0$. Kernel ridge regression maps a function $g$, known on the design, to
+\begin{equation}\label{eq:krr}
+\hat g(x) \;=\; k(x, X_n)\,(K + \lambda I)^{-1} g(X_n),
 \end{equation}
-a weighted least-squares problem on the simplex with an intercept. Its objective is a weighted
-mean squared error, while the tables report a mean of per-sample relative norms; the two are
-different functionals of the same errors, and the theory quoted below concerns
-\eqref{eq:stackobj} rather than the reported number.
+and this map is linear in $g$. Write $R g = g - \hat g$ for the residual of the regression. For a
+target $f$ and a trained network $h$, the residual-corrected predictor of Section~\ref{sec:methods}
+is $\hat f_{\mathrm{corr}} = h + \widehat{(f - h)}$. The statements below hold coordinatewise for
+vector-valued $f$ and $h$, so one coordinate is written.
 
-\paragraph{Rules that do not work on this pool.} The obvious rules bracket the
-problem. The baseline every other rule is measured against is the strongest heuristic the pool
-already had: a per-output ridge whose penalty is chosen by leave-one-out, shrunk toward the
-pool's global convex weights by an amount chosen with five-fold cross-validation on the
-calibration rows. Against it, equal weights lose $151\%$ on EMIT and $85\%$ on OCO-2, because
-the pools contain weak members; the best single head chosen on calibration loses $20\%$ and
-$2.3\%$; and per-output least squares loses $5.1\%$ and $0.9\%$. The rules random-matrix theory suggests first were applied, in the pool as we found it, to the
-covariance of the member \emph{predictions}: clipping at the Marchenko--Pastur edge
-\cite{mp, laloux}, a rotationally invariant estimator \cite{bbp2017}, and a linear shrinkage
-\cite{lw2004}. They fail badly, and for a structural reason: the leading eigenvalue of the
-prediction Gram is the shared signal, two orders of magnitude above the rest, while what
-separates one weighting from another lives in the small eigenvalues these estimators discard.
+\begin{proposition}\label{prop:identity}
+\emph{(i)} $f - \hat f_{\mathrm{corr}} = R(f - h)$: the error of the corrected predictor is the
+kernel regression's residual on the network's residual.
+\emph{(ii)} On the design, $R g(X_n) = \lambda\,(K + \lambda I)^{-1} g(X_n)$. In the eigenbasis
+$K = \sum_j \mu_j u_j u_j^{\top}$ the coefficient of $g(X_n)$ along $u_j$ is multiplied by
+$\lambda/(\mu_j + \lambda) \in (0,1)$: the correction removes from the network's training residual
+its projection on the leading eigenvectors of the Gram matrix and leaves the trailing ones.
+\emph{(iii)} Suppose the regression satisfies $\|R g\|_{L^2(P)} \le C_n\,\|g\|_{\mathcal S}$ for
+every $g$ in a class $\mathcal S$ with norm $\|\cdot\|_{\mathcal S}$, and $f, h \in \mathcal S$.
+Then
+\begin{equation}\label{eq:inherit}
+\|f - \hat f_{\mathrm{corr}}\|_{L^2(P)} \;\le\; C_n\,\|f - h\|_{\mathcal S}
+\;\le\; C_n\,\bigl(\|f\|_{\mathcal S} + \|h\|_{\mathcal S}\bigr),
+\end{equation}
+and the corrected predictor is inside the kernel's own bound $C_n \|f\|_{\mathcal S}$ exactly when
+$\|f - h\|_{\mathcal S} < \|f\|_{\mathcal S}$.
+\end{proposition}
 
-The object the theory is about is the covariance of the member \emph{errors} in the reported
-metric. A cleaning of that matrix is not by itself enough: the spiked estimator loses
-$11.6\%$ to the baseline on EMIT and an unconstrained rotationally invariant estimator
-$30.9\%$, while the same estimator combined with the pool's pooled shrink gains $2.2\%$. The
-error covariance is nearly singular --- the members are close to collinear, with an effective
-dimension of two or three and condition numbers of $10^{6}$ to $10^{17}$, so the ratio of
-members to calibration rows understates the estimation problem by an order of magnitude --- and
-its spectrum is dense rather than spiked, eleven of twenty-three eigenvalues lying above the
-Marchenko--Pastur edge on a typical EMIT cell, which is why the spiked model is the worst of
-them. The near-zero eigenvalues are genuine rank deficiency from near-duplicate members and
-not sampling noise, a separate diagnostic.
+\begin{proof}
+(i) By linearity of \eqref{eq:krr}, $\widehat{(f - h)} = \hat f - \hat h$, so
+$f - \hat f_{\mathrm{corr}} = (f - \hat f) - (h - \hat h) = R f - R h = R(f - h)$.
+(ii) On the design $\hat g(X_n) = K (K + \lambda I)^{-1} g(X_n)$, so
+$R g(X_n) = (I - K(K + \lambda I)^{-1})\, g(X_n) = \lambda (K + \lambda I)^{-1} g(X_n)$; the
+eigen-expansion of $(K + \lambda I)^{-1}$ gives the factors. (iii) Apply the bound to $g = f - h$
+and the triangle inequality.
+\end{proof}
 
-\paragraph{The constrained minimum-variance rule.} Writing the stack as a minimum-variance portfolio on
-the error covariance, in the reported metric, with an intercept and with the weights
-nonnegative and summing to one --- gross exposure one in the sense of \cite{fzy} --- gives a
-rule with no cross-validated quantity and no tuned constant. On EMIT it beats the pool's best heuristic by $4.6\%$ on average (33 of the 40
-cells; $8.8\%$ against per-output least squares, and $9.3\%$ on the radiance metric at all
-ten splits), and the gain is about $5\%$ at every smaller calibration size tried (60, 120
-and 240 rows), so it is not bought with the full calibration block. On OCO-2 the same rule
-loses $1.3\%$ on all thirty cells. The two corpora differ the way the mechanism predicts:
-EMIT has 285 outputs, heterogeneous members and a large mismatch between the members'
-training losses and the scored metric, and there the constraint removes estimation
-variance; OCO-2 has forty outputs, members within a factor of six of one another, and
-almost no mismatch, and there pooling the weights across outputs is the regularizer that
-matters. A ladder of seventy cells over the covariance cleaners --- the raw sample
-covariance, the rotationally invariant estimator at several floors, the linear and the
-analytical nonlinear shrinkage of Ledoit and Wolf \cite{lw2004, lw2020}, and the
-nonparametric eigenvalue-regularized estimator \cite{nercome} --- shows that inside the
-nonnegativity constraint every consistent cleaner ties to within a percent at full
-calibration. What loses is corpus-dependent and smaller than that ladder's spread suggests: on
-EMIT a floor at one $\sigma^2$ and the linear shrinkage each lose about $6\%$ and a floor at
-$0.2\sigma^2$ about $1\%$, while on OCO-2 the same cleaners lose at most $1\%$ and the linear
-shrinkage does not lose at all. This is the mechanism Jagannathan and Ma identified for
-portfolio weights \cite{jm}: a nonnegativity constraint is itself a shrinkage of the
-covariance, and the nonnegativity constraint rather than the cleaning is what produces the
-gain. The entrywise bound of Fan, Zhang and Yu \cite{fzy} applies to exactly the
-problem \eqref{eq:stackobj}: for weights on the simplex, the excess of $w^{\top}\Sigma w$ over
-its optimum is at most twice the largest entrywise error of the covariance estimate, with
-neither the member-to-row ratio nor the condition number in it. That bound is about the
-quadratic objective and not about the mean relative error the tables report, and it does not
-transfer to it; what it explains is why the constrained problem is stable where the
-unconstrained one is not. Measured on every output, it holds and is loose by one to three
-orders of magnitude. The same account explains where the gain comes from: the pairs-bootstrap variance of the least-squares weights at the rows the stack
-is scored on tracks the cell's gain inside every output group (rank correlation $0.69$
-across the forty EMIT cells with the group effect removed, and $0.74$ on a fresh split). The
-association is within-split: the same predictor taken from one split and applied to another
-falls to $0.17$, so it describes which cells gain on the rows at hand rather than which cells
-gain in general. Separately,
-removing the tenth of rows with the largest gains and losses leaves $87\%$ of the EMIT gain,
-so the constraint helps broadly across the evaluation rows rather than on a few.
+The proposition is algebraic, so what needs checking is that the implementation is the object it
+describes: that the correction enters linearly and that no centring or re-standardization between
+the stages breaks that. A script accompanying the records builds a small design, runs the
+campaign's own kernel and solver, and verifies (i) to machine precision, the linearity it rests
+on, the design identity of (ii) with its shrinkage factors, that every factor lies in $(0,1)$ and
+is smallest on the leading eigendirections, and the design-space form of (iii) with the sharp
+constant $\lambda / (\mu_{\min} + \lambda)$. It also reproduces the failure mode: when the
+network's residual is made rougher than the target, correcting the network scores worse than
+regressing the target directly, which is what $Y_1$ does in Table~\ref{tab:results}, where
+the corrected network reads $0.10\%$ against the isotropic kernel's $0.08\%$.
 
-\paragraph{Removing the per-corpus choice.} The corpus dependence is removed by two rules that
-use nothing beyond the calibration rows the weights are already fitted on. They use those rows'
-labels, as the weights do; what they do not use is any information from the rows the stack is
-scored on, any held-out block, or any decision made per corpus. A five-fold cross-validation on
-the calibration rows alone, choosing per cell among
-the constrained stack, its shrunk form, the sum-to-one rotationally invariant stack and the
-pool's own heuristic, lands $6.0\%$ above the pool's best on EMIT and level with it on OCO-2,
-within $0.4\%$ of the oracle of the four. A blend of the constrained and least-squares
-stacks, with the mixing weight chosen by cross-validated calibration error in the score's
-own metric over a three-vertex grid that includes the pool's heuristic, keeps the
-constrained stack where it helps and beats both endpoints where neither does. On a split
-neither the estimator nor the criterion had seen it reads $5.3\%$ above the pool's heuristic
-on EMIT and $0.10\%$ above it on OCO-2, with no hand tuning; the earlier squared-loss form of
-the same criterion reads $4.3\%$ and $0.06\%$ on that split, which is why the criterion is
-written in the score's own metric. A transductive term using the members' predictions at the
-scored rows was tried in several forms and did not improve on the rule without it; the rule
-reported here uses neither a transductive term nor a bootstrap. Below a few hundred calibration
-rows the blend is unstable and the constrained stack alone is the better choice.
+Bounds of the form assumed in (iii) are the standard learning rates for kernel ridge regression:
+for $g$ in an interpolation space between $L^2(P)$ and the reproducing kernel Hilbert space of
+$k$, with the nugget chosen on the right schedule, $C_n$ decays as a power of $n$ whose exponent
+depends on the source condition and on the eigenvalue decay of the kernel and not on
+$\|g\|_{\mathcal S}$, which enters as a constant \cite{cdv, fs}. What (iii) then says is that the
+corrected predictor inherits the kernel's exponent with the residual's norm as its constant. The
+network's training drives $\|f - h_n\|_{\mathcal S}$ down as $n$ grows, so the corrected curve
+falls at least as fast as the kernel's bound and, through the constant, tracks the network:
+its exponent is the network's, its level the kernel's, which is what Table~\ref{tab:curves}
+measures on the radiance and Table~\ref{tab:slopes} and Figure~\ref{fig:curves} on the two
+flux components. The bound also allows the exception. On the
+path radiance the isotropic kernel alone beats the correction at every training size, and (iii)
+puts the corrected error at $C_n \|f - h\|_{\mathcal S}$ against the kernel's $C_n \|f\|_{\mathcal
+S}$: when the network's residual is rougher, in the norm the kernel measures, than the smooth map
+it approximates, correcting the network is worse than regressing the map. Part (ii) is the
+mechanism of Section~\ref{sec:results} stated exactly: the correction hands the network the
+kernel's accuracy on the smooth directions of its residual, which are the leading eigenvectors of
+the Gram matrix, and leaves what is rough. It is also why the correction is the construction
+that does not transfer to a rough map (Section~\ref{sec:oco2}), where the residual has little
+weight on those directions, and why its optimum in Table~\ref{tab:rank} lies at a moderate rank,
+where the trailing coefficients it is asked to regress are the network's noise rather than the
+map's tail.
 
-\paragraph{What this changes in the tables.} The EMIT stack row of Table~\ref{tab:results}
-is the convex stack fitted per component on the full validation block, which is
-\eqref{eq:stackobj} at its simplest. This section supports that choice of rule --- a
-nonnegative combination rather than an unconstrained one, and no covariance cleaning --- but it
-cannot quantify what a different rule would have done to that row: it uses a larger member pool
-and fits its weights on a partition of the test block, so its margins are not transferable to
-Table~\ref{tab:results}. On OCO-2 the members
-are homogeneous, the best and worst differing by a factor of six, and every rule in the ladder
-lands within two percent of every other; the constrained rule is not the one to use there, and
-this section does not score the per-coordinate selection that Table~\ref{tab:oco2} reports, so
-it says nothing about it.
+\section{Where the constructions do not transfer: OCO-2}\label{sec:oco2}
+
+The companion paper \cite{nmkc} applies the same construction to the OCO-2 radiative-transfer
+emulation problem of Lamminp\"a\"a et al.~\cite{lamminpaa}: per spectral band (O$_2$, weak
+CO$_2$, strong CO$_2$), a reduced atmospheric state of twenty or twenty-four coordinates maps to
+forty reduced radiance coefficients, with errors on the standardized coefficients and on the
+reconstructed radiance, under the ten-split protocol of Section~\ref{sec:data}. That paper
+carries the tables; the findings that are the counterpart of the EMIT results are stated here so
+the two problems can be read against each other.
+
+The problem sits at the opposite end of the structural spectrum. The input is higher-dimensional
+and the map rougher, and a kernel on the state trails the network by a factor of nine, four and
+five on the reduced coefficients: the isotropic Mat\'ern reaches $40.6\%$, $58.6\%$ and $43.4\%$
+on the three bands against $4.4\%$, $16.4\%$ and $8.2\%$ for the network. The residual correction, the EMIT table's
+second-best construction, adds nothing on any band: on a rough map the residual of a trained
+network carries little weight on the leading eigenvectors of the Gram matrix, and
+Proposition~\ref{prop:identity}(ii) leaves it as it is. The coordinate search that gives a kernel
+on the state its own length scales, the strongest construction on the EMIT table, is not the
+strongest there either. Four learned metrics were run at the same ten splits on all three bands:
+a kernel-flow metric \cite{owhadiyoo}, a Mahalanobis metric under the same flow, the gradient outer
+product of the recursive feature machine \cite{rfm}, and per-input scales fitted by empirical
+Bayes. The last is the best of the four at every band, taking the isotropic kernel's $40.6\%$,
+$58.6\%$ and $44.3\%$ on the coefficients to $18.7\%$, $25.3\%$ and $16.9\%$, and on O$_2$ its
+radiance from $0.233\%$ to $0.150\%$; the two flow metrics agree within half a point of each other
+at $26.9\%$, $29.8\%$ and $23.9\%$, the recursive feature machine reads $28.2\%$, $47.9\%$ and
+$31.3\%$, and an additive kernel $38.2\%$, $46.9\%$ and $47.7\%$. The isotropic baseline agrees
+between these lanes and the protocol lanes on O$_2$ and weak CO$_2$ to two decimals; on strong
+CO$_2$ it reads $44.3\%$ here and $43.4\%$ there, the one band where they part, and also the one
+whose isotropic column carries a spread of $\pm3.4$ because two of its ten splits land three points
+below the other eight. So a learned metric does close a
+good part of the distance on the state, cutting the isotropic error to between two fifths and a
+half of itself depending on the band. What it does not reach
+is the kernel inside the representation, and by how much is a property of the band rather than a
+constant: the exact Mat\'ern regression on the network's frozen features reads $4.1\%$, $16.3\%$
+and $8.1\%$ at the same splits, so the best state metric is $4.6$ times that on O$_2$ but only
+$1.6$ and $2.1$ times it on the two CO$_2$ bands. One caution on the best row: on O$_2$ the
+empirical-Bayes metric is bimodal across splits, eight of the ten landing near $17.2\%$ and two at
+$24.7\%$, so its spread of $\pm3.2$ is thirty times the isotropic kernel's $\pm0.1$ and its mean
+is not the value a single split is likely to show. That last construction is the one thing that does transfer, and it transfers
+with room to spare: the exact Mat\'ern
+regression on the network's frozen features beats a ridge readout refitted on the same features at
+every split, on every band and under every training loss, and a per-coefficient choice among heads
+trained under different losses holds both reported metrics at once, below the release's stored
+emulator on both; those results and their tables are in \cite{nmkc}.
+
+One observation about the release itself is recorded here because it does not depend on the
+protocol. The reference's data release carries 976 retrieval records, each with an atmospheric
+state, the full-physics monochromatic radiance at that state, its rank-40 reconstruction, and the
+prediction of the release's Gaussian-process emulator at the same forty coefficients. Every one of
+the 976 reduced states matches a stored test input within $6.67\times10^{-16}$; the records map
+to 974 distinct test rows, and the nearest test-row index is the same in all three bands. The
+records are therefore not disjoint from the stored test set and cannot serve as an independent
+evaluation pool, though they do provide a different target, the full-physics radiance, at those
+states. The state reduction was replayed independently from the release's two
+dimensional-reduction files and the \texttt{x\_in} and \texttt{geo\_in} fields of all 976
+records; the replay code and its digests are archived with the per-run records.
 
 \section{Ten further emulation configurations}\label{sec:corpora}
 
@@ -834,12 +903,12 @@ to within six percent of the network on a corpus where the plain kernel was seve
 worse. With the low-fidelity coefficients supplied as inputs the same pair reads $15.76$ and
 $4.60$, a factor of three: the easier the problem is made for the plain kernel, the less the
 learned metric adds. This is the same mechanism as the per-input length scales on the EMIT table
-and the empirical-Bayes metric of Section~\ref{sec:oco2-neg}, at a scale where its effect is
+and the empirical-Bayes metric of Section~\ref{sec:oco2}, at a scale where its effect is
 unambiguous.
 
 Third, the combination is at or near the best row of its own pool everywhere, and where it is
 not the lowest row of the table the reason is membership rather than weighting. The convex stack
-of Section~\ref{sec:stack} is the lowest row on eight of the ten configurations and the second
+is the lowest row on eight of the ten configurations and the second
 lowest on the other two; the residual-corrected network is in the lowest two on five. Both
 exceptions are the linear problems, and on both the row that beats the stack is the ridge, which
 the stack does not contain. On advection the ridge is lower by $0.07$ points while the stack, at
@@ -853,11 +922,19 @@ The statement this supports is correspondingly narrow: a combination is a good d
 member of its own pool dominates it, and a combination can only be read against the whole
 comparison when the pool contains the families the comparison includes.
 
-Two limits on scope. These rows use one training budget per corpus and one architecture family,
+Three limits on scope. These rows use one training budget per corpus and one architecture family,
 and several of these corpora have published results from methods tuned for them specifically;
 the comparison here is between families under a common protocol, not against the state of the
-art on each problem. And with three to five runs, and one on two rows, the spreads support the
-large orderings above and not fine distinctions between adjacent families.
+art on each problem. With three to five runs, and one on two rows, the spreads support the
+large orderings above and not fine distinctions between adjacent families. And every kernel
+column here inherits the tuning protocol Section~\ref{sec:retune} measures: the length scale is
+chosen on a $6{,}000$-row subsample and the winner refit on every row, which over-smooths by an
+amount that grows with the ratio of the two. On the EMIT table that costs the isotropic kernel a
+factor $0.882$; on ClimSim, where the subsample is a sixteenth of the solve, re-choosing the
+scale against the solve that actually runs halves it and lowers the kernel's error by $3.6\%$;
+on a $20{,}000$-row corpus it changes nothing. The kernel columns of
+Table~\ref{tab:corpora} are therefore pessimistic by an amount that differs by row and is not
+measured here, and the gaps they show to the network columns are upper bounds on the true ones.
 
 \section{Discussion}\label{sec:discussion}
 
@@ -878,41 +955,50 @@ fitted in the reported metric, is the best row at every split but one. We read t
 statement about calibration data rather than about the heads: with a few thousand rows the right
 way to use complementary predictors is a low-dimensional combination, not a per-output choice.
 
-The OCO-2 problem says the same thing from the opposite structure. There the kernel on the
-state is an order of magnitude behind the network, the residual correction adds nothing, and
-the construction that helps is the exact kernel inside the network's representation. The
-ridge-readout control settles what that construction is worth and why: the kernel head beats
-a linear readout refitted on the same frozen features at every split, on every band and under
-every loss, while the linear readout is worse than the network it reads out from. The gain is
-the kernel, not the refitting, and it is available to any trained network at the cost of one
-Cholesky factorization.
+The curves of Section~\ref{sec:scaling} say how far each of those statements carries. The
+cubic's floor is reached by a thousand rows; every other family falls at close to $n^{-1/2}$ on
+the smooth components and not at all on the albedo, so the table's ordering is an ordering of
+constants and not of rates, and the kernel's margin over the network, $3.1$ times at $500$ rows
+and $1.6$ times at the full block, is a margin at this training size. The bend at the top of the
+kernel's curve is its tuning protocol and nothing else: tuning with every training row in the
+solve, rather than a $6{,}000$-row subsample, lowers the isotropic kernel's radiance error by a
+factor $0.885$ there, straightens the curve to a line in $\log n$ over a factor of $38$ in data,
+and widens the kernel's margin at the full block from $1.6$ to $1.8$; the per-input kernel, whose
+search rescales the coordinates first, never pays that cost. A tuning set smaller than the solve
+supports a longer length scale than the solve does, and it over-smooths by exactly that much. The
+identity of Section~\ref{sec:identity} then accounts for
+the corrected network's curve without a free parameter: its error is the kernel regression's
+residual on the network's residual, so it inherits the kernel's rate with the residual's norm as
+its constant, which is why it takes the network's exponent, sits at the kernel's level, lies
+below both parents on the flux components from a few thousand rows on, and stays above the
+kernel alone on the path radiance, where the network's residual is rougher than the map. The
+same identity, read on the training design, is the mechanism the single split reported: the
+correction removes the projection of the network's residual on the leading eigenvectors of the
+Gram matrix and leaves the rest, which is why it does not transfer to a rough map and why it has
+an optimum in the output rank where the kernel itself has none.
 
-The other thing OCO-2 shows is that the training loss, not the architecture, is the axis a
-selection can exploit. Networks trained on the coefficients and networks trained through the
-reconstruction sit at opposite ends of the two reported metrics, and because the
-reconstruction basis is orthogonal a per-coefficient choice acts on both metrics through the
-same errors, so a choice made on validation can hold both ends at once, as it does here: one coefficient of forty, assigned at every split on every band to the kernel
-head of the network trained on the weighted coefficients, is what separates a selection that
-loses the radiance metric from one that wins it. The single-split version of this study reached neither metric and attributed the
-failure to a member set that varied architecture within one objective; varying the objective
-instead, as Table~\ref{tab:oco2losses} does, confirms that attribution.
+Width changes the network's standing in one direction and its representation's in the other. A
+network four times wider is a worse emulator on this table, stopping early at every seed, and
+its last layer is a better coordinate system for the kernel than the narrower network's: the
+exact kernel on those features beats the per-input kernel at every seed, and the convex stack
+built on the wide pipeline is the lowest row of the study. What a wider network learns here is
+not a better map but a better metric, and the exact solve is what turns the metric into accuracy.
 
-Section~\ref{sec:stack} identifies the rule behind that row: the convex stack that wins the
-EMIT table is the constrained minimum-variance rule in its simplest form; the random-matrix
-cleaners that seemed the natural refinement act on the covariance of the predictions rather than
-of the errors; the nonnegativity constraint, and not the cleaning, is what stabilizes the
-estimate; and on a pool that one head dominates, no combination rule is worth more than a
-percent. Section~\ref{sec:corpora} applies the same family set to ten further configurations,
-where the family ordering follows the structure as it does here, a learned metric rescues a
-kernel on the state exactly where the plain kernel fails worst, and the stack is the lowest row
-on eight of the ten and the second lowest on the other two, in both cases behind a reference
-family its pool does not contain.
+The OCO-2 problem of the companion paper says the same thing from the opposite structure. There
+the kernel on the state is four to nine times behind the network, the residual correction
+adds nothing, the learned metrics on the state cut its error roughly in half but leave it
+between one and a half and five times the kernel inside the representation, which is the
+construction that helps (Section~\ref{sec:oco2}). Section~\ref{sec:corpora} applies the same family set to ten further
+configurations, where the family ordering follows the structure as it does here, a learned
+metric rescues a kernel on the state exactly where the plain kernel fails worst, and the stack is
+the lowest row on eight of the ten and the second lowest on the other two, in both cases behind
+a reference family its pool does not contain.
 
 The spherical albedo is the hard component throughout. Every family in Table~\ref{tab:results}
 is an order of magnitude worse on $Y_4$ than on the other three, and the per-band anatomy places
 that error where the albedo is close to zero, so relative error is large there for any
-predictor. No family in this pool moves it, and larger networks and longer schedules are not
-evaluated here. An albedo error reaches an emulator used through the inversion \eqref{eq:inv}
+predictor. No family in this pool moves it, at any training size in Table~\ref{tab:curves}, at
+any output rank, or at four times the width. An albedo error reaches an emulator used through the inversion \eqref{eq:inv}
 directly and everywhere, not only in the cancellation tail: by \eqref{eq:sens},
 $\partial\hat\rho/\partial\hat Y_4 = -\hat\rho^{\,2}$, so at $\rho = 0.7$ an albedo error moves
 the recovered reflectance by about half its own size at every band, whatever the transmitted
@@ -949,9 +1035,9 @@ describes their role here. The software --- the data pipeline, the model compari
 diagnostics, and the figures --- was written and executed by Claude Code (Anthropic) and Codex
 (OpenAI), which also prepared the first draft of this manuscript, working from the author's data
 and from the method and experimental recipe of \cite{nmkc}. The measurements of the data's
-structure, the identification of the ill-posed reflectance entries, and the reevaluation of
-Section~\ref{sec:retstates} were produced in the same AI-assisted sessions and verified against
-the run summaries. The author reviewed the code, the numbers, and the text, and takes full
+structure, the identification of the ill-posed reflectance entries, the scaling runs of
+Section~\ref{sec:scaling} and the identity check of Section~\ref{sec:identity} were produced in the
+same AI-assisted sessions and verified against the run summaries. The author reviewed the code, the numbers, and the text, and takes full
 responsibility for the content of the manuscript.
 
 \section*{Data and code availability}
@@ -960,10 +1046,11 @@ The dataset (\texttt{data\_EMIT\_24k}) consists of tabulated radiative-transfer 
 generated at the Jet Propulsion Laboratory; the OCO-2 data and the reference emulator's stored
 predictions are those of the companion paper's release; the corpora of
 Section~\ref{sec:corpora} are public releases, cited there. The pipeline, the per-seed records
-behind every number reported here (one record per band, seed and family for OCO-2, one per
-seed for EMIT, and the seventy-cell stacking runs), and the exact configuration of each
-experiment are retained by the author and will accompany the published version of this
-manuscript; the method repository of \cite{nmkc} is at
+behind every number reported here (one record per seed for the EMIT table and one per seed and
+rung, rank, width or metric exponent for Section~\ref{sec:scaling}, each with its test
+predictions), and the
+exact configuration of each experiment are retained by the author and will accompany the
+published version of this manuscript; the method repository of \cite{nmkc} is at
 \url{https://github.com/yspennstate/neural-means-kernel-corrections}.
 
 \begin{thebibliography}{10}
@@ -1054,40 +1141,15 @@ A.~Radhakrishnan, D.~Beaglehole, P.~Pandit, and M.~Belkin.
 learning models.
 \newblock \emph{Science}, 383(6690):1461--1467, 2024.
 
-\bibitem{mp}
-V.~A. Marchenko and L.~A. Pastur.
-\newblock Distribution of eigenvalues for some sets of random matrices.
-\newblock \emph{Mathematics of the USSR-Sbornik}, 1(4):457--483, 1967.
+\bibitem{cdv}
+A.~Caponnetto and E.~De~Vito.
+\newblock Optimal rates for the regularized least-squares algorithm.
+\newblock \emph{Foundations of Computational Mathematics}, 7(3):331--368, 2007.
 
-\bibitem{bbp2017}
-J.~Bun, J.-P. Bouchaud, and M.~Potters.
-\newblock Cleaning large correlation matrices: tools from random matrix theory.
-\newblock \emph{Physics Reports}, 666:1--109, 2017.
-
-\bibitem{lw2004}
-O.~Ledoit and M.~Wolf.
-\newblock A well-conditioned estimator for large-dimensional covariance matrices.
-\newblock \emph{Journal of Multivariate Analysis}, 88(2):365--411, 2004.
-
-\bibitem{lw2020}
-O.~Ledoit and M.~Wolf.
-\newblock Analytical nonlinear shrinkage of large-dimensional covariance matrices.
-\newblock \emph{Annals of Statistics}, 48(5):3043--3065, 2020.
-
-\bibitem{nercome}
-C.~Lam.
-\newblock Nonparametric eigenvalue-regularized precision or covariance matrix estimator.
-\newblock \emph{Annals of Statistics}, 44(3):928--953, 2016.
-
-\bibitem{jm}
-R.~Jagannathan and T.~Ma.
-\newblock Risk reduction in large portfolios: why imposing the wrong constraints helps.
-\newblock \emph{Journal of Finance}, 58(4):1651--1683, 2003.
-
-\bibitem{fzy}
-J.~Fan, J.~Zhang, and K.~Yu.
-\newblock Vast portfolio selection with gross-exposure constraints.
-\newblock \emph{Journal of the American Statistical Association}, 107(498):592--606, 2012.
+\bibitem{fs}
+S.~Fischer and I.~Steinwart.
+\newblock Sobolev norm learning rates for regularized least-squares algorithms.
+\newblock \emph{Journal of Machine Learning Research}, 21(205):1--38, 2020.
 
 \bibitem{dehoop}
 M.~V. de~Hoop, D.~Z. Huang, E.~Qian, and A.~M. Stuart.
@@ -1139,11 +1201,6 @@ J.~M. Bates and C.~W.~J. Granger.
 H.~Owhadi and G.~R. Yoo.
 \newblock Kernel flows: from learning kernels from data into the abyss.
 \newblock \emph{Journal of Computational Physics}, 389:22--47, 2019.
-
-\bibitem{laloux}
-L.~Laloux, P.~Cizeau, J.-P. Bouchaud, and M.~Potters.
-\newblock Noise dressing of financial correlation matrices.
-\newblock \emph{Physical Review Letters}, 83(7):1467--1470, 1999.
 
 \end{thebibliography}
 
