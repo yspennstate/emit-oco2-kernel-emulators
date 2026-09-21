@@ -23,34 +23,18 @@
 \begin{abstract}
 We compare neural networks, exact Mat\'ern regression and their combinations on a
 six-dimensional radiative-transfer table over the 285-band EMIT grid. Across ten random
-splits, with validation-based selection and 18{,}884 training samples, input-scaled kernels
-achieve $0.095\%$ mean relative radiance error, compared with $0.76\%$ for cubic regression
-and $0.39\%$ for a neural network. Residual correction reduces the network error to
-$0.14\%$. A kernel on wider-network features reaches $0.079\%$, and its convex stack
-reaches $0.078\%$. This small forward-error gain accompanies an increase in the mean
-within-split 95th-percentile reflectance error from $7.57$ to $22.71$ percentage points,
-with a larger tail at every split. We prove that the reflectance error of a physically
-constrained retrieval is bounded, with constant one, by a transmission-weighted component
-error divided by the transmission, that the resulting loss of rate on an evaluation
-distribution with vanishing transmission is unavoidable, and that it disappears when the
-conditional component error decreases proportionally to the transmission; the diagnostic
-that decides between these cases is the error profile against transmission, which we
-measure. A same-data perturbation bound describes how a learned representation, a changed
-ridge or a Nystr\"om approximation moves the corrected predictor, in terms of its action on
-the fitted residual. Learning-curve, output-rank, width and combination experiments
-characterize the effects of representation and tuning. At four further splits the kernel on
-the concatenated features of three wide members improves on the single-member feature kernel in
-the mean and in the reflectance tail, and a ridge-path reading of the correction shows the network
-mean carrying the prediction where the kernel step is over-smoothed. Across ten kernels on the state
-inputs the choice of kernel is not the limiting factor: a convex stack of all heads is roughly a
-quarter below the best single head on three of the four components, and the two kernel steps compress the differences between
-regularisation arms of the network by six to twelve times. Under the protocol of a
-published multi-fidelity benchmark the residual-corrected network improves on the published
-values in all four metrics on both the release's split and its out-of-distribution split (RMSE
-$0.0058$ against $0.0062$, and $0.0062$ against $0.0102$ out of distribution). Comparisons with
-OCO-2, where the reduced-coefficient and radiance metrics order the heads differently, and with
-ten further configurations demonstrate the task dependence of the relative performance of neural
-and kernel emulators.
+splits, with validation-based selection and 18{,}884 training samples, an input-scaled
+kernel reaches $0.095\%$ mean relative radiance error against $0.76\%$ for cubic regression
+and $0.39\%$ for a neural network; residual correction takes the network to $0.14\%$, and a
+kernel on wider-network features to $0.079\%$. The forward gain does not carry to the
+inverse problem: a convex stack of all heads raises the mean within-split 95th-percentile
+reflectance error from $7.57$ to $22.71$ percentage points. We prove that the reflectance
+error of a physically constrained retrieval is bounded, with constant one, by a
+transmission-weighted component error divided by the transmission, that the loss of rate
+where the transmission vanishes is unavoidable, and that it disappears when the conditional
+component error falls with the transmission. Under the protocol of a published
+multi-fidelity benchmark the residual-corrected network improves on the published values in
+all four metrics on both of its splits.
 \end{abstract}
 
 \section{Introduction}
@@ -1006,11 +990,6 @@ The OCO-2 arrays and reference predictions are from the release accompanying
 
 \begin{thebibliography}{99}
 
-\bibitem{isofit}
-D.~R. Thompson, V.~Natraj, R.~O. Green, M.~C. Helmlinger, B.-C. Gao, and M.~L. Eastwood.
-\newblock Optimal estimation for imaging spectrometer atmospheric correction.
-\newblock \emph{Remote Sensing of Environment}, 216:355--373, 2018.
-
 \bibitem{srtmnet}
 P.~G. Brodrick, D.~R. Thompson, J.~E. Fahlen, M.~L. Eastwood, C.~M. Sarture, S.~R. Lundeen,
 W.~Olson-Duvall, N.~Carmon, and R.~O. Green.
@@ -1018,11 +997,10 @@ W.~Olson-Duvall, N.~Carmon, and R.~O. Green.
 retrievals.
 \newblock \emph{Remote Sensing of Environment}, 261:112476, 2021.
 
-\bibitem{pkan}
-M.~A.~A. Mazid and N.~Rishe.
-\newblock Multi-fidelity emulation of atmospheric correction coefficients with physics-guided
-Kolmogorov--Arnold networks.
-\newblock \emph{Remote Sensing}, 18(11):1826, 2026.
+\bibitem{isofit}
+D.~R. Thompson, V.~Natraj, R.~O. Green, M.~C. Helmlinger, B.-C. Gao, and M.~L. Eastwood.
+\newblock Optimal estimation for imaging spectrometer atmospheric correction.
+\newblock \emph{Remote Sensing of Environment}, 216:355--373, 2018.
 
 \bibitem{lamminpaa}
 O.~Lamminp\"a\"a, J.~Susiluoto, J.~Hobbs, J.~McDuffie, A.~Braverman, and H.~Owhadi.
@@ -1030,11 +1008,11 @@ O.~Lamminp\"a\"a, J.~Susiluoto, J.~Hobbs, J.~McDuffie, A.~Braverman, and H.~Owha
 cross validation.
 \newblock \emph{Atmospheric Measurement Techniques}, 18:673--694, 2025.
 
-\bibitem{nmkc}
-Y.~Shmalo.
-\newblock Neural means and kernel corrections for operator learning.
-\newblock Preprint, ResearchGate, 2026. Code and per-run summaries at
-\url{https://github.com/yspennstate/neural-means-kernel-corrections}.
+\bibitem{pkan}
+M.~A.~A. Mazid and N.~Rishe.
+\newblock Multi-fidelity emulation of atmospheric correction coefficients with physics-guided
+Kolmogorov--Arnold networks.
+\newblock \emph{Remote Sensing}, 18(11):1826, 2026.
 
 \bibitem{batlle}
 P.~Batlle, M.~Darcy, B.~Hosseini, and H.~Owhadi.
@@ -1053,78 +1031,10 @@ A.~Anandkumar.
 \newblock Fourier neural operator for parametric partial differential equations.
 \newblock In \emph{International Conference on Learning Representations}, 2021.
 
-\bibitem{yoo}
-G.~R. Yoo and H.~Owhadi.
-\newblock Deep regularization and direct training of the inner layers of neural networks with
-kernel flows.
-\newblock \emph{Physica D: Nonlinear Phenomena}, 426:132952, 2021.
-
-\bibitem{green}
-R.~O. Green et al.
-\newblock The Earth surface mineral dust source investigation: an Earth science imaging
-spectroscopy mission.
-\newblock In \emph{IEEE Aerospace Conference}, 2020.
-
 \bibitem{rw}
 C.~E. Rasmussen and C.~K.~I. Williams.
 \newblock \emph{Gaussian Processes for Machine Learning}.
 \newblock MIT Press, 2006.
-
-\bibitem{rfm}
-A.~Radhakrishnan, D.~Beaglehole, P.~Pandit, and M.~Belkin.
-\newblock Mechanism for feature learning in neural networks and backpropagation-free machine
-learning models.
-\newblock \emph{Science}, 383(6690):1461--1467, 2024.
-
-\bibitem{cdv}
-A.~Caponnetto and E.~De~Vito.
-\newblock Optimal rates for the regularized least-squares algorithm.
-\newblock \emph{Foundations of Computational Mathematics}, 7(3):331--368, 2007.
-
-\bibitem{sutherland}
-D.~J. Sutherland.
-\newblock Fixing an error in Caponnetto and de Vito (2007).
-\newblock arXiv:1702.02982v2, 2021.
-
-\bibitem{fs}
-S.~Fischer and I.~Steinwart.
-\newblock Sobolev norm learning rates for regularized least-squares algorithms.
-\newblock \emph{Journal of Machine Learning Research}, 21(205):1--38, 2020.
-
-\bibitem{dehoop}
-M.~V. de~Hoop, D.~Z. Huang, E.~Qian, and A.~M. Stuart.
-\newblock The cost-accuracy trade-off in operator learning with neural networks.
-\newblock \emph{Journal of Machine Learning}, 1(3):299--341, 2022.
-
-\bibitem{pdebench}
-M.~Takamoto, T.~Praditia, R.~Leiteritz, D.~MacKinlay, F.~Alesiani, D.~Pfl\"uger, and
-M.~Niepert.
-\newblock {PDEBench}: an extensive benchmark for scientific machine learning.
-\newblock In \emph{Advances in Neural Information Processing Systems 35}, 2022.
-
-\bibitem{thewell}
-R.~Ohana, M.~McCabe, L.~Meyer, R.~Morel, F.~Agocs, M.~Beneitez, M.~Berger, B.~Burkhart,
-S.~Dalziel, D.~Fielding, et~al.
-\newblock The Well: a large-scale collection of diverse physics simulations for machine
-learning.
-\newblock In \emph{Advances in Neural Information Processing Systems 37}, pages
-44989--45037, 2024.
-
-\bibitem{climsim}
-S.~Yu, W.~M. Hannah, L.~Peng, J.~Lin, M.~A. Bhouri, R.~Gupta, B.~L\"utjens, J.~C. Will,
-G.~Behrens, et~al.
-\newblock {ClimSim}: a large multi-scale dataset for hybrid physics-{ML} climate emulation.
-\newblock In \emph{Advances in Neural Information Processing Systems 36}, 2023.
-
-\bibitem{wolpert}
-D.~H. Wolpert.
-\newblock Stacked generalization.
-\newblock \emph{Neural Networks}, 5(2):241--259, 1992.
-
-\bibitem{breiman}
-L.~Breiman.
-\newblock Stacked regressions.
-\newblock \emph{Machine Learning}, 24:49--64, 1996.
 
 \bibitem{wilson}
 A.~G. Wilson, Z.~Hu, R.~Salakhutdinov, and E.~P. Xing.
@@ -1132,15 +1042,23 @@ A.~G. Wilson, Z.~Hu, R.~Salakhutdinov, and E.~P. Xing.
 \newblock In \emph{Proceedings of the 19th International Conference on Artificial
 Intelligence and Statistics}, pages 370--378, 2016.
 
-\bibitem{bates-granger}
-J.~M. Bates and C.~W.~J. Granger.
-\newblock The combination of forecasts.
-\newblock \emph{Operational Research Quarterly}, 20(4):451--468, 1969.
+\bibitem{yoo}
+G.~R. Yoo and H.~Owhadi.
+\newblock Deep regularization and direct training of the inner layers of neural networks with
+kernel flows.
+\newblock \emph{Physica D: Nonlinear Phenomena}, 426:132952, 2021.
 
-\bibitem{owhadiyoo}
-H.~Owhadi and G.~R. Yoo.
-\newblock Kernel flows: from learning kernels from data into the abyss.
-\newblock \emph{Journal of Computational Physics}, 389:22--47, 2019.
+\bibitem{nmkc}
+Y.~Shmalo.
+\newblock Neural means and kernel corrections for operator learning.
+\newblock Preprint, ResearchGate, 2026. Code and per-run summaries at
+\url{https://github.com/yspennstate/neural-means-kernel-corrections}.
+
+\bibitem{green}
+R.~O. Green et al.
+\newblock The Earth surface mineral dust source investigation: an Earth science imaging
+spectroscopy mission.
+\newblock In \emph{IEEE Aerospace Conference}, 2020.
 
 \bibitem{vermote}
 E.~F. Vermote, D.~Tanr\'e, J.~L. Deuz\'e, M.~Herman, and J.-J. Morcrette.
@@ -1191,12 +1109,6 @@ C.~W. O'Dell, B.~Connor, H.~Bosch, D.~O'Brien, C.~Frankenberg, et~al.
 \newblock The {ACOS} {CO$_2$} retrieval algorithm --- part 1: description and validation
 against synthetic observations.
 \newblock \emph{Atmospheric Measurement Techniques}, 5:99--121, 2012.
-
-\bibitem{cawse}
-K.~Cawse-Nicholson, P.~A. Townsend, D.~Schimel, A.~M. Assiri, P.~L. Blake, et~al.
-\newblock {NASA} surface biology and geology designated observable: a perspective on surface
-imaging algorithms.
-\newblock \emph{Remote Sensing of Environment}, 257:112349, 2021.
 
 \bibitem{chevallier}
 F.~Chevallier, F.~Ch\'eruy, N.~A. Scott, and A.~Ch\'edin.
@@ -1285,6 +1197,12 @@ B.~Peherstorfer, K.~Willcox, and M.~Gunzburger.
 optimization.
 \newblock \emph{SIAM Review}, 60(3):550--591, 2018.
 
+\bibitem{cawse}
+K.~Cawse-Nicholson, P.~A. Townsend, D.~Schimel, A.~M. Assiri, P.~L. Blake, et~al.
+\newblock {NASA} surface biology and geology designated observable: a perspective on surface
+imaging algorithms.
+\newblock \emph{Remote Sensing of Environment}, 257:112349, 2021.
+
 \bibitem{aronszajn}
 N.~Aronszajn.
 \newblock Theory of reproducing kernels.
@@ -1306,6 +1224,41 @@ B.~Sch\"olkopf, R.~Herbrich, and A.~J. Smola.
 \newblock In \emph{Proceedings of the 14th Annual Conference on Computational Learning
 Theory}, pages 416--426, 2001.
 
+\bibitem{hoerl}
+A.~E. Hoerl and R.~W. Kennard.
+\newblock Ridge regression: biased estimation for nonorthogonal problems.
+\newblock \emph{Technometrics}, 12(1):55--67, 1970.
+
+\bibitem{engl}
+H.~W. Engl, M.~Hanke, and A.~Neubauer.
+\newblock \emph{Regularization of Inverse Problems}.
+\newblock Kluwer, 1996.
+
+\bibitem{stein}
+M.~L. Stein.
+\newblock \emph{Interpolation of Spatial Data: Some Theory for Kriging}.
+\newblock Springer, 1999.
+
+\bibitem{cdv}
+A.~Caponnetto and E.~De~Vito.
+\newblock Optimal rates for the regularized least-squares algorithm.
+\newblock \emph{Foundations of Computational Mathematics}, 7(3):331--368, 2007.
+
+\bibitem{sutherland}
+D.~J. Sutherland.
+\newblock Fixing an error in Caponnetto and de Vito (2007).
+\newblock arXiv:1702.02982v2, 2021.
+
+\bibitem{fs}
+S.~Fischer and I.~Steinwart.
+\newblock Sobolev norm learning rates for regularized least-squares algorithms.
+\newblock \emph{Journal of Machine Learning Research}, 21(205):1--38, 2020.
+
+\bibitem{smalezhou}
+S.~Smale and D.-X. Zhou.
+\newblock Learning theory estimates via integral operators and their approximations.
+\newblock \emph{Constructive Approximation}, 26:153--172, 2007.
+
 \bibitem{scholkopf}
 B.~Sch\"olkopf and A.~J. Smola.
 \newblock \emph{Learning with Kernels}.
@@ -1316,25 +1269,10 @@ I.~Steinwart and A.~Christmann.
 \newblock \emph{Support Vector Machines}.
 \newblock Springer, 2008.
 
-\bibitem{stein}
-M.~L. Stein.
-\newblock \emph{Interpolation of Spatial Data: Some Theory for Kriging}.
-\newblock Springer, 1999.
-
-\bibitem{smalezhou}
-S.~Smale and D.-X. Zhou.
-\newblock Learning theory estimates via integral operators and their approximations.
-\newblock \emph{Constructive Approximation}, 26:153--172, 2007.
-
-\bibitem{hoerl}
-A.~E. Hoerl and R.~W. Kennard.
-\newblock Ridge regression: biased estimation for nonorthogonal problems.
-\newblock \emph{Technometrics}, 12(1):55--67, 1970.
-
-\bibitem{engl}
-H.~W. Engl, M.~Hanke, and A.~Neubauer.
-\newblock \emph{Regularization of Inverse Problems}.
-\newblock Kluwer, 1996.
+\bibitem{esl}
+T.~Hastie, R.~Tibshirani, and J.~Friedman.
+\newblock \emph{The Elements of Statistical Learning}.
+\newblock Springer, second edition, 2009.
 
 \bibitem{micchelli}
 C.~A. Micchelli and M.~Pontil.
@@ -1360,6 +1298,11 @@ H.~Owhadi and C.~Scovel.
 Y.~Chen, B.~Hosseini, H.~Owhadi, and A.~M. Stuart.
 \newblock Solving and learning nonlinear {PDEs} with {Gaussian} processes.
 \newblock \emph{Journal of Computational Physics}, 447:110668, 2021.
+
+\bibitem{owhadiyoo}
+H.~Owhadi and G.~R. Yoo.
+\newblock Kernel flows: from learning kernels from data into the abyss.
+\newblock \emph{Journal of Computational Physics}, 389:22--47, 2019.
 
 \bibitem{hamziowhadi}
 B.~Hamzi and H.~Owhadi.
@@ -1471,6 +1414,21 @@ C.~Cortes, M.~Mohri, and A.~Rostamizadeh.
 \newblock Algorithms for learning kernels based on centered alignment.
 \newblock \emph{Journal of Machine Learning Research}, 13:795--828, 2012.
 
+\bibitem{bates-granger}
+J.~M. Bates and C.~W.~J. Granger.
+\newblock The combination of forecasts.
+\newblock \emph{Operational Research Quarterly}, 20(4):451--468, 1969.
+
+\bibitem{wolpert}
+D.~H. Wolpert.
+\newblock Stacked generalization.
+\newblock \emph{Neural Networks}, 5(2):241--259, 1992.
+
+\bibitem{breiman}
+L.~Breiman.
+\newblock Stacked regressions.
+\newblock \emph{Machine Learning}, 24:49--64, 1996.
+
 \bibitem{stonecv}
 M.~Stone.
 \newblock Cross-validatory choice and assessment of statistical predictions.
@@ -1485,16 +1443,6 @@ G.~H. Golub, M.~Heath, and G.~Wahba.
 S.~Arlot and A.~Celisse.
 \newblock A survey of cross-validation procedures for model selection.
 \newblock \emph{Statistics Surveys}, 4:40--79, 2010.
-
-\bibitem{esl}
-T.~Hastie, R.~Tibshirani, and J.~Friedman.
-\newblock \emph{The Elements of Statistical Learning}.
-\newblock Springer, second edition, 2009.
-
-\bibitem{hoeffding}
-W.~Hoeffding.
-\newblock Probability inequalities for sums of bounded random variables.
-\newblock \emph{Journal of the American Statistical Association}, 58(301):13--30, 1963.
 
 \bibitem{hornik}
 K.~Hornik, M.~Stinchcombe, and H.~White.
@@ -1527,11 +1475,6 @@ R.~M. Neal.
 \newblock \emph{Bayesian Learning for Neural Networks}.
 \newblock Springer, 1996.
 
-\bibitem{chosaul}
-Y.~Cho and L.~K. Saul.
-\newblock Kernel methods for deep learning.
-\newblock In \emph{Advances in Neural Information Processing Systems 22}, pages 342--350, 2009.
-
 \bibitem{leenngp}
 J.~Lee, Y.~Bahri, R.~Novak, S.~S. Schoenholz, J.~Pennington, and J.~Sohl-Dickstein.
 \newblock Deep neural networks as {Gaussian} processes.
@@ -1541,6 +1484,11 @@ J.~Lee, Y.~Bahri, R.~Novak, S.~S. Schoenholz, J.~Pennington, and J.~Sohl-Dickste
 A.~G. de~G. Matthews, M.~Rowland, J.~Hron, R.~E. Turner, and Z.~Ghahramani.
 \newblock {Gaussian} process behaviour in wide deep neural networks.
 \newblock In \emph{International Conference on Learning Representations}, 2018.
+
+\bibitem{chosaul}
+Y.~Cho and L.~K. Saul.
+\newblock Kernel methods for deep learning.
+\newblock In \emph{Advances in Neural Information Processing Systems 22}, pages 342--350, 2009.
 
 \bibitem{ntk}
 A.~Jacot, F.~Gabriel, and C.~Hongler.
@@ -1557,6 +1505,12 @@ M.~Belkin, S.~Ma, and S.~Mandal.
 \newblock To understand deep learning we need to understand kernel learning.
 \newblock In \emph{Proceedings of the 35th International Conference on Machine Learning},
 pages 541--549, 2018.
+
+\bibitem{rfm}
+A.~Radhakrishnan, D.~Beaglehole, P.~Pandit, and M.~Belkin.
+\newblock Mechanism for feature learning in neural networks and backpropagation-free machine
+learning models.
+\newblock \emph{Science}, 383(6690):1461--1467, 2024.
 
 \bibitem{kolmogorov}
 A.~N. Kolmogorov.
@@ -1588,20 +1542,50 @@ M.~Raissi, P.~Perdikaris, and G.~E. Karniadakis.
 inverse problems involving nonlinear partial differential equations.
 \newblock \emph{Journal of Computational Physics}, 378:686--707, 2019.
 
+\bibitem{dehoop}
+M.~V. de~Hoop, D.~Z. Huang, E.~Qian, and A.~M. Stuart.
+\newblock The cost-accuracy trade-off in operator learning with neural networks.
+\newblock \emph{Journal of Machine Learning}, 1(3):299--341, 2022.
+
+\bibitem{pdebench}
+M.~Takamoto, T.~Praditia, R.~Leiteritz, D.~MacKinlay, F.~Alesiani, D.~Pfl\"uger, and
+M.~Niepert.
+\newblock {PDEBench}: an extensive benchmark for scientific machine learning.
+\newblock In \emph{Advances in Neural Information Processing Systems 35}, 2022.
+
+\bibitem{thewell}
+R.~Ohana, M.~McCabe, L.~Meyer, R.~Morel, F.~Agocs, M.~Beneitez, M.~Berger, B.~Burkhart,
+S.~Dalziel, D.~Fielding, et~al.
+\newblock The Well: a large-scale collection of diverse physics simulations for machine
+learning.
+\newblock In \emph{Advances in Neural Information Processing Systems 37}, pages
+44989--45037, 2024.
+
+\bibitem{climsim}
+S.~Yu, W.~M. Hannah, L.~Peng, J.~Lin, M.~A. Bhouri, R.~Gupta, B.~L\"utjens, J.~C. Will,
+G.~Behrens, et~al.
+\newblock {ClimSim}: a large multi-scale dataset for hybrid physics-{ML} climate emulation.
+\newblock In \emph{Advances in Neural Information Processing Systems 36}, 2023.
+
 \bibitem{golubvanloan}
 G.~H. Golub and C.~F. Van~Loan.
 \newblock \emph{Matrix Computations}.
 \newblock Johns Hopkins University Press, fourth edition, 2013.
 
-\bibitem{higham}
-N.~J. Higham.
-\newblock \emph{Accuracy and Stability of Numerical Algorithms}.
-\newblock SIAM, second edition, 2002.
+\bibitem{hoeffding}
+W.~Hoeffding.
+\newblock Probability inequalities for sums of bounded random variables.
+\newblock \emph{Journal of the American Statistical Association}, 58(301):13--30, 1963.
 
 \bibitem{stewartsun}
 G.~W. Stewart and J.-G. Sun.
 \newblock \emph{Matrix Perturbation Theory}.
 \newblock Academic Press, 1990.
+
+\bibitem{higham}
+N.~J. Higham.
+\newblock \emph{Accuracy and Stability of Numerical Algorithms}.
+\newblock SIAM, second edition, 2002.
 
 \end{thebibliography}
 
