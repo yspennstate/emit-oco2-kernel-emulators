@@ -67,17 +67,35 @@ Section~\ref{sec:theory}, which does replace them, is reported separately.}
 \IfFileExists{../figures/emit_quantiles_top_models.png}{%
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{emit_quantiles_top_models.png}
+\includegraphics[height=0.84\textheight,width=\textwidth,keepaspectratio]%
+{emit_quantiles_top_models.png}
 \caption{Residual quantile bands across the test set, band by band. The envelopes are
 nested percentiles of the residual at each wavelength: $25$--$75$ in red, $5$--$25$ and
 $75$--$95$ in blue, $2.5$--$5$ and $95$--$97.5$ in green, $0.5$--$2.5$ and
-$97.5$--$99.5$ in grey, with the median as a thin black line. Left column: the direct-flux
-residual $Y_2 - \widehat{Y_2}$ in physical units. Centre: the reflectance residual over all
-bands. Right: the same residual restricted to the admissible domain with the conditioning
-floor, on the same vertical scale, so that the difference between the two columns is the
-contribution of the excluded entries.}
+$97.5$--$99.5$ in grey, with the median as a thin black line. The columns are, from the
+left: the direct-flux residual $Y_2-\widehat{Y_2}$ in physical units; the radiance residual
+$L-\widehat{L}$ at $\rho=0.7$; the reflectance residual over all bands; and the same
+reflectance residual restricted to the admissible domain with the conditioning floor. The
+last two columns share a vertical scale, so the difference between them is the contribution
+of the excluded entries. The first two columns are smooth in wavelength and differ between
+families mainly in amplitude; the last two are not, and their walls sit at the same
+wavelengths in every family.}
 \label{fig:bands}
 \end{figure}}{}
+
+The restriction is a statement about tails and not about the centre. Across the six
+families the median absolute reflectance error is unchanged to three decimals by the
+floor, while the 95th percentile falls by a third to a half. Whether a family's tail is
+conditioning-dominated is itself informative: the cubic ridge, whose reflectance error is
+carried by its own inaccuracy, barely moves ($70.68$ to $70.63$ points), while the network
+moves from $37.50$ to $24.11$.
+
+The reversal of Section~\ref{sec:results} is not an artefact of the excluded entries. On
+the split reported in Table~\ref{tab:constrained} the convex stack has the lowest radiance
+error of the six families and the fifth-lowest reflectance tail; the kernel on learned
+features has a larger radiance error and a tail smaller by a factor of $6.1$ over all
+bands. Under the conditioning floor that factor is $5.0$. Restricting the evaluation to
+the domain on which the retrieval statements hold narrows the gap and leaves it in place.
 
 Two features of Figure~\ref{fig:bands} do not appear in the aggregates. The component
 residual of every family is smooth in wavelength and widens where the transmitted flux is
@@ -85,5 +103,5 @@ small, so the families differ mainly in the amplitude of a shared shape. The ref
 residual does not inherit that shape: over all bands its outer envelopes open into vertical
 walls at the water-vapour features near 1380 and 1900\,nm and at the long-wave edge, in
 every family and at the same wavelengths, because those walls are set by the denominator
-and not by the emulator. Under the conditioning floor the walls close, and what remains is
-what the component errors predict.
+and not by the emulator. Under the conditioning floor the walls narrow, and what remains is
+closer to what the component errors predict.
