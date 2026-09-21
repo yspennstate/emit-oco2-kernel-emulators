@@ -4,7 +4,7 @@
 % statement, the split-sample bias-variance identity, the finite-class selection guarantee, the constant-one
 % transfer theorem with its matching construction, the conditional error-profile theorem, the signed-spectrum and
 % residual-action perturbation bounds, the explicit chain to the kernel paper's power-function bound, the stacking
-% objective, and a short discussion of the two interpolation theorems. It is \input after sec:stability.
+% objective and the objective the stacks actually minimise. It is \input after sec:stability.
 % Environments: proposition and theorem (existing); add \newtheorem{corollary}[proposition]{Corollary} if absent.
 % Macros: \Prob, \E, \1 (indicator) - define if absent.
 
@@ -42,15 +42,7 @@ is $\sigma^2\|a_\lambda(x)\|_2^2$.
 \end{enumerate}
 \end{proposition}
 
-\begin{proof}
-(i) is the chain rule applied to $\widehat y=S_\lambda y+(I-S_\lambda)h_X(y)$, and the two examples are direct
-substitutions. (ii) With the mean and kernel frozen the map is affine with linear part $S_\lambda$; the trace is the
-sum of the eigenvalues $\mu_j/(\mu_j+\lambda)$, and the operator norm of a symmetric positive semidefinite matrix is
-its largest eigenvalue. (iii) $\widehat y-f_X=-(I-S_\lambda)r+S_\lambda\varepsilon$; the cross term has zero mean,
-and both matrices are diagonal in the eigenbasis of $K$. (iv) The correction at $x$ is $a_\lambda(x)^{\top}(y-h_X)$,
-linear in $\varepsilon$ with coefficient vector $a_\lambda(x)$.
-\end{proof}
-
+\noindent\emph{Proof in Appendix~\ref{app:proofs}.}
 Item (iii) is what the ridge-path experiments report: the residual's spectral energy $\sum_j r_j^2$ by eigendirection,
 and the two sums as functions of $\lambda$, together with the out-of-sample factor of item (iv). A ridge chosen from
 fits that depend on the correction noise is outside the hypothesis of (iii).
@@ -69,10 +61,7 @@ R(\widehat p)\le\min_{1\le j\le M}R(p_j)+2B\sqrt{\frac{\log(2M/\delta)}{2m}} .
 \]
 \end{proposition}
 
-\begin{proof}
-Hoeffding's inequality \cite{hoeffding} for each candidate and a union bound over the $M$ candidates.
-\end{proof}
-
+\noindent\emph{Proof in Appendix~\ref{app:proofs}.}
 The squared error of the constrained retrieval of Section~\ref{sec:transfer} is bounded by $R^2$, so the guarantee
 covers it. It covers the damped correction
 $p_{\alpha,\lambda}(x)=h(x)+\alpha\,k(x,X_n)(K+\lambda I)^{-1}(y-h_X)$ at finitely many $\alpha\in[0,1]$, with
@@ -125,30 +114,7 @@ $\varepsilon_{R,n}=O(n^{-r})$ yields $\|\bar\rho_n-\rho\|_{L^2(P)}=O(n^{-r\beta/
 \end{enumerate}
 \end{theorem}
 
-\begin{proof}
-Write $q=1-\rho s$, $u=L-a=\rho t/q$, $D=t/q$, $\widehat D=\widehat t+\widehat s(L-\widehat a)$ and $z=\bar\rho$.
-Suppose first $\widehat D>0$. The map $F(v)=\widehat Dv-(L-\widehat a)$ is increasing and affine, $z$ is the
-projection of its root onto $[0,R]$ and $\rho\in[0,R]$, so $(z-\rho)F(z)\le0$: at an interior root $F(z)=0$; at
-$z=R$ the root exceeds $R$, so $F(R)<0$ and $z-\rho\ge0$; at $z=0$ the root is negative, so $F(0)>0$ and
-$z-\rho\le0$. Since $L-\widehat a=u-e_a$ and, by \eqref{eq:inverse-error},
-$\widehat D=D+e_t+ue_s-\widehat se_a$ with $u=\rho D$,
-\[
-F(z)=D(z-\rho)+(1-z\widehat s)e_a+ze_t+zue_s ,
-\]
-hence $D(z-\rho)^2\le|z-\rho|\bigl((1-z\widehat s)|e_a|+z|e_t|+zu|e_s|\bigr)$ and, with $D=t/q$,
-\[
-|z-\rho|\le q(1-z\widehat s)\frac{|e_a|}{t}+qz\frac{|e_t|}{t}+z\rho\,|e_s| .
-\]
-Now $0<1-RS\le q(1-z\widehat s)\le1$, $qz\le R$ and $z\rho\le R^2$, so $|z-\rho|\le e_R/t$; and $|z-\rho|\le R$
-because both lie in $[0,R]$. If $\widehat D\le0$, then $\widehat t\le\widehat s(e_a-u)\le\widehat s|e_a|$ and
-$t=\widehat t-e_t\le|e_t|+\widehat s|e_a|$, so $Rt\le R|e_t|+R\widehat s|e_a|\le R|e_t|+|e_a|\le e_R$; the fallback
-value and $\rho$ lie in $[0,R]$, so $|z-\rho|\le R=\min\{R,e_R/t\}$. For optimality take $s=\widehat s=0$,
-$\widehat t=t$, $\rho=r_0$ and $\widehat a=a+ct$ with $0<c<r_0<R$: then $|\bar\rho-\rho|=c=e_R/t$ exactly, with a
-positive denominator and no projection active. This proves (i). For (ii) integrate (i), split at $t=\tau$ and bound
-$e_R^2/t^2$ by $e_R^2/\tau^2$ on $\{t>\tau\}$. For (iii) take $\tau=\varepsilon_R^{2/(\beta+2)}\le u_0$; then
-$R^2A\tau^\beta+\varepsilon_R^2/\tau^2=(R^2A+1)\varepsilon_R^{2\beta/(\beta+2)}$. (iv) is (i) with $t\ge t_0$.
-\end{proof}
-
+\noindent\emph{Proof in Appendix~\ref{app:proofs}.}
 The middle expression in (ii) keeps the association between the errors and the transmission and is the one the
 tables evaluate; the last needs no power law. Both are computable on a finite test table; (iii) is a population
 statement whose tail hypothesis a finite table cannot establish down to $t=0$. The exponent in (iii) cannot be
@@ -166,12 +132,7 @@ $\widehat t=t$, $\widehat s=0$ and $\widehat a=ct\,\1\{t\le\tau\}$, for which $\
 \]
 \end{proposition}
 
-\begin{proof}
-$L=r_0t$ and $\widehat\rho=(r_0t-\widehat a)/t$; $e_R=|\widehat a|=ct\,\1\{t\le\tau\}$; with density
-$\beta u^{\beta-1}$ on $(0,1)$, $\E_P[t^2\1\{t\le\tau\}]=\beta\tau^{\beta+2}/(\beta+2)$; the retrieval error equals
-$c$ exactly on $\{t\le\tau\}$, an event of probability $\tau^\beta$. Eliminate $\tau$.
-\end{proof}
-
+\noindent\emph{Proof in Appendix~\ref{app:proofs}.}
 This is sharpness of the transfer inequality for the physical inverse, not a minimax statement over retrieval
 algorithms. What decides the rate is where the errors sit relative to the transmission.
 
@@ -194,19 +155,7 @@ Proposition~\ref{prop:attained} the predictor $\widehat a=a+\min\{ct,\sigma t^\n
 $|\bar\rho-\rho|=\min\{c,\sigma t^{\nu-1}\}$, and attains each order.
 \end{theorem}
 
-\begin{proof}
-Conditional on $t$ the squared error is at most both $R^2$ and $e_R^2/t^2$ by Theorem~\ref{thm:transfer}(i), so
-$\E[|\bar\rho-\rho|^2\mid t]\le\min\{R^2,\E[e_R^2\mid t]/t^2\}\le\min\{R^2,\sigma^2t^{2\nu-2}\}$; integrate. With
-$t_*=(\sigma/R)^{1/(1-\nu)}$,
-$\E_P\min\{R^2,\sigma^2t^{2\nu-2}\}=R^2F_t(t_*)+\sigma^2\E_P[t^{2\nu-2}\1\{t>t_*\}]$; the first term is at most
-$R^2At_*^\beta=O(\sigma^{\beta/(1-\nu)})$ once $t_*\le u_0$, and
-$\E_P[t^{2\nu-2}\1\{t>t_*\}]=\int_0^{t_*^{2\nu-2}}\Prob(t_*<t<v^{-1/(2-2\nu)})\,dv
-\le u_0^{2\nu-2}+A\int_{u_0^{2\nu-2}}^{t_*^{2\nu-2}}v^{-\beta/(2-2\nu)}\,dv$, which is $O(1)$ for
-$\beta>2(1-\nu)$, $O(\log(1/\sigma))$ for $\beta=2(1-\nu)$ and $O(t_*^{\beta-2(1-\nu)})$ for $\beta<2(1-\nu)$. At
-$\nu=1$ the bound is $\sigma^2$ before any tail enters. In the model,
-$c^{-2}\E_P|\bar\rho-\rho|^2=\E_P\min\{1,(\sigma/c)^2t^{2\nu-2}\}$, the same integral with equality.
-\end{proof}
-
+\noindent\emph{Proof in Appendix~\ref{app:proofs}.}
 At $\nu=0$ the theorem recovers the uniform-error regimes under the weaker hypothesis of a bounded conditional
 second moment; at $\nu=1$ an emulator whose conditional root-mean-square error decreases proportionally to the
 transmission loses no rate. The central diagnostic is therefore the profile $t\mapsto\E[e_R^2\mid t]$ and not only
@@ -239,22 +188,12 @@ $W$ and the label shift $U$ separate, which is what makes it readable on data.
 +\|Q\widetilde g\|_2\,\|BW+U\|_{\mathrm{op}}$.
 \item $\|\widetilde p(x)-p(x)\|_2\le\|\widetilde h(x)-h(x)\|_2
 +\|W\|_F\bigl(\gamma_Q\|v\|_2+\eta_Q\|g\|_2\bigr)+\gamma_Q\|U\|_F\|\widetilde g\|_2$.
-\item If $\widetilde H=H+sI$ with the kernel and the means unchanged, then
+\item If $\widetilde H=H+sI$ with $s\ge0$ and the kernel and the means unchanged, then
 $\|\widetilde p(x)-p(x)\|_2\le\|g\|_2\|W\|_F\,s/(\lambda_{\min}(H)+s)$.
 \end{enumerate}
 \end{proposition}
 
-\begin{proof}
-$\widetilde H=H^{1/2}(I+B)H^{1/2}$ gives $\widetilde H^{-1}=H^{-1/2}QH^{-1/2}$ and $Q=I-QB$. Hence
-$\widetilde k_x^{\top}\widetilde H^{-1}(Y-\widetilde M)-k_x^{\top}H^{-1}(Y-M)
-=\widetilde g^{\top}Q(W-U)-g^{\top}W
-=\widetilde g^{\top}W-\widetilde g^{\top}QBW-\widetilde g^{\top}QU-g^{\top}W
-=v^{\top}W-(Q\widetilde g)^{\top}(BW+U)$, which is (i) since $Q$ is symmetric; (ii) bounds its two terms. For (iii)
-write the same difference as $v^{\top}QW+g^{\top}(Q-I)W-\widetilde g^{\top}QU$ and use
-$\|Q\|_{\mathrm{op}}=\gamma_Q$ and $\|Q-I\|_{\mathrm{op}}=\|QB\|_{\mathrm{op}}=\eta_Q$. For (iv), $v=0$, $U=0$ and
-$B=sH^{-1}$ has eigenvalues $s/\lambda_i(H)\ge0$, so $\eta_Q=\max_i(s/\lambda_i)/(1+s/\lambda_i)=s/(\lambda_{\min}(H)+s)$.
-\end{proof}
-
+\noindent\emph{Proof in Appendix~\ref{app:proofs}.}
 Only positive definiteness of $\widetilde H$ is needed: a large positive eigenvalue of $B$, from a larger ridge or an
 approximation that dominates the exact Gram matrix nowhere, does not make the bound vacuous. Item (ii) keeps the
 interaction between the perturbation and the residual: with $v=0$, $U=0$ and $BW=0$ the predictor does not move
@@ -300,28 +239,28 @@ $e_R^2\le3(e_a^2+R^2e_t^2+R^4t^2e_s^2)$,
 \end{equation}
 Projecting an unrestricted combination inside the loss would destroy the convexity. The threshold $\tau$ is fixed
 before any test read under a declared coverage requirement, because a threshold can make the task easier by
-discounting the difficult bands; candidate stacks at a few values of $\tau$ are frozen and selected under
-Proposition~\ref{prop:selection}.
+discounting the difficult bands.
 
-\subsection{The interpolation regime}\label{sec:interp}
+The stacks measured below minimise a separable form of \eqref{eq:Jtau}. Writing $e_2$ and $e_3$ for the errors of
+the two flux components, whose sum is $e_t$, that form is
+\begin{equation}\label{eq:Jtau-sep}
+J'_\tau(w)=\E_P\Bigl[\frac{e_a(w)^2+R^2e_2(w)^2+R^2e_3(w)^2+R^4t^2e_s(w)^2}{(t\vee\tau)^2}\Bigr],
+\end{equation}
+which scores the two fluxes separately and so drops the cross term $2R^2e_2e_3$ that \eqref{eq:Jtau} carries; it
+also applies the flux projection when a combination is scored rather than to the base heads before they are
+combined. It is convex in $w$ for the same reason. The bound it comes with has the same shape with one more term
+in the Cauchy--Schwarz step: from Theorem~\ref{thm:transfer}(i) and
+$e_R\le|e_a|+R|e_2|+R|e_3|+R^2t|e_s|$, so that $e_R^2\le4(e_a^2+R^2e_2^2+R^2e_3^2+R^4t^2e_s^2)$,
+\begin{equation}\label{eq:Jtau-sep-bound}
+\E_P|\bar\rho_w-\rho|^2\le R^2F_t(\tau)+4J'_\tau(w) .
+\end{equation}
+The stacks reported in Section~\ref{sec:results-representation} therefore carry
+\eqref{eq:Jtau-sep-bound}; \eqref{eq:Jtau-bound} is the bound for the unseparated objective \eqref{eq:Jtau},
+which a stack minimising the cross term as well would carry.
 
-Two results on the Gaussian kernel at a bandwidth that does not scale with the dimension describe a regime the
-corpora of this paper are not in; they are stated for the record and proved elsewhere.
-
-\begin{theorem}\label{thm:benign}
-For every fixed $h>0$, $q_0$, $B$ and $\sigma$, and every $\epsilon>0$,
-$\sum_\ell\Pr\{\mathcal R_\ell>\epsilon\}<\infty$ along $d_\ell=2^{2^\ell}$, $n_\ell=2^{2^{2\ell}}$. In
-particular $\mathcal R_\ell\to0$ in probability, and almost surely under any coupling of the levels.
-\end{theorem}
-
-\begin{theorem}\label{thm:obstruction}
-For every fixed $h>0$,
-$\liminf_{d\to\infty}\E\,\mathcal E_{2^d,d}/\sigma^2\ge 5/36$, the expectation being over the design and
-the noise.
-\end{theorem}
-
-The first concerns uniform inputs on a sphere of growing dimension, independent Gaussian noise and a signal in a
-fixed finite sum of harmonic spaces; the second a noise-only problem at $n=2^d$, and the same argument gives larger
-constants, so $5/36$ is not sharp. A network with two or six thousand features does not place a Mat\'ern regression
-on those features in either setting. The bridge to the corpora is Proposition~\ref{prop:sensitivity} together with
-Theorems~\ref{thm:transfer} and~\ref{thm:profile}.
+Proposition~\ref{prop:selection} requires the candidates to be frozen before an independent selection sample. The
+combinations and per-coordinate selections below are fitted on the campaign's validation rows, which also served
+for early stopping and for the kernels' hyperparameters, so the proposition states the protocol a deployment
+should follow and does not certify the constants of those particular numbers. What the experiments do preserve is
+the weaker discipline that matters for the comparison: every threshold, weight and selection is fixed on
+validation rows, and the test rows are read once.

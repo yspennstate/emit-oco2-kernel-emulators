@@ -40,13 +40,7 @@ smaller than $C_n\|f\|_{\mathcal S}$ when $C_n>0$. It is neither a necessary nor
 sufficient condition for the corrected predictor's actual error to be smaller than that of
 $Sf$.
 \end{proposition}
-\begin{proof}
-Subtract $h+S(f-h)$ from $f$ to obtain \eqref{eq:residual-exact}. On the design,
-$I-K(K+\lambda I)^{-1}=\lambda(K+\lambda I)^{-1}$, which proves
-\eqref{eq:design-residual} and its spectral form. Apply the assumed uniform inequality to
-$g=f-h$ for \eqref{eq:inherit}. The examples below distinguish this bound from actual error comparisons.
-\end{proof}
-
+\noindent\emph{Proof in Appendix~\ref{app:proofs}.}
 \paragraph{Why the bounds do not order the errors.}
 On a two-point design take $K=\operatorname{diag}(1,99)$ and $\lambda=1$, so
 $R=\operatorname{diag}(1/2,1/100)$ and $C_n=1/2$ is its Euclidean operator norm. With
@@ -76,13 +70,7 @@ if $b=0$, every $t$ is equivalent. If the direct fit uses $S_0$ and the correcti
 $S_1$, \eqref{eq:alignment} instead holds with
 $a=(I-S_0)f$ and $b=(S_1-S_0)f+(I-S_1)h$.
 \end{proposition}
-\begin{proof}
-For a common operator the corrected error is $a-b$, so expansion of its squared norm gives
-\eqref{eq:alignment}. The error of $p_t$ is $a-tb$; minimize the resulting quadratic on
-$[0,1]$ to obtain \eqref{eq:shrink-mean}. For distinct operators,
-$f-h-S_1(f-h)=(I-S_0)f-[(S_1-S_0)f+(I-S_1)h]$, after which the same expansion applies.
-\end{proof}
-
+\noindent\emph{Proof in Appendix~\ref{app:proofs}.}
 The criterion depends on the unknown target error. Replacing its inner
 products by validation errors gives a validation-optimal interpolation, not a guarantee on new
 data. The reported experiments use separately tuned direct and residual kernels, so their

@@ -14,9 +14,11 @@ the raw inverse \eqref{eq:inv} with its non-finite and non-positive-denominator 
 entries at which the pointwise inequality of Theorem~\ref{thm:transfer}(i) fails, and the ratio of the middle bound
 of Theorem~\ref{thm:transfer}(ii), minimised over a threshold ladder, to the measured mean-square error of the
 constrained retrieval. The albedo bound $S$ is the largest physical value on the training rows; the table carries
-454 training entries with spherical albedo above one, all in deep absorption bands at vanishing flux, which are
-outside the hypothesis and are counted rather than used, and no held-out entry exceeds $S$. The surface reflectance
-is $\rho=0.7$ and $R=0.9$.
+227 to 454 training entries with spherical albedo above one, depending on the split, all in deep absorption bands
+at vanishing flux; they are outside the hypothesis and are counted rather than used. On the held-out rows the
+bound is not clean on every split: four of the five records have no entry above $S$, and the fifth has 228 of
+2{,}331, so the theorem is checked on the entries that satisfy its hypothesis and the exceedances are reported
+beside them rather than absorbed. The surface reflectance is $\rho=0.7$ and $R=0.9$.
 
 \IfFileExists{table_v2_transmission.tex}{
 \begin{table}[t]
@@ -99,7 +101,8 @@ matches the kernel's forward error does not match its inverse tail. The theorem'
 squared form and therefore the network's albedo; its promise is the bound \eqref{eq:Jtau-bound}, not a forward
 improvement, and the table shows the price: $0.22$--$0.23\%$ radiance error for $\tau\le0.1$, $0.15\%$ at
 $\tau=0.3$ and $0.12\%$ at $\tau\ge1$, with constrained 95th percentiles between $0.10$ and $0.17$ and the 99th
-percentile at the clip $R=0.7$ except at $\tau$ between $0.01$ and $0.1$, where it falls to $0.59\pm0.22$. The
+percentile at $0.70$, which is the error of a retrieval returning zero at $\rho=0.7$ rather than the clip at
+$R=0.9$, except at $\tau$ between $0.01$ and $0.1$, where it falls to $0.59\pm0.22$. The
 threshold $\tau$ is fixed before the test read, with the validation coverage $F_t(\tau)$ it implies recorded in the
 file.
 
@@ -158,8 +161,9 @@ the network where the control is ($2.27\%$ against $2.27\%$ in the component err
 radiance), and early stopping at the selected patience, which halts training between epochs 37 and 97, makes it
 worse and less stable ($2.72\pm0.45\%$ and $1.29\pm0.37\%$). The residual kernel takes every arm to
 $1.88$--$1.95\%$ in the components and $0.62$--$0.79\%$ in radiance, and the kernel on its features to
-$0.95$--$0.99\%$ and $0.15\%$: level with the input-scaled kernel in the components ($0.94\%$) and at half its
-radiance error ($0.28\%$). The order of the arms in the component error survives both kernel steps, with the
+$0.95$--$0.99\%$ and $0.15\%$: level with the isotropic kernel of the same campaign in the components ($0.94\%$)
+and at half its radiance error ($0.28\%$). That isotropic head is not the input-scaled kernel of
+Table~\ref{tab:results}, whose per-input metric is searched on validation. The order of the arms in the component error survives both kernel steps, with the
 differences between them compressed six times by the residual step and twelve times by the feature step, and in
 radiance the three feature kernels are indistinguishable. The last hidden layer of an under-trained network is as good a kernel input as that of the
 control.}{}
@@ -243,7 +247,9 @@ hundred; the pointwise inequality holds at every one of the ten million samples.
 \caption{The correction-coefficient corpus of \cite{pkan} under its own protocol: the release's state split
 (35,000 / 7,500 / 7,500 states) and the paper's out-of-distribution split, whose test states lie above the 0.85
 quantile of aerosol optical depth or of column water vapour, with the remaining states split 85/15; the paper's
-categorical inputs, with and without the 6S \cite{vermote} coefficients as inputs; pooled RMSE, MAE, $R^2$ and SMAPE over the
+categorical inputs, with and without the 6S \cite{vermote} coefficients as inputs; pooled RMSE, MAE and SMAPE, and
+$R^2$ averaged over the three coefficients with equal weight, which is what the benchmark's own scorer computes,
+over the
 three coefficients and thirteen bands, mean and standard deviation over three seeds (standard) or three
 initialisations (OOD); the published values on the last rows.}
 \label{tab:v2-pkanrtm}
@@ -264,11 +270,14 @@ On the correction-coefficient corpus the comparison is made under the benchmark'
 claim is improvement over the published values under that protocol and nothing wider. The residual-corrected
 network improves on the published pKANrtm values in every one of the four metrics on both splits. On the release's
 own split with the state inputs alone it reaches an RMSE of $0.00581\pm0.00004$ against the published $0.00619$, a
-MAE of $0.00151$ against $0.00186$, $R^2=0.9982$ against $0.9947$ and a SMAPE of $3.54\%$ against $3.91\%$; with
+MAE of $0.00151$ against $0.00186$, $R^2=0.9952$ against $0.9947$ and a SMAPE of $3.54\%$ against $3.91\%$; with
 the low-fidelity 6S coefficients as inputs, the benchmark paper's own construction, the same head reaches
-$0.00578$, $0.00148$, $0.9982$ and $3.19\%$. Out of distribution the margin widens: $0.00620$ against the published
-$0.01022$ in RMSE, $0.00252$ against $0.00544$ in MAE, $0.9980$ against $0.9942$ in $R^2$ and $3.37\%$ against
-$5.40\%$ in SMAPE with the state inputs, and $0.00596$, $0.00232$, $0.9982$ and $2.92\%$ with the 6S inputs. The
+$0.00578$, $0.00148$, $0.9954$ and $3.19\%$. Out of distribution the margin widens: $0.00620$ against the published
+$0.01022$ in RMSE, $0.00252$ against $0.00544$ in MAE, $0.9967$ against $0.9942$ in $R^2$ and $3.37\%$ against
+$5.40\%$ in SMAPE with the state inputs, and $0.00596$, $0.00232$, $0.9969$ and $2.92\%$ with the 6S inputs.
+Both sides of the $R^2$ comparison are the equally weighted average over the three coefficients that the
+benchmark's scorer computes; the variance-weighted form, which is the one a pooled call returns by default, reads
+$0.9982$ and $0.9980$ for the same predictions and is not comparable with the published number. The
 ensemble without the correction is close behind the corrected head (RMSE $0.00591$ and MAE $0.00170$ on the
 release's split, $0.00624$ and $0.00258$ out of distribution), the single network a little further back, and the
 kernel on the network's features is the best of the kernels at

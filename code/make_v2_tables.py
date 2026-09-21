@@ -51,7 +51,7 @@ def msd(vals, digits=3, scale=1.0):
     return f"{v.mean():.{digits}f}$\\pm${v.std(ddof=1):.{digits}f}"
 
 
-FAM_NAMES = {"krr": "input-scaled kernel", "dnn": "network", "dnn_ens": "network ensemble", "dnn_corr": "network + residual kernel",
+FAM_NAMES = {"krr": "isotropic kernel", "ard": "input-scaled kernel", "dnn": "network", "dnn_ens": "network ensemble", "dnn_corr": "network + residual kernel",
              "ens_corr": "ensemble + residual kernel", "dkr": "kernel on features", "dkr_cat": "kernel on concatenated features",
              "select": "coordinatewise selection", "stack": "convex stack"}
 
@@ -184,6 +184,43 @@ if rp:
 else:
     write("table_v2_ridge.tex", "", pending=True)
 
+def _lane_sigma(tag, heads):
+    """Per-coefficient target standard deviations of a benchmark lane, recovered from the heads.
+
+    Each head records its per-coefficient RMSE and the mean normalised RMSE
+    nrmse_mean = mean_j rmse_j / sigma_j, and every head of a lane shares the same sigma_j, so the
+    heads over-determine 1/sigma_j. The solution is checked against the variance-weighted R^2 the
+    same records store, which was computed independently of nrmse."""
+    import numpy as np
+    rec = load(os.path.join(RES, "pkanrtm", tag + ".json"))
+    if not rec or "results" not in rec:
+        return None
+    hs = [h for h in heads if h in rec["results"] and "rmse_by_coef" in heads[h]
+          and "test_nrmse_mean" in rec["results"][h]]
+    if len(hs) < 3:
+        return None
+    coef = list(heads[hs[0]]["rmse_by_coef"])
+    A = np.array([[heads[h]["rmse_by_coef"][c] for c in coef] for h in hs]) / float(len(coef))
+    b = np.array([rec["results"][h]["test_nrmse_mean"] for h in hs])
+    u, *_ = np.linalg.lstsq(A, b, rcond=None)
+    if np.max(np.abs(A @ u - b) / np.abs(b)) > 1e-4:
+        return None
+    sigma = 1.0 / u
+    for h in hs:
+        mse = np.array([heads[h]["rmse_by_coef"][c] for c in coef]) ** 2
+        if abs(1.0 - mse.sum() / (sigma ** 2).sum() - heads[h]["r2"]) > 1e-4:
+            return None
+    return coef, sigma
+
+
+def _uniform_r2(sig, m):
+    """R^2 averaged over the coefficients with equal weight, the benchmark scorer's convention."""
+    import numpy as np
+    coef, sigma = sig
+    mse = np.array([m["rmse_by_coef"][c] for c in coef]) ** 2
+    return float(1.0 - np.mean(mse / sigma ** 2))
+
+
 # ---- 7. pKANrtm matched benchmark (E5) ----
 P = load(os.path.join(RES, "pkanrtm", "rescored_pkanrtm.json"))
 # the standard-split lanes were rerun in block E5b (their first run was killed for memory) and rescored separately;
@@ -199,8 +236,10 @@ if P and P.get("lanes"):
     rows = []; groups = {}
     for tag, lane in P["lanes"].items():
         split = "OOD" if "_ood" in tag else "standard"; lowfi = "with 6S inputs" if lane["lowfi"] else "state only"
+        sig = _lane_sigma(tag, lane["heads"])
         for h, m in lane["heads"].items():
-            groups.setdefault((split, lowfi, h), []).append((m["rmse"], m["mae"], m["r2"], m["smape_pct"]))
+            r2 = _uniform_r2(sig, m) if sig else m["r2"]
+            groups.setdefault((split, lowfi, h), []).append((m["rmse"], m["mae"], r2, m["smape_pct"]))
     for (split, lowfi, h), L in sorted(groups.items()):
         rows.append([split, lowfi, h.replace("_", "\\_"), msd([a[0] for a in L], 5), msd([a[1] for a in L], 5), msd([a[2] for a in L], 5), msd([a[3] for a in L], 3)])
     pub = P.get("published", {})
@@ -270,7 +309,7 @@ if rs:
     def cell(h):
         L = per.get(h)
         return "--" if not L else msd([a[0] for a in L], 3, 100) + " / " + msd([a[1] for a in L], 3, 100)
-    rows = [["input-scaled kernel", cell("krr"), "--", "--"]]
+    rows = [["isotropic kernel", cell("krr"), "--", "--"]]
     for arm, name in (("mlp_base", "network, control"), ("mlp_wd", "network, weight decay"), ("mlp_earlystop", "network, early stopping")):
         if arm in per:
             rows.append([name, cell(arm), cell(arm + "_resid"), cell(arm + "_dkr")])

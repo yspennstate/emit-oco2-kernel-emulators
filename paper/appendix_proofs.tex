@@ -1,0 +1,97 @@
+\appendix
+\section{Proofs}\label{app:proofs}
+
+The statements are as numbered in the text.
+
+\begin{proof}[Proof of Proposition~\ref{prop:stability}]
+Subtract the two forward maps and use
+$1/\widehat q-1/q=\rho e_s/(q\widehat q)$ to obtain
+\eqref{eq:forward-error}. Since $u=\rho D$,
+$\widehat D=D+e_t+u e_s-\widehat s e_a$ and
+$\widehat\rho-\rho=(u-e_a-\rho\widehat D)/\widehat D$, which gives
+\eqref{eq:inverse-error}. The triangle inequality yields
+$|\widehat D-D|\le B$ and then \eqref{eq:inverse-bound}.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:identity}]
+Subtract $h+S(f-h)$ from $f$ to obtain \eqref{eq:residual-exact}. On the design,
+$I-K(K+\lambda I)^{-1}=\lambda(K+\lambda I)^{-1}$, which proves
+\eqref{eq:design-residual} and its spectral form. Apply the assumed uniform inequality to
+$g=f-h$ for \eqref{eq:inherit}. The examples below distinguish this bound from actual error comparisons.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:alignment}]
+For a common operator the corrected error is $a-b$, so expansion of its squared norm gives
+\eqref{eq:alignment}. The error of $p_t$ is $a-tb$; minimize the resulting quadratic on
+$[0,1]$ to obtain \eqref{eq:shrink-mean}. For distinct operators,
+$f-h-S_1(f-h)=(I-S_0)f-[(S_1-S_0)f+(I-S_1)h]$, after which the same expansion applies.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:sensitivity}]
+(i) is the chain rule applied to $\widehat y=S_\lambda y+(I-S_\lambda)h_X(y)$, and the two examples are direct
+substitutions. (ii) With the mean and kernel frozen the map is affine with linear part $S_\lambda$; the trace is the
+sum of the eigenvalues $\mu_j/(\mu_j+\lambda)$, and the operator norm of a symmetric positive semidefinite matrix is
+its largest eigenvalue. (iii) $\widehat y-f_X=-(I-S_\lambda)r+S_\lambda\varepsilon$; the cross term has zero mean,
+and both matrices are diagonal in the eigenbasis of $K$. (iv) The correction at $x$ is $a_\lambda(x)^{\top}(y-h_X)$,
+linear in $\varepsilon$ with coefficient vector $a_\lambda(x)$.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:selection}]
+Hoeffding's inequality \cite{hoeffding} for each candidate and a union bound over the $M$ candidates.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:transfer}]
+Write $q=1-\rho s$, $u=L-a=\rho t/q$, $D=t/q$, $\widehat D=\widehat t+\widehat s(L-\widehat a)$ and $z=\bar\rho$.
+Suppose first $\widehat D>0$. The map $F(v)=\widehat Dv-(L-\widehat a)$ is increasing and affine, $z$ is the
+projection of its root onto $[0,R]$ and $\rho\in[0,R]$, so $(z-\rho)F(z)\le0$: at an interior root $F(z)=0$; at
+$z=R$ the root exceeds $R$, so $F(R)<0$ and $z-\rho\ge0$; at $z=0$ the root is negative, so $F(0)>0$ and
+$z-\rho\le0$. Since $L-\widehat a=u-e_a$ and, by \eqref{eq:inverse-error},
+$\widehat D=D+e_t+ue_s-\widehat se_a$ with $u=\rho D$,
+\[
+F(z)=D(z-\rho)+(1-z\widehat s)e_a+ze_t+zue_s ,
+\]
+hence $D(z-\rho)^2\le|z-\rho|\bigl((1-z\widehat s)|e_a|+z|e_t|+zu|e_s|\bigr)$ and, with $D=t/q$,
+\[
+|z-\rho|\le q(1-z\widehat s)\frac{|e_a|}{t}+qz\frac{|e_t|}{t}+z\rho\,|e_s| .
+\]
+Now $q(1-z\widehat s)$ is positive and at most $1$ under the hypotheses, which is all that is used here,
+$qz\le R$ and $z\rho\le R^2$, so $|z-\rho|\le e_R/t$; and $|z-\rho|\le R$
+because both lie in $[0,R]$. If $\widehat D\le0$, then $\widehat t\le\widehat s(e_a-u)\le\widehat s|e_a|$ and
+$t=\widehat t-e_t\le|e_t|+\widehat s|e_a|$, so $Rt\le R|e_t|+R\widehat s|e_a|\le R|e_t|+|e_a|\le e_R$; the fallback
+value and $\rho$ lie in $[0,R]$, so $|z-\rho|\le R=\min\{R,e_R/t\}$. For optimality take $s=\widehat s=0$,
+$\widehat t=t$, $\rho=r_0$ and $\widehat a=a+ct$ with $0<c<r_0<R$: then $|\bar\rho-\rho|=c=e_R/t$ exactly, with a
+positive denominator and no projection active. This proves (i). For (ii) integrate (i), split at $t=\tau$ and bound
+$e_R^2/t^2$ by $e_R^2/\tau^2$ on $\{t>\tau\}$. For (iii) take $\tau=\varepsilon_R^{2/(\beta+2)}\le u_0$; then
+$R^2A\tau^\beta+\varepsilon_R^2/\tau^2=(R^2A+1)\varepsilon_R^{2\beta/(\beta+2)}$. (iv) is (i) with $t\ge t_0$.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:attained}]
+$L=r_0t$ and $\widehat\rho=(r_0t-\widehat a)/t$; $e_R=|\widehat a|=ct\,\1\{t\le\tau\}$; with density
+$\beta u^{\beta-1}$ on $(0,1)$, $\E_P[t^2\1\{t\le\tau\}]=\beta\tau^{\beta+2}/(\beta+2)$; the retrieval error equals
+$c$ exactly on $\{t\le\tau\}$, an event of probability $\tau^\beta$. Eliminate $\tau$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:profile}]
+Conditional on $t$ the squared error is at most both $R^2$ and $e_R^2/t^2$ by Theorem~\ref{thm:transfer}(i), so
+$\E[|\bar\rho-\rho|^2\mid t]\le\min\{R^2,\E[e_R^2\mid t]/t^2\}\le\min\{R^2,\sigma^2t^{2\nu-2}\}$; integrate. With
+$t_*=(\sigma/R)^{1/(1-\nu)}$,
+$\E_P\min\{R^2,\sigma^2t^{2\nu-2}\}=R^2F_t(t_*)+\sigma^2\E_P[t^{2\nu-2}\1\{t>t_*\}]$; the first term is at most
+$R^2At_*^\beta=O(\sigma^{\beta/(1-\nu)})$ once $t_*\le u_0$, and
+$\E_P[t^{2\nu-2}\1\{t>t_*\}]=\int_0^{t_*^{2\nu-2}}\Prob(t_*<t<v^{-1/(2-2\nu)})\,dv
+\le u_0^{2\nu-2}+A\int_{u_0^{2\nu-2}}^{t_*^{2\nu-2}}v^{-\beta/(2-2\nu)}\,dv$, which is $O(1)$ for
+$\beta>2(1-\nu)$, $O(\log(1/\sigma))$ for $\beta=2(1-\nu)$ and $O(t_*^{\beta-2(1-\nu)})$ for $\beta<2(1-\nu)$. At
+$\nu=1$ the bound is $\sigma^2$ before any tail enters. In the model,
+$c^{-2}\E_P|\bar\rho-\rho|^2=\E_P\min\{1,(\sigma/c)^2t^{2\nu-2}\}$, the same integral with equality.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:perturb}]
+$\widetilde H=H^{1/2}(I+B)H^{1/2}$ gives $\widetilde H^{-1}=H^{-1/2}QH^{-1/2}$ and $Q=I-QB$. Hence
+$\widetilde k_x^{\top}\widetilde H^{-1}(Y-\widetilde M)-k_x^{\top}H^{-1}(Y-M)
+=\widetilde g^{\top}Q(W-U)-g^{\top}W
+=\widetilde g^{\top}W-\widetilde g^{\top}QBW-\widetilde g^{\top}QU-g^{\top}W
+=v^{\top}W-(Q\widetilde g)^{\top}(BW+U)$, which is (i) since $Q$ is symmetric; (ii) bounds its two terms. For (iii)
+write the same difference as $v^{\top}QW+g^{\top}(Q-I)W-\widetilde g^{\top}QU$ and use
+$\|Q\|_{\mathrm{op}}=\gamma_Q$ and $\|Q-I\|_{\mathrm{op}}=\|QB\|_{\mathrm{op}}=\eta_Q$. For (iv), $v=0$, $U=0$ and
+$B=sH^{-1}$ has eigenvalues $s/\lambda_i(H)\ge0$, so $\eta_Q=\max_i(s/\lambda_i)/(1+s/\lambda_i)=s/(\lambda_{\min}(H)+s)$.
+\end{proof}
+

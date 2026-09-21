@@ -76,17 +76,29 @@ error-alignment criterion for residual correction and separate its kernel-regres
 from principal-component truncation. These calculations complement the empirical
 comparison by identifying the quantities required for improvement in a specified metric.
 
-Section~\ref{sec:related} places the constructions used here beside the literature they come
-from. Section~\ref{sec:data} describes the data, evaluation protocol and inversion stability.
-Sections~\ref{sec:methods}--\ref{sec:scaling} present the models, results and ablations.
-Section~\ref{sec:identity} analyses residual correction. Section~\ref{sec:theory} proves the
-transfer of component error into retrieval error with constant one, the conditional
-error-profile theorem that decides the rate, and the same-data perturbation bound for learned
-corrections; Sections~\ref{sec:results-transfer} to~\ref{sec:results-benchmarks} measure the
-quantities those results name, replicate the three-member feature kernel, compare combination
-rules, and place the corpus beside a published multi-fidelity benchmark under its own protocol.
-Sections~\ref{sec:oco2} and \ref{sec:corpora} compare the findings with OCO-2 and ten further
-emulation configurations.
+\paragraph{What this gives someone building an emulator.} Three things, in the order they bite.
+A forward error is not a retrieval error: the model with the lowest radiance error here has the
+worse reflectance tail, and the quantity that decides which is which is the error conditioned on
+transmission, not an average over all bands. The representation matters more than the kernel: ten
+kernels on the raw state fall within a factor of a few of each other, while the same kernel on a
+trained network's features is better than all of them, so effort spent choosing a covariance
+function is better spent on what the covariance is computed from. And an approximation can be
+checked before it is trusted: the perturbation bound of Section~\ref{sec:perturb} is evaluated at
+held-out rows and stays finite where a bound in the norm of the Gram perturbation does not, which
+is what a practitioner needs before replacing an exact solve by a cheaper one.
+
+The paper runs as follows. Section~\ref{sec:related} places these constructions beside the
+literature they come from. Section~\ref{sec:data} describes the data and the evaluation protocol.
+Sections~\ref{sec:methods} to~\ref{sec:scaling} present the models, the comparison and the
+ablations, and Section~\ref{sec:identity} analyses residual correction. Section~\ref{sec:theory}
+proves three things: that component error transfers into retrieval error with constant one, that
+the loss of rate where the transmission vanishes cannot be avoided in the worst case over the
+class, and how far a learned representation, a changed ridge or a kernel approximation can move a
+corrected predictor fitted to the same data. Sections~\ref{sec:results-transfer}
+to~\ref{sec:results-benchmarks} measure the quantities those statements name, compare ten kernels
+and three combination rules, and rescore a published multi-fidelity benchmark under its own
+protocol. Sections~\ref{sec:oco2} and~\ref{sec:corpora} carry the comparison to OCO-2 and to ten
+further emulation configurations. The proofs are in Appendix~\ref{app:proofs}.
 The study concerns interpolation of a fixed radiative-transfer table; the implications for
 retrieval and computational cost are discussed in Section~\ref{sec:discussion}.
 
@@ -157,8 +169,10 @@ infinite-width limit a network is a Gaussian process \cite{neal,leenngp,matthews
 the arc-cosine kernel of \cite{chosaul}, and gradient descent on a wide network follows the neural
 tangent kernel \cite{ntk,arora}; both enter the kernel comparison of
 Section~\ref{sec:results-representation} as heads. The limit is not the whole story, since a
-finite network learns its representation \cite{belkin,rfm}, which is what deep kernel learning
-\cite{wilson} and the construction of \cite{nmkc} exploit. Kolmogorov--Arnold networks
+finite network learns its representation \cite{rfm}, and the comparison between kernel machines
+and trained networks is itself unsettled \cite{belkin}; a learned representation under a kernel is
+what deep kernel learning \cite{wilson}, the Gaussian process with a neural-operator mean
+\cite{mora} and the construction of \cite{nmkc} exploit. Kolmogorov--Arnold networks
 \cite{kolmogorov,kan} are the architecture behind the multi-fidelity model of \cite{pkan}.
 Operator learning supplies the other comparison: DeepONet \cite{deeponet}, Fourier neural
 operators \cite{fno} and the general formulation \cite{kovachki}, with fair-comparison protocols
@@ -170,8 +184,8 @@ from which Section~\ref{sec:corpora} draws.
 
 The data are $n = 23{,}313$ tabulated radiative-transfer evaluations. Each
 input $x \in \mathbb{R}^6$ collects the atmospheric and viewing state; the coordinate ranges are
-consistent with the standard lookup-table axes for imaging-spectroscopy atmospheric correction
-\cite{isofit} --- an aerosol optical depth in $[0.05, 1.2]$, a surface elevation in $[-0.5, 6]$ km,
+the ranges over which such lookup tables are built for imaging-spectroscopy atmospheric
+correction \cite{isofit,modtran} --- an aerosol optical depth in $[0.05, 1.2]$, a surface elevation in $[-0.5, 6]$ km,
 a water-vapor column in $[0.05, 7]$ cm, a relative azimuth in $[0, 180]^\circ$, a solar zenith
 angle in $[0, 65]^\circ$, and a view zenith angle within $30^\circ$ of nadir. Each output is a set
 of four spectral components on the same 285-point EMIT wavelength grid spanning
@@ -283,7 +297,10 @@ All models are trained per component and evaluated in physical units after undoi
 standardization; unless stated otherwise they regress the 64 leading principal coefficients of
 the standardized component, with the training variance criterion and projection
 qualification of Section~\ref{sec:data}. Every hyperparameter named below is selected on the validation set
-of the seed at hand. All experiments use CPU computation.
+of the seed at hand. The comparisons of Sections~\ref{sec:results}--\ref{sec:retune} run on CPU; the
+ten-kernel comparison, the regularisation suite and the matched benchmark of
+Sections~\ref{sec:results-representation}--\ref{sec:results-benchmarks} run on one T4 GPU, whose device and
+peak memory each run record carries.
 
 \paragraph{Reference family.} Cubic polynomial ridge regression \cite{hoerl}, acting on all monomials of
 degree at most three in the six standardized inputs, with the ridge weight selected from
@@ -416,6 +433,22 @@ improvement with sample size on this component; the experiments do not isolate w
 the plateau arises from approximation, optimization or the relative-error weighting.
 
 \input{paired_and_tail_results}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{emit_band_anatomy.png}
+\caption{Where along the spectrum each family makes its error: band RMSE divided by the band's
+root-mean-square value over the test rows, against wavelength, for the isotropic Mat\'ern kernel,
+the $3\times512$ network and the network with its residual kernel. The kernel's error follows the
+band structure, rising by two orders of magnitude in the water-vapour bands near 940, 1140, 1380
+and 1870\,nm; the network's is nearly flat across the spectrum and higher in the windows; the
+residual correction keeps the network's floor in the windows and most of the kernel's advantage
+outside them. On the spherical albedo $Y_4$ the three families agree to within a factor of two at
+every wavelength, and all of them degrade towards 2500\,nm. The panels explain the component
+averages of Table~\ref{tab:results}: an average over 285 bands is dominated by the handful in
+which the flux vanishes.}
+\label{fig:band-anatomy}
+\end{figure}
+
 
 \section{Learning curves, output rank and network width}\label{sec:scaling}
 
@@ -928,6 +961,8 @@ to reproduce the training campaign. Within these limits, the results show that n
 features and exact kernels can complement one another, while a small forward-error gain
 can coincide with a substantially worse inverse-error tail.
 
+\input{appendix_proofs}
+
 \section*{Acknowledgements}
 
 The research presented in this paper was supported by the European Research Council (ERC) under
@@ -1036,6 +1071,11 @@ C.~E. Rasmussen and C.~K.~I. Williams.
 \newblock \emph{Gaussian Processes for Machine Learning}.
 \newblock MIT Press, 2006.
 
+\bibitem{mora}
+C.~Mora, A.~Yousefpour, S.~Hosseinmardi, H.~Owhadi, and R.~Bostanabad.
+\newblock Operator learning with {Gaussian} processes.
+\newblock \emph{Computer Methods in Applied Mechanics and Engineering}, 434:117581, 2025.
+
 \bibitem{wilson}
 A.~G. Wilson, Z.~Hu, R.~Salakhutdinov, and E.~P. Xing.
 \newblock Deep kernel learning.
@@ -1095,8 +1135,8 @@ A.~Eldering, C.~W. O'Dell, P.~O. Wennberg, D.~Crisp, M.~R. Gunson, et~al.
 
 \bibitem{crisp}
 D.~Crisp, H.~R. Pollock, R.~Rosenberg, L.~Chapsky, R.~A.~M. Lee, et~al.
-\newblock The on-orbit performance of the {Orbiting Carbon Observatory-2} instrument and its
-radiometrically calibrated products.
+\newblock The on-orbit performance of the {Orbiting Carbon Observatory-2} ({OCO-2}) instrument and
+its radiometrically calibrated products.
 \newblock \emph{Atmospheric Measurement Techniques}, 10:59--81, 2017.
 
 \bibitem{connor}
