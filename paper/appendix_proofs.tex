@@ -37,7 +37,12 @@ linear in $\varepsilon$ with coefficient vector $a_\lambda(x)$.
 \end{proof}
 
 \begin{proof}[Proof of Proposition~\ref{prop:selection}]
-Hoeffding's inequality \cite{hoeffding} for each candidate and a union bound over the $M$ candidates.
+Let $\widehat{\mathcal R}_j$ and $\mathcal R_j$ be the empirical and population risks.
+Hoeffding's inequality \cite{hoeffding} and a union bound give
+$|\widehat{\mathcal R}_j-\mathcal R_j|\le
+B\sqrt{\log(2M/\delta)/(2m)}$ simultaneously for all candidates with probability at least
+$1-\delta$. Apply this once to the empirical minimizer and once to a population minimizer,
+and use empirical optimality between the two inequalities.
 \end{proof}
 
 \begin{proof}[Proof of Theorem~\ref{thm:transfer}]
@@ -61,7 +66,7 @@ $t=\widehat t-e_t\le|e_t|+\widehat s|e_a|$, so $Rt\le R|e_t|+R\widehat s|e_a|\le
 value and $\rho$ lie in $[0,R]$, so $|z-\rho|\le R=\min\{R,e_R/t\}$. For optimality take $s=\widehat s=0$,
 $\widehat t=t$, $\rho=r_0$ and $\widehat a=a+ct$ with $0<c<r_0<R$: then $|\bar\rho-\rho|=c=e_R/t$ exactly, with a
 positive denominator and no projection active. This proves (i). For (ii) integrate (i), split at $t=\tau$ and bound
-$e_R^2/t^2$ by $e_R^2/\tau^2$ on $\{t>\tau\}$. For (iii) take $\tau=\varepsilon_R^{2/(\beta+2)}\le u_0$; then
+$e_R^2/t^2$ by $e_R^2/\tau^2$ on $\{t>\tau\}$. For (iii), $\varepsilon_R=0$ gives zero error by (i). Otherwise take $\tau=\varepsilon_R^{2/(\beta+2)}\le u_0$; then
 $R^2A\tau^\beta+\varepsilon_R^2/\tau^2=(R^2A+1)\varepsilon_R^{2\beta/(\beta+2)}$. (iv) is (i) with $t\ge t_0$.
 \end{proof}
 
@@ -72,7 +77,7 @@ $c$ exactly on $\{t\le\tau\}$, an event of probability $\tau^\beta$. Eliminate $
 \end{proof}
 
 \begin{proof}[Proof of Theorem~\ref{thm:profile}]
-Conditional on $t$ the squared error is at most both $R^2$ and $e_R^2/t^2$ by Theorem~\ref{thm:transfer}(i), so
+If $R=0$ the statement is immediate; assume $R>0$. Conditional on $t$ the squared error is at most both $R^2$ and $e_R^2/t^2$ by Theorem~\ref{thm:transfer}(i), so
 $\E[|\bar\rho-\rho|^2\mid t]\le\min\{R^2,\E[e_R^2\mid t]/t^2\}\le\min\{R^2,\sigma^2t^{2\nu-2}\}$; integrate. With
 $t_*=(\sigma/R)^{1/(1-\nu)}$,
 $\E_P\min\{R^2,\sigma^2t^{2\nu-2}\}=R^2F_t(t_*)+\sigma^2\E_P[t^{2\nu-2}\1\{t>t_*\}]$; the first term is at most

@@ -6,10 +6,11 @@ on:
       - 'paper/**'
       - 'code/**'
       - 'docs/**'
+      - 'results/**'
       - 'requirements-revision.txt'
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: manuscript-${{ github.ref }}
   cancel-in-progress: false
@@ -19,67 +20,46 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Apply staged revision without overwriting concurrent edits
-        id: revision
-        shell: bash
-        run: |
-          set -euo pipefail
-          if test -f revisions/apply_publication_revision.py; then
-            python revisions/apply_publication_revision.py
-            echo 'applied=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'applied=false' >> "$GITHUB_OUTPUT"
-          fi
       - name: Install analysis dependencies
         run: python -m pip install -r requirements-revision.txt
-      - name: Check identities and diagnostic edge cases
-        run: python -m unittest discover -s code -p 'test_publication_revision.py' -v
-      - name: Regenerate tables from archived records
+      - name: Check identities, projections, precision and physical-domain semantics
+        run: python -m unittest discover -s code -p 'test_*.py' -v
+      - name: Regenerate supported tables and provenance inventory
         run: |
           python code/make_revision_tables.py
           python code/make_tables.py
+          python code/make_v2_tables.py
+          python code/format_publication_tables.py
+          python code/revision_manifest.py
       - name: Install TeX
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends latexmk texlive-latex-recommended texlive-fonts-recommended
-      - name: Compile manuscript and check references
+          sudo apt-get install -y --no-install-recommends latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
+      - name: Compile manuscript and check references and layout
         shell: bash
         run: |
           set -euo pipefail
           export SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
           latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
-          if grep -Eq 'There were undefined references|Citation .* undefined|Reference .* undefined|Overfull \\hbox' paper/emit_kernel_dnn.log; then
-            echo 'Manuscript has unresolved references or overflowing text.'
+          if grep -Eq 'There were undefined references|Citation .* undefined|Reference .* undefined|Overfull \\(hbox|vbox)|Float too large' paper/emit_kernel_dnn.log; then
+            echo 'Manuscript has unresolved references or overflowing content.'
             exit 1
           fi
-      - name: Publish requested manuscript
-        if: steps.revision.outputs.applied == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git rm revisions/20260918-payload-1.b64 revisions/20260918-payload-2.b64 revisions/20260918-payload-3.b64 revisions/apply_publication_revision.py
-          git add README.md requirements-revision.txt code/*.py docs/*.md paper/*.tex paper/abstract.txt paper/emit_kernel_dnn.pdf results/revision_20260918/reanalysis.json
-          git commit -m 'Edit standalone EMIT manuscript, document AI contributions and specify benchmark metric'
-          git push origin HEAD:main
-          echo "Published commit: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
       - name: Record build provenance
-        shell: bash
+        if: always()
         run: |
           mkdir -p build
           git rev-parse HEAD > build/commit.txt
           python --version > build/environment.txt
           python -m pip freeze >> build/environment.txt
-          pdflatex --version >> build/environment.txt
-          sha256sum paper/emit_kernel_dnn.pdf > build/pdf-sha256.txt
-          cp paper/emit_kernel_dnn.log build/latex.log
-      - name: Archive verified paper and source
+          if command -v pdflatex >/dev/null; then pdflatex --version >> build/environment.txt; fi
+          if test -f paper/emit_kernel_dnn.pdf; then sha256sum paper/emit_kernel_dnn.pdf > build/pdf-sha256.txt; fi
+          if test -f paper/emit_kernel_dnn.log; then cp paper/emit_kernel_dnn.log build/latex.log; fi
+      - name: Archive manuscript, sources and diagnostics
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: verified-manuscript
