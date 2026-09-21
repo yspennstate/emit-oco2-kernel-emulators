@@ -1,0 +1,762 @@
+{
+ "what": "pkanrtm",
+ "lanes": {
+  "pkanrtm_s0_cats_off": {
+   "heads": {
+    "ridge": {
+     "rmse": 0.11958884810159019,
+     "mae": 0.060666856035917684,
+     "smape_pct": 41.64694269464295,
+     "r2": 0.24771568090064955,
+     "rmse_by_coef": {
+      "rho_path": 0.030722061918963622,
+      "T_total": 0.20041826075144686,
+      "spher_alb": 0.04234564251027542
+     },
+     "smape_by_coef": {
+      "rho_path": 61.21613748058928,
+      "T_total": 23.744588715248526,
+      "spher_alb": 39.98010188809104
+     }
+    },
+    "krr": {
+     "rmse": 0.11288077415738172,
+     "mae": 0.05157693474598896,
+     "smape_pct": 31.20832142124253,
+     "r2": 0.32974416675344653,
+     "rmse_by_coef": {
+      "rho_path": 0.013802927780570046,
+      "T_total": 0.19357657547170648,
+      "spher_alb": 0.023744391683943815
+     },
+     "smape_by_coef": {
+      "rho_path": 44.14955548941401,
+      "T_total": 24.181812526174298,
+      "spher_alb": 25.293596248139274
+     }
+    },
+    "mlp": {
+     "rmse": 0.00628940710892827,
+     "mae": 0.002131245948765272,
+     "smape_pct": 4.632735451488471,
+     "r2": 0.9979192492573145,
+     "rmse_by_coef": {
+      "rho_path": 0.0010830577151494847,
+      "T_total": 0.005452496391586202,
+      "spher_alb": 0.0093684147234688
+     },
+     "smape_by_coef": {
+      "rho_path": 5.170607882475549,
+      "T_total": 3.86716295412061,
+      "spher_alb": 4.860435517869256
+     }
+    },
+    "mlp_ens": {
+     "rmse": 0.005887910082387685,
+     "mae": 0.0016835956724629419,
+     "smape_pct": 3.747801121864459,
+     "r2": 0.9981764277198667,
+     "rmse_by_coef": {
+      "rho_path": 0.0009351110619609508,
+      "T_total": 0.004690166306427474,
+      "spher_alb": 0.009007239462493401
+     },
+     "smape_by_coef": {
+      "rho_path": 4.417905196683637,
+      "T_total": 3.529943725991538,
+      "spher_alb": 3.295554442918205
+     }
+    },
+    "mlp_resid": {
+     "rmse": 0.005826205338648622,
+     "mae": 0.001554238050391777,
+     "smape_pct": 3.524328548646206,
+     "r2": 0.9982144491716641,
+     "rmse_by_coef": {
+      "rho_path": 0.0008601667871398112,
+      "T_total": 0.0045123405808121545,
+      "spher_alb": 0.00898514894285846
+     },
+     "smape_by_coef": {
+      "rho_path": 3.90214820563496,
+      "T_total": 3.4768007588293655,
+      "spher_alb": 3.1940366814742904
+     }
+    },
+    "dkr": {
+     "rmse": 0.007887009990052424,
+     "mae": 0.0033491039197759164,
+     "smape_pct": 5.164298434423075,
+     "r2": 0.9967279086050703,
+     "rmse_by_coef": {
+      "rho_path": 0.0013811954098889973,
+      "T_total": 0.009778750622803537,
+      "spher_alb": 0.009438385203321659
+     },
+     "smape_by_coef": {
+      "rho_path": 6.5891136036437095,
+      "T_total": 4.503538536618139,
+      "spher_alb": 4.400243163007375
+     }
+    }
+   },
+   "best_head": "mlp_resid",
+   "n_te": 91471,
+   "lowfi": 0,
+   "seed": 0
+  },
+  "pkanrtm_s0_lowfi_cats_off": {
+   "heads": {
+    "ridge": {
+     "rmse": 0.0698088365081325,
+     "mae": 0.03631138944857596,
+     "smape_pct": 28.300006200739553,
+     "r2": 0.7436570113286336,
+     "rmse_by_coef": {
+      "rho_path": 0.013873124067224778,
+      "T_total": 0.11711791321411492,
+      "spher_alb": 0.02665992867289696
+     },
+     "smape_by_coef": {
+      "rho_path": 38.41937754440408,
+      "T_total": 19.217556909874624,
+      "spher_alb": 27.263084147939942
+     }
+    },
+    "krr": {
+     "rmse": 0.025070074265265616,
+     "mae": 0.011556540172597106,
+     "smape_pct": 10.20142988518957,
+     "r2": 0.9669393121719033,
+     "rmse_by_coef": {
+      "rho_path": 0.0043573802929311985,
+      "T_total": 0.040801154926976814,
+      "spher_alb": 0.014205803905636956
+     },
+     "smape_by_coef": {
+      "rho_path": 12.637473675881747,
+      "T_total": 9.33790599128968,
+      "spher_alb": 8.628909988397295
+     }
+    },
+    "lowfi_resid": {
+     "rmse": 0.025054401020664915,
+     "mae": 0.01155201317144988,
+     "smape_pct": 10.198353576148294,
+     "r2": 0.9669806368419437,
+     "rmse_by_coef": {
+      "rho_path": 0.004339852153741122,
+      "T_total": 0.040775024086559475,
+      "spher_alb": 0.014203243486508593
+     },
+     "smape_by_coef": {
+      "rho_path": 12.593616563198506,
+      "T_total": 9.347526681737477,
+      "spher_alb": 8.653917483508911
+     }
+    },
+    "mlp": {
+     "rmse": 0.006530209361379809,
+     "mae": 0.002429966866068477,
+     "smape_pct": 4.596379223732598,
+     "r2": 0.9977568678798092,
+     "rmse_by_coef": {
+      "rho_path": 0.0011844091169171912,
+      "T_total": 0.006709515359549951,
+      "spher_alb": 0.009028315545775094
+     },
+     "smape_by_coef": {
+      "rho_path": 5.865194721186428,
+      "T_total": 3.859188132646478,
+      "spher_alb": 4.0647548173648875
+     }
+    },
+    "mlp_ens": {
+     "rmse": 0.005907999163854253,
+     "mae": 0.00170451692326807,
+     "smape_pct": 3.4621109241840893,
+     "r2": 0.9981639627237825,
+     "rmse_by_coef": {
+      "rho_path": 0.0008191909476571494,
+      "T_total": 0.005119921473833981,
+      "spher_alb": 0.00882205716674733
+     },
+     "smape_by_coef": {
+      "rho_path": 3.7896399137663663,
+      "T_total": 3.5705289312503585,
+      "spher_alb": 3.0261639275355434
+     }
+    },
+    "mlp_resid": {
+     "rmse": 0.0057934120584189,
+     "mae": 0.0015311804320187199,
+     "smape_pct": 3.2588253856342506,
+     "r2": 0.9982344928457425,
+     "rmse_by_coef": {
+      "rho_path": 0.0007731827908245197,
+      "T_total": 0.0047293501263001025,
+      "spher_alb": 0.008816252355209584
+     },
+     "smape_by_coef": {
+      "rho_path": 3.4379300278289318,
+      "T_total": 3.4640809226402647,
+      "spher_alb": 2.874465206433554
+     }
+    },
+    "dkr": {
+     "rmse": 0.00654228951452614,
+     "mae": 0.002419709102201529,
+     "smape_pct": 4.6184430329550334,
+     "r2": 0.9977485611191553,
+     "rmse_by_coef": {
+      "rho_path": 0.0012225910834683766,
+      "T_total": 0.006666436487370969,
+      "spher_alb": 0.009081219735151698
+     },
+     "smape_by_coef": {
+      "rho_path": 5.453008049601,
+      "T_total": 3.8576299930620555,
+      "spher_alb": 4.544691056202049
+     }
+    }
+   },
+   "best_head": "mlp_resid",
+   "n_te": 91471,
+   "lowfi": 1,
+   "seed": 0
+  },
+  "pkanrtm_s1_cats_off": {
+   "heads": {
+    "ridge": {
+     "rmse": 0.11958884810159019,
+     "mae": 0.060666856035917684,
+     "smape_pct": 41.64694269464295,
+     "r2": 0.24771568090064955,
+     "rmse_by_coef": {
+      "rho_path": 0.030722061918963622,
+      "T_total": 0.20041826075144686,
+      "spher_alb": 0.04234564251027542
+     },
+     "smape_by_coef": {
+      "rho_path": 61.21613748058928,
+      "T_total": 23.744588715248526,
+      "spher_alb": 39.98010188809104
+     }
+    },
+    "krr": {
+     "rmse": 0.11287671043178274,
+     "mae": 0.05157264437569934,
+     "smape_pct": 31.18224435110623,
+     "r2": 0.329792424515325,
+     "rmse_by_coef": {
+      "rho_path": 0.013779973801779616,
+      "T_total": 0.19357440228827966,
+      "spher_alb": 0.023717469815710313
+     },
+     "smape_by_coef": {
+      "rho_path": 44.09598809570797,
+      "T_total": 24.185889836012624,
+      "spher_alb": 25.2648551215981
+     }
+    },
+    "mlp": {
+     "rmse": 0.006791682371993461,
+     "mae": 0.0027284427931101763,
+     "smape_pct": 5.052132181504213,
+     "r2": 0.9975736392174366,
+     "rmse_by_coef": {
+      "rho_path": 0.001114843108833758,
+      "T_total": 0.0071176689264121126,
+      "spher_alb": 0.00929928826431429
+     },
+     "smape_by_coef": {
+      "rho_path": 5.543344618821986,
+      "T_total": 3.9222681758395708,
+      "spher_alb": 5.690783749851079
+     }
+    },
+    "mlp_ens": {
+     "rmse": 0.005857011950080404,
+     "mae": 0.0016650094446285086,
+     "smape_pct": 3.8612848797247405,
+     "r2": 0.9981955167125063,
+     "rmse_by_coef": {
+      "rho_path": 0.0009144096672971718,
+      "T_total": 0.004546279362892536,
+      "spher_alb": 0.009022691719495069
+     },
+     "smape_by_coef": {
+      "rho_path": 3.8047569808877904,
+      "T_total": 3.4479505960209504,
+      "spher_alb": 4.331147062265481
+     }
+    },
+    "mlp_resid": {
+     "rmse": 0.005772000855697311,
+     "mae": 0.0014996419828017357,
+     "smape_pct": 3.615887071575321,
+     "r2": 0.9982475185990854,
+     "rmse_by_coef": {
+      "rho_path": 0.0007777454396762998,
+      "T_total": 0.004303169081462849,
+      "spher_alb": 0.008990318655193284
+     },
+     "smape_by_coef": {
+      "rho_path": 3.627854761178822,
+      "T_total": 3.4112305231312416,
+      "spher_alb": 3.808575930415903
+     }
+    },
+    "dkr": {
+     "rmse": 0.00820903970160216,
+     "mae": 0.0035908982943321406,
+     "smape_pct": 5.147558288259129,
+     "r2": 0.9964552520827716,
+     "rmse_by_coef": {
+      "rho_path": 0.001397166037729581,
+      "T_total": 0.010656428251147293,
+      "spher_alb": 0.00930878415576418
+     },
+     "smape_by_coef": {
+      "rho_path": 6.361728709769977,
+      "T_total": 4.625720496747988,
+      "spher_alb": 4.455225658259418
+     }
+    }
+   },
+   "best_head": "mlp_resid",
+   "n_te": 91471,
+   "lowfi": 0,
+   "seed": 1
+  },
+  "pkanrtm_s1_lowfi_cats_off": {
+   "heads": {
+    "ridge": {
+     "rmse": 0.0698088365081325,
+     "mae": 0.03631138944857596,
+     "smape_pct": 28.300006200739553,
+     "r2": 0.7436570113286336,
+     "rmse_by_coef": {
+      "rho_path": 0.013873124067224778,
+      "T_total": 0.11711791321411492,
+      "spher_alb": 0.02665992867289696
+     },
+     "smape_by_coef": {
+      "rho_path": 38.41937754440408,
+      "T_total": 19.217556909874624,
+      "spher_alb": 27.263084147939942
+     }
+    },
+    "krr": {
+     "rmse": 0.0251076316615901,
+     "mae": 0.011524747780611997,
+     "smape_pct": 10.142387082254686,
+     "r2": 0.9668401817572287,
+     "rmse_by_coef": {
+      "rho_path": 0.004361031266559926,
+      "T_total": 0.04086871111764959,
+      "spher_alb": 0.014209481371128098
+     },
+     "smape_by_coef": {
+      "rho_path": 12.507987602184013,
+      "T_total": 9.347224162882545,
+      "spher_alb": 8.571949481697505
+     }
+    },
+    "lowfi_resid": {
+     "rmse": 0.025085750678894108,
+     "mae": 0.011517738436526852,
+     "smape_pct": 10.130937545427456,
+     "r2": 0.9668979532951163,
+     "rmse_by_coef": {
+      "rho_path": 0.004343276546985065,
+      "T_total": 0.04083007620464923,
+      "spher_alb": 0.01421004881518199
+     },
+     "smape_by_coef": {
+      "rho_path": 12.445801894373378,
+      "T_total": 9.353244978192485,
+      "spher_alb": 8.593765763716506
+     }
+    },
+    "mlp": {
+     "rmse": 0.006230970716222963,
+     "mae": 0.002204355331917626,
+     "smape_pct": 4.3110911684062145,
+     "r2": 0.9979577351422921,
+     "rmse_by_coef": {
+      "rho_path": 0.0010146591126114874,
+      "T_total": 0.006053729489079849,
+      "spher_alb": 0.00887681329968834
+     },
+     "smape_by_coef": {
+      "rho_path": 5.2628667716833295,
+      "T_total": 3.8230099231021164,
+      "spher_alb": 3.8473968104331977
+     }
+    },
+    "mlp_ens": {
+     "rmse": 0.00597471381089344,
+     "mae": 0.001696377968259109,
+     "smape_pct": 3.2584243750092083,
+     "r2": 0.998122262590459,
+     "rmse_by_coef": {
+      "rho_path": 0.0008180052730746531,
+      "T_total": 0.005009911306151989,
+      "spher_alb": 0.009017941641192571
+     },
+     "smape_by_coef": {
+      "rho_path": 3.25987833108559,
+      "T_total": 3.5244822316674647,
+      "spher_alb": 2.9909125622745734
+     }
+    },
+    "mlp_resid": {
+     "rmse": 0.005895589374917055,
+     "mae": 0.001515057050190603,
+     "smape_pct": 3.075096567141625,
+     "r2": 0.998171667838358,
+     "rmse_by_coef": {
+      "rho_path": 0.0007641422967483025,
+      "T_total": 0.004758248727869532,
+      "spher_alb": 0.009002726133063965
+     },
+     "smape_by_coef": {
+      "rho_path": 3.01905364105599,
+      "T_total": 3.4567940915657935,
+      "spher_alb": 2.7494419688030916
+     }
+    },
+    "dkr": {
+     "rmse": 0.006061265802088501,
+     "mae": 0.002110421144163192,
+     "smape_pct": 4.376496841470705,
+     "r2": 0.9980674652916329,
+     "rmse_by_coef": {
+      "rho_path": 0.0008902980694954831,
+      "T_total": 0.005665806974581955,
+      "spher_alb": 0.00879334009605757
+     },
+     "smape_by_coef": {
+      "rho_path": 4.698386784675329,
+      "T_total": 3.7732125605323747,
+      "spher_alb": 4.657891179204409
+     }
+    }
+   },
+   "best_head": "mlp_resid",
+   "n_te": 91471,
+   "lowfi": 1,
+   "seed": 1
+  },
+  "pkanrtm_s2_cats_off": {
+   "heads": {
+    "ridge": {
+     "rmse": 0.11958884810159019,
+     "mae": 0.060666856035917684,
+     "smape_pct": 41.64694269464295,
+     "r2": 0.24771568090064955,
+     "rmse_by_coef": {
+      "rho_path": 0.030722061918963622,
+      "T_total": 0.20041826075144686,
+      "spher_alb": 0.04234564251027542
+     },
+     "smape_by_coef": {
+      "rho_path": 61.21613748058928,
+      "T_total": 23.744588715248526,
+      "spher_alb": 39.98010188809104
+     }
+    },
+    "krr": {
+     "rmse": 0.11286755530495084,
+     "mae": 0.05154758541326664,
+     "smape_pct": 31.144234890569482,
+     "r2": 0.3299011375793969,
+     "rmse_by_coef": {
+      "rho_path": 0.013719760569702522,
+      "T_total": 0.1935681448017906,
+      "spher_alb": 0.023672697553330655
+     },
+     "smape_by_coef": {
+      "rho_path": 44.026473269638075,
+      "T_total": 24.184773023799313,
+      "spher_alb": 25.22145837827105
+     }
+    },
+    "mlp": {
+     "rmse": 0.006623500271458952,
+     "mae": 0.0024106299933998984,
+     "smape_pct": 5.723685861007517,
+     "r2": 0.9976923190721744,
+     "rmse_by_coef": {
+      "rho_path": 0.0011450174895492038,
+      "T_total": 0.0064579039087823325,
+      "spher_alb": 0.009412580920853258
+     },
+     "smape_by_coef": {
+      "rho_path": 8.635304565232781,
+      "T_total": 3.77112787427413,
+      "spher_alb": 4.764625143515644
+     }
+    },
+    "mlp_ens": {
+     "rmse": 0.005995885645977725,
+     "mae": 0.001753120710588625,
+     "smape_pct": 4.011184698011797,
+     "r2": 0.9981089312123675,
+     "rmse_by_coef": {
+      "rho_path": 0.0008444498027804634,
+      "T_total": 0.004744039475433026,
+      "spher_alb": 0.009199615645506191
+     },
+     "smape_by_coef": {
+      "rho_path": 5.373441071862662,
+      "T_total": 3.504467359682198,
+      "spher_alb": 3.155645662490526
+     }
+    },
+    "mlp_resid": {
+     "rmse": 0.005846106762786363,
+     "mae": 0.0014859510682637674,
+     "smape_pct": 3.4887927622250356,
+     "r2": 0.9982022300021195,
+     "rmse_by_coef": {
+      "rho_path": 0.0007706049006916978,
+      "T_total": 0.004199115257726126,
+      "spher_alb": 0.00918174776309233
+     },
+     "smape_by_coef": {
+      "rho_path": 3.975583422245263,
+      "T_total": 3.3871080857515814,
+      "spher_alb": 3.1036867786782607
+     }
+    },
+    "dkr": {
+     "rmse": 0.01013237043121726,
+     "mae": 0.004681139417766336,
+     "smape_pct": 5.714589375647395,
+     "r2": 0.9945996393809394,
+     "rmse_by_coef": {
+      "rho_path": 0.0015983988272999599,
+      "T_total": 0.014712668703461329,
+      "spher_alb": 0.009432777558985111
+     },
+     "smape_by_coef": {
+      "rho_path": 7.238904489831775,
+      "T_total": 5.162068695036716,
+      "spher_alb": 4.742794942073694
+     }
+    }
+   },
+   "best_head": "mlp_resid",
+   "n_te": 91471,
+   "lowfi": 0,
+   "seed": 2
+  },
+  "pkanrtm_s2_lowfi_cats_off": {
+   "heads": {
+    "ridge": {
+     "rmse": 0.0698088365081325,
+     "mae": 0.03631138944857596,
+     "smape_pct": 28.300006200739553,
+     "r2": 0.7436570113286336,
+     "rmse_by_coef": {
+      "rho_path": 0.013873124067224778,
+      "T_total": 0.11711791321411492,
+      "spher_alb": 0.02665992867289696
+     },
+     "smape_by_coef": {
+      "rho_path": 38.41937754440408,
+      "T_total": 19.217556909874624,
+      "spher_alb": 27.263084147939942
+     }
+    },
+    "krr": {
+     "rmse": 0.025254043238851945,
+     "mae": 0.011578933233657829,
+     "smape_pct": 10.20926529280447,
+     "r2": 0.9664523206541067,
+     "rmse_by_coef": {
+      "rho_path": 0.004366884402967914,
+      "T_total": 0.04114196367528088,
+      "spher_alb": 0.014197508418113193
+     },
+     "smape_by_coef": {
+      "rho_path": 12.695251184903396,
+      "T_total": 9.337119375882063,
+      "spher_alb": 8.595425317627944
+     }
+    },
+    "lowfi_resid": {
+     "rmse": 0.02523521193500413,
+     "mae": 0.011574265641714638,
+     "smape_pct": 10.20474656173764,
+     "r2": 0.9665023333192817,
+     "rmse_by_coef": {
+      "rho_path": 0.004350466488632702,
+      "T_total": 0.04111055527090181,
+      "spher_alb": 0.014193077568418234
+     },
+     "smape_by_coef": {
+      "rho_path": 12.632614608214082,
+      "T_total": 9.345588761024153,
+      "spher_alb": 8.636036315974675
+     }
+    },
+    "mlp": {
+     "rmse": 0.006196562564170184,
+     "mae": 0.0020859760830494443,
+     "smape_pct": 4.580641369511676,
+     "r2": 0.9979802281186857,
+     "rmse_by_coef": {
+      "rho_path": 0.0011982225708544484,
+      "T_total": 0.005608524897546632,
+      "spher_alb": 0.009071982913306253
+     },
+     "smape_by_coef": {
+      "rho_path": 5.2062717678818276,
+      "T_total": 3.9424355649651557,
+      "spher_alb": 4.593216775688046
+     }
+    },
+    "mlp_ens": {
+     "rmse": 0.0057146326751575565,
+     "mae": 0.0014950469569767605,
+     "smape_pct": 3.500774932904508,
+     "r2": 0.9982821814664768,
+     "rmse_by_coef": {
+      "rho_path": 0.0007108791762618479,
+      "T_total": 0.004257235373936711,
+      "spher_alb": 0.008907394546307831
+     },
+     "smape_by_coef": {
+      "rho_path": 3.510793673908906,
+      "T_total": 3.4204406375047567,
+      "spher_alb": 3.5710904872998586
+     }
+    },
+    "mlp_resid": {
+     "rmse": 0.005659020339170613,
+     "mae": 0.0013827705792620823,
+     "smape_pct": 3.2198095040550943,
+     "r2": 0.9983154529186459,
+     "rmse_by_coef": {
+      "rho_path": 0.000687803248549384,
+      "T_total": 0.0040611903512740395,
+      "spher_alb": 0.008894222462893743
+     },
+     "smape_by_coef": {
+      "rho_path": 3.3749746696314302,
+      "T_total": 3.3818469172681165,
+      "spher_alb": 2.9026069252657383
+     }
+    },
+    "dkr": {
+     "rmse": 0.006216247408348898,
+     "mae": 0.0020211514121123626,
+     "smape_pct": 4.293249656949979,
+     "r2": 0.9979673751712308,
+     "rmse_by_coef": {
+      "rho_path": 0.0008853381929549717,
+      "T_total": 0.00531733792551707,
+      "spher_alb": 0.009320262292197913
+     },
+     "smape_by_coef": {
+      "rho_path": 4.542176837319032,
+      "T_total": 3.7527669139145314,
+      "spher_alb": 4.584805219616374
+     }
+    }
+   },
+   "best_head": "mlp_resid",
+   "n_te": 91471,
+   "lowfi": 1,
+   "seed": 2
+  }
+ },
+ "controls": {
+  "passed": [
+   "pkanrtm_s0_cats_off/ridge: rmse 0.119589 vs stored 0.119589",
+   "pkanrtm_s0_cats_off/krr: rmse 0.112881 vs stored 0.112881",
+   "pkanrtm_s0_cats_off/mlp: rmse 0.00628941 vs stored 0.00628941",
+   "pkanrtm_s0_cats_off/mlp_ens: rmse 0.00588791 vs stored 0.00588791",
+   "pkanrtm_s0_cats_off/mlp_resid: rmse 0.00582621 vs stored 0.00582621",
+   "pkanrtm_s0_cats_off/dkr: rmse 0.00788701 vs stored 0.00788701",
+   "pkanrtm_s0_lowfi_cats_off/ridge: rmse 0.0698088 vs stored 0.0698088",
+   "pkanrtm_s0_lowfi_cats_off/krr: rmse 0.0250701 vs stored 0.0250701",
+   "pkanrtm_s0_lowfi_cats_off/lowfi_resid: rmse 0.0250544 vs stored 0.0250544",
+   "pkanrtm_s0_lowfi_cats_off/mlp: rmse 0.00653021 vs stored 0.00653021",
+   "pkanrtm_s0_lowfi_cats_off/mlp_ens: rmse 0.005908 vs stored 0.005908",
+   "pkanrtm_s0_lowfi_cats_off/mlp_resid: rmse 0.00579341 vs stored 0.00579341",
+   "pkanrtm_s0_lowfi_cats_off/dkr: rmse 0.00654229 vs stored 0.00654229",
+   "pkanrtm_s1_cats_off/ridge: rmse 0.119589 vs stored 0.119589",
+   "pkanrtm_s1_cats_off/krr: rmse 0.112877 vs stored 0.112877",
+   "pkanrtm_s1_cats_off/mlp: rmse 0.00679168 vs stored 0.00679168",
+   "pkanrtm_s1_cats_off/mlp_ens: rmse 0.00585701 vs stored 0.00585701",
+   "pkanrtm_s1_cats_off/mlp_resid: rmse 0.005772 vs stored 0.005772",
+   "pkanrtm_s1_cats_off/dkr: rmse 0.00820904 vs stored 0.00820904",
+   "pkanrtm_s1_lowfi_cats_off/ridge: rmse 0.0698088 vs stored 0.0698088",
+   "pkanrtm_s1_lowfi_cats_off/krr: rmse 0.0251076 vs stored 0.0251076",
+   "pkanrtm_s1_lowfi_cats_off/lowfi_resid: rmse 0.0250858 vs stored 0.0250858",
+   "pkanrtm_s1_lowfi_cats_off/mlp: rmse 0.00623097 vs stored 0.00623097",
+   "pkanrtm_s1_lowfi_cats_off/mlp_ens: rmse 0.00597471 vs stored 0.00597471",
+   "pkanrtm_s1_lowfi_cats_off/mlp_resid: rmse 0.00589559 vs stored 0.00589559",
+   "pkanrtm_s1_lowfi_cats_off/dkr: rmse 0.00606127 vs stored 0.00606127",
+   "pkanrtm_s2_cats_off/ridge: rmse 0.119589 vs stored 0.119589",
+   "pkanrtm_s2_cats_off/krr: rmse 0.112868 vs stored 0.112868",
+   "pkanrtm_s2_cats_off/mlp: rmse 0.0066235 vs stored 0.0066235",
+   "pkanrtm_s2_cats_off/mlp_ens: rmse 0.00599589 vs stored 0.00599589",
+   "pkanrtm_s2_cats_off/mlp_resid: rmse 0.00584611 vs stored 0.00584611",
+   "pkanrtm_s2_cats_off/dkr: rmse 0.0101324 vs stored 0.0101324",
+   "pkanrtm_s2_lowfi_cats_off/ridge: rmse 0.0698088 vs stored 0.0698088",
+   "pkanrtm_s2_lowfi_cats_off/krr: rmse 0.025254 vs stored 0.025254",
+   "pkanrtm_s2_lowfi_cats_off/lowfi_resid: rmse 0.0252352 vs stored 0.0252352",
+   "pkanrtm_s2_lowfi_cats_off/mlp: rmse 0.00619656 vs stored 0.00619656",
+   "pkanrtm_s2_lowfi_cats_off/mlp_ens: rmse 0.00571463 vs stored 0.00571463",
+   "pkanrtm_s2_lowfi_cats_off/mlp_resid: rmse 0.00565902 vs stored 0.00565902",
+   "pkanrtm_s2_lowfi_cats_off/dkr: rmse 0.00621625 vs stored 0.00621625"
+  ],
+  "failed": []
+ },
+ "six_s_input": {
+  "rmse": 0.09789962273437826,
+  "rmse_by_coef": {
+   "rho_path": 0.020652262094374065,
+   "T_total": 0.16183009672518367,
+   "spher_alb": 0.0462332375991964
+  }
+ },
+ "published": {
+  "pKANrtm_standard": {
+   "rmse": 0.00619,
+   "mae": 0.00186,
+   "r2": 0.99472,
+   "smape_pct": 3.91249
+  },
+  "sRTMNet_standard": {
+   "rmse": 0.00691,
+   "mae": 0.00211,
+   "r2": 0.99418,
+   "smape_pct": 4.2817
+  },
+  "RF_standard": {
+   "rmse": 0.01075,
+   "smape_pct": 7.0185
+  },
+  "UMR_standard": {
+   "rmse": 0.01394,
+   "smape_pct": 9.8462
+  },
+  "pKANrtm_OOD": {
+   "rmse": 0.01022,
+   "mae": 0.00544,
+   "r2": 0.99418,
+   "smape_pct": 5.3985
+  },
+  "source": "Remote Sens. submission, Tables 3 and 4; dataset qavalid_intersection_libradtran_6s_50k_13b (609,722 rows / 50,000 states / 13 bands, B10 9,722) - matched row for row on this box",
+  "split_note": "ours is a seeded random 80/10/10 STATE split; the paper's standard split is also state-level, its exact state assignment is not reproduced here"
+ },
+ "minutes": 0.12,
+ "n_controls_passed": 39,
+ "n_controls_failed": 0
+}

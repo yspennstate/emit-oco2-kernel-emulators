@@ -1,0 +1,327 @@
+% New theory material, v4. Proposition 1 (frozen residual correction and error alignment) and the conditional
+% stability bound stay as published in residual_analysis.tex and reflectance_stability.tex, with one sentence of
+% Proposition 1 corrected (see sec:sensitivity, first paragraph). This file adds the conditional sensitivity
+% statement, the split-sample bias-variance identity, the finite-class selection guarantee, the constant-one
+% transfer theorem with its matching construction, the conditional error-profile theorem, the signed-spectrum and
+% residual-action perturbation bounds, the explicit chain to the kernel paper's power-function bound, the stacking
+% objective, and a short discussion of the two interpolation theorems. It is \input after sec:stability.
+% Environments: proposition and theorem (existing); add \newtheorem{corollary}[proposition]{Corollary} if absent.
+% Macros: \Prob, \E, \1 (indicator) - define if absent.
+
+\subsection{Sensitivity of the correction}\label{sec:sensitivity}
+
+For a common frozen operator $R=I-S_\lambda$ and the norm of Section~\ref{sec:identity}, the exact criterion
+$2\langle Rf,Rh\rangle>\|Rh\|^2$ is necessary and sufficient for strict improvement of the corrected predictor over
+the standalone kernel, since $\|Rf-Rh\|^2<\|Rf\|^2$ is that inequality rearranged; the comparison of smoothness
+norms is neither necessary nor sufficient. Write the design values of the targets, of the fitted mean and of the
+corrected predictor as $y$, $h_X$ and $\widehat y$, with $\widehat y=h_X+S_\lambda(y-h_X)$ and
+$S_\lambda=K(K+\lambda I)^{-1}$; in the nugget convention of the experiments, $\lambda=n\gamma$. The mean is trained
+on the same labels, so $h_X=h_X(y)$.
+
+\begin{proposition}\label{prop:sensitivity}
+\begin{enumerate}
+\item If $h_X$ is differentiable in $y$, the Jacobian of the trained pipeline is
+$J_{\widehat y}=S_\lambda+(I-S_\lambda)J_{h}$. In particular the correction stage alone does not bound the
+sensitivity of the pipeline: with $K=I$, $\lambda=1$ and $h_X(y)=2y$ one has $\widehat y=\tfrac32 y$ although
+$\|S_\lambda\|_{\mathrm{op}}=\tfrac12$; and if the mean interpolates the training labels, $h_X(y)=y$, then
+$\widehat y=y$ and the correction changes nothing on the design.
+\item With the mean and the kernel frozen, $y\mapsto\widehat y$ is affine with linear part $S_\lambda$, its
+effective degrees of freedom are $\operatorname{tr}S_\lambda=\sum_j\mu_j/(\mu_j+\lambda)$, and
+$\|S_\lambda\|_{\mathrm{op}}=\max_j\mu_j/(\mu_j+\lambda)<1$.
+\item Suppose the mean, the kernel and the ridge are fixed independently of the correction noise, conditional on
+the design, and the correction is fitted on an independent sample with $y=f_X+\varepsilon$, $\E\varepsilon=0$,
+$\E[\varepsilon\varepsilon^{\top}]=\sigma^2I$. With $r=f_X-h_X$ and $r_j$ its coordinates in the
+eigenbasis of $K$,
+\[
+\frac1n\,\E_\varepsilon\|\widehat y-f_X\|^2
+=\frac1n\sum_j\Bigl(\frac{\lambda}{\mu_j+\lambda}\Bigr)^2r_j^2
++\frac{\sigma^2}{n}\sum_j\Bigl(\frac{\mu_j}{\mu_j+\lambda}\Bigr)^2 .
+\]
+\item At a new input $x$, with $a_\lambda(x)=(K+\lambda I)^{-1}k(X_n,x)$, the noise variance of the correction
+is $\sigma^2\|a_\lambda(x)\|_2^2$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) is the chain rule applied to $\widehat y=S_\lambda y+(I-S_\lambda)h_X(y)$, and the two examples are direct
+substitutions. (ii) With the mean and kernel frozen the map is affine with linear part $S_\lambda$; the trace is the
+sum of the eigenvalues $\mu_j/(\mu_j+\lambda)$, and the operator norm of a symmetric positive semidefinite matrix is
+its largest eigenvalue. (iii) $\widehat y-f_X=-(I-S_\lambda)r+S_\lambda\varepsilon$; the cross term has zero mean,
+and both matrices are diagonal in the eigenbasis of $K$. (iv) The correction at $x$ is $a_\lambda(x)^{\top}(y-h_X)$,
+linear in $\varepsilon$ with coefficient vector $a_\lambda(x)$.
+\end{proof}
+
+Item (iii) is what the ridge-path experiments report: the residual's spectral energy $\sum_j r_j^2$ by eigendirection,
+and the two sums as functions of $\lambda$, together with the out-of-sample factor of item (iv). A ridge chosen from
+fits that depend on the correction noise is outside the hypothesis of (iii).
+
+\subsection{A finite-class selection guarantee}\label{sec:damped}
+
+Every predictor below is chosen on held-out rows rather than by an information criterion
+\cite{stonecv,gcv,arlot}, so what has to be bounded is the price of that choice.
+
+\begin{proposition}\label{prop:selection}
+Let $p_1,\dots,p_M$ be predictors frozen before an independent selection sample of $m$ i.i.d.\ units, let the loss
+take values in $[0,B]$, and let $\widehat p$ minimise the empirical risk on that sample. Then with probability at
+least $1-\delta$,
+\[
+R(\widehat p)\le\min_{1\le j\le M}R(p_j)+2B\sqrt{\frac{\log(2M/\delta)}{2m}} .
+\]
+\end{proposition}
+
+\begin{proof}
+Hoeffding's inequality \cite{hoeffding} for each candidate and a union bound over the $M$ candidates.
+\end{proof}
+
+The squared error of the constrained retrieval of Section~\ref{sec:transfer} is bounded by $R^2$, so the guarantee
+covers it. It covers the damped correction
+$p_{\alpha,\lambda}(x)=h(x)+\alpha\,k(x,X_n)(K+\lambda I)^{-1}(y-h_X)$ at finitely many $\alpha\in[0,1]$, with
+$\alpha=0$ and the standalone kernel among the candidates. It does not cover a stack whose weights are optimised;
+the stacks of Section~\ref{sec:joint} are therefore fitted on development rows, frozen as a small collection, and
+selected on an independent state-level sample, with bands and prescribed reflectances averaged within each state,
+so that $m$ is the number of independent states.
+
+\subsection{Transfer of component error into retrieval error}\label{sec:transfer}
+
+Section~\ref{sec:stability} controls the inverse where the denominator stays away from zero. The theorem below
+describes a whole evaluation distribution, with entries of vanishing transmission included, with the constant one,
+and shows that the resulting loss of rate is not an artefact of the argument. Let $P$ be the evaluation distribution
+over entries (a state, a band, and the surface reflectance when it is varied), in fixed physical units; expectations
+are conditional on the fitted emulator. Assume
+\begin{equation}\label{eq:transfer-hyp}
+0\le\rho\le R\le1,\qquad t>0,\qquad 0\le s\le S,\qquad RS<1 .
+\end{equation}
+The emulator predicts $(\widehat a,\widehat t,\widehat s)$. The \emph{constrained retrieval} replaces $\widehat t$ by
+$\max\{\widehat t,0\}$ and $\widehat s$ by its projection onto $[0,S]$, neither of which increases $|e_t|$ or
+$|e_s|$, and sets
+\begin{equation}\label{eq:rhobar}
+\bar\rho=\Pi_{[0,R]}\Bigl(\frac{L-\widehat a}{\widehat t+\widehat s\,(L-\widehat a)}\Bigr)
+\end{equation}
+when the denominator is positive, and otherwise returns a prescribed value in $[0,R]$ and records a failure. It is
+an estimator in its own right and is reported beside the unconstrained inverse and its failure counts, never in
+place of them. The \emph{retrieval-weighted component error}, computed after the projections, is
+\begin{equation}\label{eq:eR}
+e_R=|e_a|+R\,|e_t|+R^2\,t\,|e_s|,\qquad \varepsilon_R^2=\E_P[e_R^2],
+\end{equation}
+which is at most $e=|e_a|+|e_t|+t|e_s|$ since $R\le1$; $\varepsilon_R$ is not the mean relative radiance error of
+the tables. Put $F_t(\tau)=\Prob(t\le\tau)$.
+
+\begin{theorem}[error transfer with constant one]\label{thm:transfer}
+Under \eqref{eq:transfer-hyp}, for the constrained retrieval \eqref{eq:rhobar}:
+\begin{enumerate}
+\item $|\bar\rho-\rho|\le\min\{R,\;e_R/t\}\le\min\{R,\;e/t\}$ at every entry, and no universal constant below one
+is possible.
+\item For every $\tau>0$,
+\[
+\E_P|\bar\rho-\rho|^2\le\E_P\min\Bigl\{R^2,\frac{e_R^2}{t^2}\Bigr\}
+\le R^2F_t(\tau)+\E_P\Bigl[\frac{e_R^2}{t^2}\1\{t>\tau\}\Bigr]
+\le R^2F_t(\tau)+\frac{\varepsilon_R^2}{\tau^2}.
+\]
+\item If $F_t(u)\le Au^\beta$ for $0<u\le u_0$ with some $\beta>0$, then for
+$\varepsilon_R\le u_0^{(\beta+2)/2}$,
+$\E_P|\bar\rho-\rho|^2\le(R^2A+1)\,\varepsilon_R^{2\beta/(\beta+2)}$; a component-error bound
+$\varepsilon_{R,n}=O(n^{-r})$ yields $\|\bar\rho_n-\rho\|_{L^2(P)}=O(n^{-r\beta/(\beta+2)})$.
+\item If $t\ge t_0>0$ $P$-almost surely, then $\|\bar\rho-\rho\|_{L^2(P)}\le\varepsilon_R/t_0$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Write $q=1-\rho s$, $u=L-a=\rho t/q$, $D=t/q$, $\widehat D=\widehat t+\widehat s(L-\widehat a)$ and $z=\bar\rho$.
+Suppose first $\widehat D>0$. The map $F(v)=\widehat Dv-(L-\widehat a)$ is increasing and affine, $z$ is the
+projection of its root onto $[0,R]$ and $\rho\in[0,R]$, so $(z-\rho)F(z)\le0$: at an interior root $F(z)=0$; at
+$z=R$ the root exceeds $R$, so $F(R)<0$ and $z-\rho\ge0$; at $z=0$ the root is negative, so $F(0)>0$ and
+$z-\rho\le0$. Since $L-\widehat a=u-e_a$ and, by \eqref{eq:inverse-error},
+$\widehat D=D+e_t+ue_s-\widehat se_a$ with $u=\rho D$,
+\[
+F(z)=D(z-\rho)+(1-z\widehat s)e_a+ze_t+zue_s ,
+\]
+hence $D(z-\rho)^2\le|z-\rho|\bigl((1-z\widehat s)|e_a|+z|e_t|+zu|e_s|\bigr)$ and, with $D=t/q$,
+\[
+|z-\rho|\le q(1-z\widehat s)\frac{|e_a|}{t}+qz\frac{|e_t|}{t}+z\rho\,|e_s| .
+\]
+Now $0<1-RS\le q(1-z\widehat s)\le1$, $qz\le R$ and $z\rho\le R^2$, so $|z-\rho|\le e_R/t$; and $|z-\rho|\le R$
+because both lie in $[0,R]$. If $\widehat D\le0$, then $\widehat t\le\widehat s(e_a-u)\le\widehat s|e_a|$ and
+$t=\widehat t-e_t\le|e_t|+\widehat s|e_a|$, so $Rt\le R|e_t|+R\widehat s|e_a|\le R|e_t|+|e_a|\le e_R$; the fallback
+value and $\rho$ lie in $[0,R]$, so $|z-\rho|\le R=\min\{R,e_R/t\}$. For optimality take $s=\widehat s=0$,
+$\widehat t=t$, $\rho=r_0$ and $\widehat a=a+ct$ with $0<c<r_0<R$: then $|\bar\rho-\rho|=c=e_R/t$ exactly, with a
+positive denominator and no projection active. This proves (i). For (ii) integrate (i), split at $t=\tau$ and bound
+$e_R^2/t^2$ by $e_R^2/\tau^2$ on $\{t>\tau\}$. For (iii) take $\tau=\varepsilon_R^{2/(\beta+2)}\le u_0$; then
+$R^2A\tau^\beta+\varepsilon_R^2/\tau^2=(R^2A+1)\varepsilon_R^{2\beta/(\beta+2)}$. (iv) is (i) with $t\ge t_0$.
+\end{proof}
+
+The middle expression in (ii) keeps the association between the errors and the transmission and is the one the
+tables evaluate; the last needs no power law. Both are computable on a finite test table; (iii) is a population
+statement whose tail hypothesis a finite table cannot establish down to $t=0$. The exponent in (iii) cannot be
+improved from its hypotheses.
+
+\begin{proposition}[the exponent is attained]\label{prop:attained}
+For every $\beta>0$, every $0<c<r_0<R$ and every $\tau\in(0,1)$ there are an evaluation distribution and a predictor
+satisfying \eqref{eq:transfer-hyp} with $S=0$ and $F_t(u)=u^\beta$ on $(0,1)$, namely $\rho=r_0$, $a=s=0$,
+$\widehat t=t$, $\widehat s=0$ and $\widehat a=ct\,\1\{t\le\tau\}$, for which $\bar\rho=r_0-c\,\1\{t\le\tau\}$,
+\[
+\varepsilon_R^2=\frac{c^2\beta}{\beta+2}\,\tau^{\beta+2},\qquad
+\E_P|\bar\rho-\rho|^2=c^2\tau^\beta,
+\qquad\text{so}\qquad
+\E_P|\bar\rho-\rho|^2=c^{4/(\beta+2)}\Bigl(\frac{\beta+2}{\beta}\Bigr)^{\beta/(\beta+2)}\varepsilon_R^{2\beta/(\beta+2)} .
+\]
+\end{proposition}
+
+\begin{proof}
+$L=r_0t$ and $\widehat\rho=(r_0t-\widehat a)/t$; $e_R=|\widehat a|=ct\,\1\{t\le\tau\}$; with density
+$\beta u^{\beta-1}$ on $(0,1)$, $\E_P[t^2\1\{t\le\tau\}]=\beta\tau^{\beta+2}/(\beta+2)$; the retrieval error equals
+$c$ exactly on $\{t\le\tau\}$, an event of probability $\tau^\beta$. Eliminate $\tau$.
+\end{proof}
+
+This is sharpness of the transfer inequality for the physical inverse, not a minimax statement over retrieval
+algorithms. What decides the rate is where the errors sit relative to the transmission.
+
+\begin{theorem}[conditional error profile]\label{thm:profile}
+Suppose $\E_P[e_R^2\mid t]\le\sigma^2t^{2\nu}$ $P$-almost surely for some $0\le\nu\le1$. Then
+\[
+\E_P|\bar\rho-\rho|^2\le\E_P\min\{R^2,\;\sigma^2t^{-2(1-\nu)}\} .
+\]
+Under the tail hypothesis of Theorem~\ref{thm:transfer}(iii) and $\nu<1$, as $\sigma\to0$,
+\[
+\E_P|\bar\rho-\rho|^2=
+\begin{cases}
+O(\sigma^{\beta/(1-\nu)}), & \beta<2(1-\nu),\\
+O(\sigma^2\log(1/\sigma)), & \beta=2(1-\nu),\\
+O(\sigma^2), & \beta>2(1-\nu),
+\end{cases}
+\]
+and at $\nu=1$, $\E_P|\bar\rho-\rho|^2\le\sigma^2$ with no tail hypothesis. In the model of
+Proposition~\ref{prop:attained} the predictor $\widehat a=a+\min\{ct,\sigma t^\nu\}$ has $e_R\le\sigma t^\nu$ and
+$|\bar\rho-\rho|=\min\{c,\sigma t^{\nu-1}\}$, and attains each order.
+\end{theorem}
+
+\begin{proof}
+Conditional on $t$ the squared error is at most both $R^2$ and $e_R^2/t^2$ by Theorem~\ref{thm:transfer}(i), so
+$\E[|\bar\rho-\rho|^2\mid t]\le\min\{R^2,\E[e_R^2\mid t]/t^2\}\le\min\{R^2,\sigma^2t^{2\nu-2}\}$; integrate. With
+$t_*=(\sigma/R)^{1/(1-\nu)}$,
+$\E_P\min\{R^2,\sigma^2t^{2\nu-2}\}=R^2F_t(t_*)+\sigma^2\E_P[t^{2\nu-2}\1\{t>t_*\}]$; the first term is at most
+$R^2At_*^\beta=O(\sigma^{\beta/(1-\nu)})$ once $t_*\le u_0$, and
+$\E_P[t^{2\nu-2}\1\{t>t_*\}]=\int_0^{t_*^{2\nu-2}}\Prob(t_*<t<v^{-1/(2-2\nu)})\,dv
+\le u_0^{2\nu-2}+A\int_{u_0^{2\nu-2}}^{t_*^{2\nu-2}}v^{-\beta/(2-2\nu)}\,dv$, which is $O(1)$ for
+$\beta>2(1-\nu)$, $O(\log(1/\sigma))$ for $\beta=2(1-\nu)$ and $O(t_*^{\beta-2(1-\nu)})$ for $\beta<2(1-\nu)$. At
+$\nu=1$ the bound is $\sigma^2$ before any tail enters. In the model,
+$c^{-2}\E_P|\bar\rho-\rho|^2=\E_P\min\{1,(\sigma/c)^2t^{2\nu-2}\}$, the same integral with equality.
+\end{proof}
+
+At $\nu=0$ the theorem recovers the uniform-error regimes under the weaker hypothesis of a bounded conditional
+second moment; at $\nu=1$ an emulator whose conditional root-mean-square error decreases proportionally to the
+transmission loses no rate. The central diagnostic is therefore the profile $t\mapsto\E[e_R^2\mid t]$ and not only
+the tail $t\mapsto F_t(t)$: the same overall error concentrated in the opaque entries gives the worst-case loss,
+and proportional to the transmission gives none.
+
+\subsection{Perturbing a learned-mean kernel predictor}\label{sec:perturb}
+
+Fix the training sample and write a corrected predictor as
+$p(x)=h(x)+k_x^{\top}H^{-1}(Y-M)$ with $H=K+\lambda I$ positive definite, $Y\in\mathbb R^{n\times q}$ the targets
+and $M\in\mathbb R^{n\times q}$ the training-row means used as correction labels. Let a second fitted system be
+$\widetilde p(x)=\widetilde h(x)+\widetilde k_x^{\top}\widetilde H^{-1}(Y-\widetilde M)$ with $\widetilde H$
+symmetric positive definite; both systems may depend on $Y$ through the mean, the features, the selected ridge and
+any kernel approximation. Put $B=H^{-1/2}(\widetilde H-H)H^{-1/2}$, whose least eigenvalue exceeds $-1$,
+$Q=(I+B)^{-1}$, $\gamma_Q=\|Q\|_{\mathrm{op}}=1/(1+\lambda_{\min}(B))$,
+$\eta_Q=\|Q-I\|_{\mathrm{op}}=\max_i|b_i|/(1+b_i)$ over the eigenvalues $b_i$ of $B$, and
+\[
+g=H^{-1/2}k_x,\quad \widetilde g=H^{-1/2}\widetilde k_x,\quad v=\widetilde g-g,\quad
+W=H^{-1/2}(Y-M),\quad U=H^{-1/2}(\widetilde M-M).
+\]
+
+A conditioning argument bounds such a difference by the condition number of $H$ times a norm of the
+change \cite{stewartsun,golubvanloan,higham}. The statement below instead keeps the residual action
+$W$ and the label shift $U$ separate, which is what makes it readable on data.
+
+\begin{proposition}[same-data perturbation]\label{prop:perturb}
+\begin{enumerate}
+\item $\widetilde p(x)-p(x)=\bigl(\widetilde h(x)-h(x)\bigr)+v^{\top}W-(Q\widetilde g)^{\top}(BW+U)$.
+\item $\|\widetilde p(x)-p(x)\|_2\le\|\widetilde h(x)-h(x)\|_2+\|W^{\top}v\|_2
++\|Q\widetilde g\|_2\,\|BW+U\|_{\mathrm{op}}$.
+\item $\|\widetilde p(x)-p(x)\|_2\le\|\widetilde h(x)-h(x)\|_2
++\|W\|_F\bigl(\gamma_Q\|v\|_2+\eta_Q\|g\|_2\bigr)+\gamma_Q\|U\|_F\|\widetilde g\|_2$.
+\item If $\widetilde H=H+sI$ with the kernel and the means unchanged, then
+$\|\widetilde p(x)-p(x)\|_2\le\|g\|_2\|W\|_F\,s/(\lambda_{\min}(H)+s)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+$\widetilde H=H^{1/2}(I+B)H^{1/2}$ gives $\widetilde H^{-1}=H^{-1/2}QH^{-1/2}$ and $Q=I-QB$. Hence
+$\widetilde k_x^{\top}\widetilde H^{-1}(Y-\widetilde M)-k_x^{\top}H^{-1}(Y-M)
+=\widetilde g^{\top}Q(W-U)-g^{\top}W
+=\widetilde g^{\top}W-\widetilde g^{\top}QBW-\widetilde g^{\top}QU-g^{\top}W
+=v^{\top}W-(Q\widetilde g)^{\top}(BW+U)$, which is (i) since $Q$ is symmetric; (ii) bounds its two terms. For (iii)
+write the same difference as $v^{\top}QW+g^{\top}(Q-I)W-\widetilde g^{\top}QU$ and use
+$\|Q\|_{\mathrm{op}}=\gamma_Q$ and $\|Q-I\|_{\mathrm{op}}=\|QB\|_{\mathrm{op}}=\eta_Q$. For (iv), $v=0$, $U=0$ and
+$B=sH^{-1}$ has eigenvalues $s/\lambda_i(H)\ge0$, so $\eta_Q=\max_i(s/\lambda_i)/(1+s/\lambda_i)=s/(\lambda_{\min}(H)+s)$.
+\end{proof}
+
+Only positive definiteness of $\widetilde H$ is needed: a large positive eigenvalue of $B$, from a larger ridge or an
+approximation that dominates the exact Gram matrix nowhere, does not make the bound vacuous. Item (ii) keeps the
+interaction between the perturbation and the residual: with $v=0$, $U=0$ and $BW=0$ the predictor does not move
+however large $\|B\|$ is. The bounds are stated in the residual $W$, not in $Y$, they use no independence between
+the representation, the mean, the ridge and $Y$, and they transfer between fitted predictors without being
+generalisation statements.
+
+For component $j$ the physical target at band $b$ is $f_{j,b}=\mu_{j,b}+\sum_\ell(A_j)_{b\ell}z_{j,\ell}+\pi_{j,b}$,
+with $A_j$ the standardiser scale times the retained PCA basis and $\pi_j$ the truncation residual, and the
+pipeline predicts the retained coordinates. For a frozen realised system
+$p_\ell(x)=h_\ell(x)+a_x^{\top}(y_\ell-h_{\ell,X})$ with $y_\ell=f_{\ell,X}+\varepsilon_\ell$, the conditional
+power-function bound of the kernel paper gives
+\begin{equation}\label{eq:chain-coord}
+|p_\ell(x)-f_\ell(x)|\le B_\ell\widetilde P_\lambda(x)+|a_x^{\top}\varepsilon_\ell|,
+\end{equation}
+with $B_\ell$ the residual RKHS norm, a hypothesis and not an observed certificate, and the second term zero for
+deterministic simulator targets, which is the form used for EMIT. A perturbed system adds the bound
+$\Delta_\ell(x)$ of Proposition~\ref{prop:perturb}. If $|\widehat z_{j,\ell}-z_{j,\ell}|\le u_{j,\ell}$, then
+\begin{equation}\label{eq:chain-recon}
+|\widehat f_{j,b}-f_{j,b}|\le|\pi_{j,b}|+\sum_\ell|(A_j)_{b\ell}|\,u_{j,\ell},
+\end{equation}
+and a change of basis or standardiser between two systems adds its own reconstruction term. Assembling
+$e_R=|e_a|+R|e_t|+R^2t|e_s|$ from \eqref{eq:chain-recon} for the three physical components and applying
+Theorem~\ref{thm:transfer} closes the chain. If the inverse is evaluated at $L_{\mathrm{obs}}=L+\eta$, the proof of
+Theorem~\ref{thm:transfer} goes through with $e_a$ replaced by $e_a-\eta$, so
+$|\bar\rho-\rho|\le\min\{R,(|e_a-\eta|+R|e_t|+R^2t|e_s|)/t\}$. The theorem is an exact-arithmetic statement:
+forming $L=a+\rho t/q$ in floating point loses the term $\rho t/q$ once $t$ is below $2^{-52}a$, and the operational
+inverse then returns zero even with exact components; the tables separate the operational computation from an
+exact-arithmetic check on those entries.
+
+\subsection{The stacking objective}\label{sec:joint}
+
+With every base head projected first ($\widehat t\mapsto\max\{\widehat t,0\}$, $\widehat s\mapsto\Pi_{[0,S]}\widehat s$)
+and combined by simplex weights $w$ per component, the combination stays in the constraint set, its predictions are
+affine in $w$, and
+\begin{equation}\label{eq:Jtau}
+J_\tau(w)=\E_P\Bigl[\frac{e_a(w)^2+R^2e_t(w)^2+R^4t^2e_s(w)^2}{(t\vee\tau)^2}\Bigr]
+\end{equation}
+is a convex quadratic in $w$. By Theorem~\ref{thm:transfer}(i) and
+$e_R^2\le3(e_a^2+R^2e_t^2+R^4t^2e_s^2)$,
+\begin{equation}\label{eq:Jtau-bound}
+\E_P|\bar\rho_w-\rho|^2\le R^2F_t(\tau)+3J_\tau(w) .
+\end{equation}
+Projecting an unrestricted combination inside the loss would destroy the convexity. The threshold $\tau$ is fixed
+before any test read under a declared coverage requirement, because a threshold can make the task easier by
+discounting the difficult bands; candidate stacks at a few values of $\tau$ are frozen and selected under
+Proposition~\ref{prop:selection}.
+
+\subsection{The interpolation regime}\label{sec:interp}
+
+Two results on the Gaussian kernel at a bandwidth that does not scale with the dimension describe a regime the
+corpora of this paper are not in; they are stated for the record and proved elsewhere.
+
+\begin{theorem}\label{thm:benign}
+For every fixed $h>0$, $q_0$, $B$ and $\sigma$, and every $\epsilon>0$,
+$\sum_\ell\Pr\{\mathcal R_\ell>\epsilon\}<\infty$ along $d_\ell=2^{2^\ell}$, $n_\ell=2^{2^{2\ell}}$. In
+particular $\mathcal R_\ell\to0$ in probability, and almost surely under any coupling of the levels.
+\end{theorem}
+
+\begin{theorem}\label{thm:obstruction}
+For every fixed $h>0$,
+$\liminf_{d\to\infty}\E\,\mathcal E_{2^d,d}/\sigma^2\ge 5/36$, the expectation being over the design and
+the noise.
+\end{theorem}
+
+The first concerns uniform inputs on a sphere of growing dimension, independent Gaussian noise and a signal in a
+fixed finite sum of harmonic spaces; the second a noise-only problem at $n=2^d$, and the same argument gives larger
+constants, so $5/36$ is not sharp. A network with two or six thousand features does not place a Mat\'ern regression
+on those features in either setting. The bridge to the corpora is Proposition~\ref{prop:sensitivity} together with
+Theorems~\ref{thm:transfer} and~\ref{thm:profile}.

@@ -3,12 +3,17 @@
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{graphicx}
 \newtheorem{proposition}{Proposition}
+\newtheorem{theorem}[proposition]{Theorem}
+\newtheorem{corollary}[proposition]{Corollary}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\1}{\mathbf{1}}
 \usepackage{booktabs}
 \usepackage[hidelinks]{hyperref}
-\hypersetup{pdftitle={Neural means and kernel corrections for an EMIT atmospheric radiative-transfer emulator},pdfauthor={Yitzchak Shmalo}}
+\hypersetup{pdftitle={Learned representations and kernel corrections for radiative-transfer emulation},pdfauthor={Yitzchak Shmalo}}
 \graphicspath{{../figures/}}
 
-\title{Neural means and kernel corrections for an EMIT\\ atmospheric radiative-transfer emulator}
+\title{Learned representations and kernel corrections\\ for radiative-transfer emulation}
 \author{Yitzchak Shmalo\thanks{Einstein Institute of Mathematics, The Hebrew University of Jerusalem, Jerusalem, Israel. \texttt{yitzchak.shmalo@gmail.com}.}}
 \date{September 2026}
 
@@ -24,11 +29,28 @@ and $0.39\%$ for a neural network. Residual correction reduces the network error
 $0.14\%$. A kernel on wider-network features reaches $0.079\%$, and its convex stack
 reaches $0.078\%$. This small forward-error gain accompanies an increase in the mean
 within-split 95th-percentile reflectance error from $7.57$ to $22.71$ percentage points,
-with a larger tail at every split. We derive exact residual-error comparisons and a
-conditional stability bound relating radiance to reflectance errors. Learning-curve,
-output-rank and width experiments characterize the effects of representation and tuning.
-Comparisons with OCO-2 and ten further configurations demonstrate the task dependence
-of the relative performance of neural and kernel emulators.
+with a larger tail at every split. We prove that the reflectance error of a physically
+constrained retrieval is bounded, with constant one, by a transmission-weighted component
+error divided by the transmission, that the resulting loss of rate on an evaluation
+distribution with vanishing transmission is unavoidable, and that it disappears when the
+conditional component error decreases proportionally to the transmission; the diagnostic
+that decides between these cases is the error profile against transmission, which we
+measure. A same-data perturbation bound describes how a learned representation, a changed
+ridge or a Nystr\"om approximation moves the corrected predictor, in terms of its action on
+the fitted residual. Learning-curve, output-rank, width and combination experiments
+characterize the effects of representation and tuning. At four further splits the kernel on
+the concatenated features of three wide members improves on the single-member feature kernel in
+the mean and in the reflectance tail, and a ridge-path reading of the correction shows the network
+mean carrying the prediction where the kernel step is over-smoothed. Across ten kernels on the state
+inputs the choice of kernel is not the limiting factor: a convex stack of all heads is roughly a
+quarter below the best single head on three of the four components, and the two kernel steps compress the differences between
+regularisation arms of the network by six to twelve times. Under the protocol of a
+published multi-fidelity benchmark the residual-corrected network improves on the published
+values in all four metrics on both the release's split and its out-of-distribution split (RMSE
+$0.0058$ against $0.0062$, and $0.0062$ against $0.0102$ out of distribution). Comparisons with
+OCO-2, where the reduced-coefficient and radiance metrics order the heads differently, and with
+ten further configurations demonstrate the task dependence of the relative performance of neural
+and kernel emulators.
 \end{abstract}
 
 \section{Introduction}
@@ -70,12 +92,95 @@ error-alignment criterion for residual correction and separate its kernel-regres
 from principal-component truncation. These calculations complement the empirical
 comparison by identifying the quantities required for improvement in a specified metric.
 
-Section~\ref{sec:data} describes the data, evaluation protocol and inversion stability.
+Section~\ref{sec:related} places the constructions used here beside the literature they come
+from. Section~\ref{sec:data} describes the data, evaluation protocol and inversion stability.
 Sections~\ref{sec:methods}--\ref{sec:scaling} present the models, results and ablations.
-Section~\ref{sec:identity} analyses residual correction. Sections~\ref{sec:oco2} and
-\ref{sec:corpora} compare the findings with OCO-2 and ten further emulation configurations.
+Section~\ref{sec:identity} analyses residual correction. Section~\ref{sec:theory} proves the
+transfer of component error into retrieval error with constant one, the conditional
+error-profile theorem that decides the rate, and the same-data perturbation bound for learned
+corrections; Sections~\ref{sec:results-transfer} to~\ref{sec:results-benchmarks} measure the
+quantities those results name, replicate the three-member feature kernel, compare combination
+rules, and place the corpus beside a published multi-fidelity benchmark under its own protocol.
+Sections~\ref{sec:oco2} and \ref{sec:corpora} compare the findings with OCO-2 and ten further
+emulation configurations.
 The study concerns interpolation of a fixed radiative-transfer table; the implications for
 retrieval and computational cost are discussed in Section~\ref{sec:discussion}.
+
+\section{Related work}\label{sec:related}
+
+\paragraph{Radiative transfer and its surrogates.}
+The codes being replaced are physical: 6S for the solar spectrum \cite{vermote}, libRadtran for
+the band calculations behind most lookup tables \cite{mayer,emde}, and MODTRAN inside the
+atmospheric-correction tables used here \cite{modtran,isofit}. What is done with those tables is
+optimal estimation in the sense of \cite{rodgers}, and the operational carbon-dioxide product of
+OCO-2 \cite{eldering,crisp} rests on the forward model and inverse method of \cite{connor,odell}.
+Surrogates enter because the forward model is the cost. Neural emulation of longwave radiation
+goes back to \cite{chevallier} and was carried into climate models by \cite{krasnopolsky}; later
+work measures how accurate such emulators can be made \cite{veerman,ukkonen} and how learned
+parameterizations behave when the host model is stepped forward \cite{rasp,brenowitz}. In imaging
+spectroscopy and land-surface inference the same idea appears as emulator toolboxes for
+radiative-transfer models \cite{rivera,verrelst}, Gaussian-process emulation for parameter
+retrieval \cite{gomezdans}, and the wider use of Gaussian processes in earth observation
+\cite{campsvalls}; \cite{srtmnet} places an emulator inside a reflectance retrieval and
+\cite{lamminpaa} fits a cross-validated Gaussian process to the OCO-2 forward model. Replacing an
+expensive simulator by a statistical model is a classical problem \cite{sacks}, as is using a
+cheap model to inform an expensive one \cite{kennedyohagan,kennedycalib,perdikaris}, surveyed for
+propagation and inference in \cite{peherstorfer}; the network of \cite{pkan} is a multi-fidelity
+instance on the corpus rescored in Section~\ref{sec:results-benchmarks}. The measurement
+requirements behind the tables used here are those of the EMIT mission \cite{green} and of the
+surface-imaging missions that follow it \cite{cawse}.
+
+\paragraph{Kernel regression.}
+The estimators are classical: interpolation in a reproducing-kernel Hilbert space
+\cite{aronszajn}, smoothing splines and the representer theorem
+\cite{kimeldorf,wahba,representer}, ridge regularization \cite{hoerl} read as spectral filtering
+of an ill-posed problem \cite{engl}, and the Mat\'ern family, whose smoothness index fixes the
+differentiability of the sample paths \cite{stein,rw}. Rates under source and capacity conditions
+are given in \cite{cdv,sutherland,fs,smalezhou}; the textbook accounts are
+\cite{scholkopf,steinwart,esl}. Each component here is a vector of principal coefficients, so the
+multi-output formulation is the relevant one \cite{micchelli,alvarez}. Kernels also serve as
+solvers rather than regressors: Bayesian numerical homogenization \cite{owhadibnh},
+operator-adapted wavelets \cite{owhadiscovel} and the Gaussian-process treatment of nonlinear
+partial differential equations \cite{chenowhadi} use the same estimator, and cross-validating the
+kernel itself gives the kernel-flow family \cite{owhadiyoo,hamziowhadi,yoo}.
+
+\paragraph{Cost.}
+An exact solve is cubic in the number of training rows, which has produced a long line of
+approximations: the Nystr\"om method and its analysis \cite{nystrom,drineas,bachlowrank}, random
+features \cite{rahimirecht} and their operator-learning counterpart \cite{nelsenstuart},
+preconditioned solvers at large scale \cite{falkon,meanti}, inducing-point and variational
+Gaussian processes \cite{quinonero,titsias,hensman}, and structured interpolation with
+hardware-aware linear algebra \cite{kissgp,gpytorch}. At $n = 18{,}884$ the exact factorization is
+affordable, so approximation enters this study only as a perturbation whose size is measured
+(Section~\ref{sec:results-transfer}).
+
+\paragraph{Choosing and combining kernels.}
+A kernel can be built rather than picked: spectral mixtures \cite{wilsonadams}, additive structure
+\cite{additivegp}, compositional search over a grammar \cite{duvenaudstructure}, and
+per-coordinate relevance fitted by marginal likelihood \cite{rw} or by cross-validation
+\cite{owhadiyoo}. Several kernels can be combined instead of one being chosen, by semidefinite
+programming \cite{lanckriet}, by the algorithms surveyed in \cite{gonen}, or by alignment with the
+target Gram matrix \cite{cristianini,cortesalign}. Combining predictors rather than kernels is
+older still \cite{bates-granger,wolpert,breiman}. Every selection made below is made on held-out
+rows \cite{stonecv,gcv,arlot}, and Section~\ref{sec:damped} bounds what that selection costs.
+
+\paragraph{Networks, and the kernels they induce.}
+Feedforward networks are universal approximators \cite{hornik}; those trained here use the
+standard adaptive optimizer \cite{adam} with decoupled weight decay \cite{adamw} and early
+stopping \cite{prechelt}, two of the three regularizers compared in
+Section~\ref{sec:results-representation}, the third being dropout \cite{dropout}. In the
+infinite-width limit a network is a Gaussian process \cite{neal,leenngp,matthews} whose kernel is
+the arc-cosine kernel of \cite{chosaul}, and gradient descent on a wide network follows the neural
+tangent kernel \cite{ntk,arora}; both enter the kernel comparison of
+Section~\ref{sec:results-representation} as heads. The limit is not the whole story, since a
+finite network learns its representation \cite{belkin,rfm}, which is what deep kernel learning
+\cite{wilson} and the construction of \cite{nmkc} exploit. Kolmogorov--Arnold networks
+\cite{kolmogorov,kan} are the architecture behind the multi-fidelity model of \cite{pkan}.
+Operator learning supplies the other comparison: DeepONet \cite{deeponet}, Fourier neural
+operators \cite{fno} and the general formulation \cite{kovachki}, with fair-comparison protocols
+\cite{lufair}, physics-informed training \cite{pinn}, the cost-accuracy trade-off \cite{dehoop},
+kernel competitors \cite{batlle}, and the benchmark collections \cite{pdebench,thewell,climsim}
+from which Section~\ref{sec:corpora} draws.
 
 \section{Data and protocol}\label{sec:data}
 
@@ -196,29 +301,31 @@ the standardized component, with the training variance criterion and projection
 qualification of Section~\ref{sec:data}. Every hyperparameter named below is selected on the validation set
 of the seed at hand. All experiments use CPU computation.
 
-\paragraph{Reference family.} Cubic polynomial ridge regression, acting on all monomials of
+\paragraph{Reference family.} Cubic polynomial ridge regression \cite{hoerl}, acting on all monomials of
 degree at most three in the six standardized inputs, with the ridge weight selected from
 $\{10^{-10},\allowbreak 10^{-8},\allowbreak 10^{-6},\allowbreak 10^{-4},\allowbreak 10^{-2}\}$.
 It provides a low-cost, low-degree reference; its empirical error alone does not prove
 a smoothness class for the underlying function.
 
-\paragraph{Exact kernel ridge regression.} Three constructions, all Mat\'ern kernels on the
+\paragraph{Exact kernel ridge regression.} Three constructions, all Mat\'ern kernels \cite{stein} on the
 standardized inputs with the length scale expressed as a multiple of the median pairwise
 distance of the fit set. The listed nugget is $\gamma$ in $(K+n\gamma I)\alpha=Z$, not the unscaled
 diagonal term. The subset baseline is a Mat\'ern-$5/2$ kernel fitted on a uniformly drawn subset of 4{,}000 training
-points, one eigendecomposition per length scale, multiplier in $\{1,2\}$, nugget in
+points --- the landmark choice of a Nystr\"om approximation \cite{nystrom,drineas} --- one
+eigendecomposition per length scale, multiplier in $\{1,2\}$, nugget in
 $\{10^{-8},10^{-6},10^{-4},10^{-2}\}$. The second is the exact solve on every training row:
 smoothness $\nu\in\{3/2,5/2\}$, multiplier in $\{0.5,1,2,4\}$ and the same nugget grid, tuned on
 validation from a 6{,}000-row training subsample and the winner refit on all 18{,}884 rows by one
-Cholesky factorization. The third gives each input its own length scale: starting from the
+Cholesky factorization \cite{golubvanloan}. The third gives each input its own length scale, an
+automatic relevance determination \cite{neal,rw}: starting from the
 isotropic winner, a coordinate search over per-input multipliers in $\{1/4,1/2,1,2,4\}$, two
 sweeps, scored on validation, after which the smoothness, scale and nugget are re-tuned at the
 found metric and the solve is refit on every row. The third construction allows the kernel to adapt to the input anisotropy measured in
 Section~\ref{sec:data}.
 
 \paragraph{Fully connected networks.} Three ELU hidden layers of 512 units per component,
-trained on the 285 standardized bands with AdamW at learning rate $10^{-3}$, cosine decay, batch
-size 1024, weight decay $10^{-6}$, up to 150 epochs with early stopping on validation loss
+trained on the 285 standardized bands with AdamW \cite{adam,adamw} at learning rate $10^{-3}$, cosine decay, batch
+size 1024, weight decay $10^{-6}$, up to 150 epochs with early stopping on validation loss \cite{prechelt}
 (patience 25). Five networks are trained per component and seed from different initializations;
 the table reports the first and the mean of the five.
 
@@ -570,6 +677,12 @@ whereas the gradient construction selects one exponent for all four components.
 
 \input{residual_analysis}
 
+\section{Retrieval-error transfer and the sensitivity of learned corrections}\label{sec:theory}
+
+\input{sec_theory_new}
+
+\input{sec_results_new}
+
 \section{Comparison with OCO-2}\label{sec:oco2}
 
 The companion paper \cite{nmkc} applies the same construction to the OCO-2 radiative-transfer
@@ -648,7 +761,7 @@ its $128 \times 384$ grid (density, pressure, velocity), active matter on $256 \
 pressure channels. ClimSim is the low-resolution release, 124 inputs to 128 tendencies, with
 100{,}000 training rows drawn from the 10.1M available and validation and test taken from the
 release's own validation and scoring files. The correction-coefficient corpus is the paired
-6S/libRadtran Sentinel-2 set, seven state variables and band wavelength mapping to the three
+6S/libRadtran Sentinel-2 set \cite{vermote,mayer}, seven state variables and band wavelength mapping to the three
 libRadtran coefficients, split by atmospheric state so that all bands of a state travel
 together. The inputs are wavelength, solar zenith, view zenith, relative azimuth, aerosol
 optical depth, water vapor, ozone and elevation. The multi-fidelity configuration adds the
@@ -666,7 +779,7 @@ The families are those of Section~\ref{sec:methods} with two differences forced 
 reference family is a ridge regression linear in whatever inputs the models receive, not the
 cubic of Table~\ref{tab:results}: a cubic expansion of a 256-dimensional input is not tractable,
 and the linear reference is used consistently for the additional configurations. And the kernel solves are exact only when the training block has at most
-20{,}000 rows; above that they use a Nystr\"om approximation on 6{,}000 uniformly drawn
+20{,}000 rows; above that they use a Nystr\"om approximation \cite{nystrom} on 6{,}000 uniformly drawn
 landmarks. That cap binds on ClimSim, on the Helmholtz staircase at 20{,}384 rows, and on the
 two correction-coefficient configurations. Those entries are what a capped fit gives; they are
 approximate rather than full dense solves. Their errors need not bound those of the
@@ -777,6 +890,44 @@ source-norm estimate; the observed learning slopes describe only the measured sa
 range. The OCO-2 and additional-corpus comparisons likewise support task-dependent choices
 of representation and kernel metric, rather than a single preferred model family.
 
+Theorem~\ref{thm:transfer} turns the forward--inverse distinction into a quantitative
+statement. The reflectance error of the constrained retrieval is at most the
+transmission-weighted component error divided by the transmission, with constant one, and
+the mean-square error over an evaluation distribution is bounded by the tail mass of the
+transmission plus the mean of that ratio where the transmission is not small. On the EMIT
+table the absolute component errors of every head are not concentrated in the opaque bands;
+the retrieval tails come from dividing ordinary errors by a vanishing transmission, and the
+observed profile exponents are far from the value at which Theorem~\ref{thm:profile} gives a
+rate without loss. Two consequences follow for retrieval validation. On the all-band
+distribution the reflectance tails measure the opaque bands and rank the heads by where
+their small errors happen to sit; on a passband with transmission bounded below, the
+component rate transfers unchanged, and the heads are compared there. Proposition~\ref{prop:perturb}
+adds the other half of the picture: a Nystr\"om approximation \cite{nystrom,falkon}, a compressed representation
+or a changed ridge moves the corrected predictor through its action on the fitted residual,
+so the bound to check before trusting an approximation is the residual-action bound, which
+holds at every held-out row in the experiments and is finite where a bound in the norm of
+the Gram perturbation is not.
+
+The replication at further splits, the ridge path and the two external comparisons sharpen the
+picture in three ways. The concatenated-feature kernel's gain over the single-member kernel
+survives four new splits in the mean and, at these splits, in the reflectance tail as well, so
+the tail cost belongs to the stacking step and not to the wider representation. The correction
+degrades gracefully where its kernel step does not: along the ridge the kernel alone loses an
+order of magnitude before the corrected predictor loses a factor of two, because the network mean
+carries the prediction once the kernel is over-smoothed, which is the content of
+Proposition~\ref{prop:sensitivity} read on data. The kernel on the state inputs is not the limiting
+choice either: across ten of them the best is within two hundredths of a point of the kernel on a
+modest network's features, and what moves the error is combination, the convex stack of all heads
+standing roughly a quarter below the best single head on three of the four components; regularising the network changes its
+error little, and both kernel steps compress the differences between its arms by an order of
+magnitude, the correction doing the work the regulariser could not. And the metric decides the model on the two
+benchmarks in the same way it decides it here: on the correction-coefficient corpus the
+residual-corrected network improves on the published values in all four metrics on both splits,
+with the widest margin out of distribution, while on OCO-2 the heads that win in the reduced
+coordinates lose by a factor of two to three in radiance and vice versa, and the rule that aligns
+the combination with the radiance metric buys its improvement entirely in coordinates that carry
+little radiance.
+
 Accuracy must also be considered alongside cost. Dense kernel regression stores order
 $n^2$ entries and requires order $n^3$ operations for factorization. One
 $18{,}884\times18{,}884$ double-precision matrix occupies approximately $2.85$ GB before
@@ -799,8 +950,8 @@ The research presented in this paper was supported by the European Research Coun
 the European Union's Horizon Europe research and innovation programme (grant agreement
 No.~101041711), by the Simons Foundation as part of the Collaboration on the Mathematical and
 Scientific Foundations of Deep Learning, by Heights Labs, by Convex Nexus Capital, by the Israel
-Science Foundation (grant number 2258/19), and by the Israel Science Foundation (ISF Grant
-4101/25).
+Science Foundation (grant number 2258/19), by the Israel Science Foundation (ISF Grant
+4101/25), and by Google Cloud through its education credits program (credit 530550103).
 
 \section*{Declaration of competing interest}
 
@@ -816,7 +967,14 @@ comparisons, scaling experiments, diagnostics and figure generation, and drafted
 manuscript from the author's data and the methodology of \cite{nmkc}. ChatGPT (OpenAI)
 developed the residual-error and inversion-stability arguments, checked the finite
 identities, analysed the stored per-split results, implemented the conditioning diagnostics
-and verification tests, and edited the manuscript.
+and verification tests, and edited the manuscript. Claude Code implemented and ran the
+later experiments of Sections~\ref{sec:results-transfer}--\ref{sec:results-benchmarks}: the
+transmission-conditioned retrieval diagnostics, the ten-kernel comparison and its
+combiners, the regularisation suite, the ridge-path and perturbation measurements, the
+synthetic reference, the matched benchmark rescoring, and the OCO-2 selection through the
+Gram matrix of its design; it also generated every table of those sections from the stored
+run records and wrote their text. The author supplied the data, set the questions and
+reviewed the results.
 
 \section*{Data and code availability}
 
@@ -983,6 +1141,467 @@ J.~M. Bates and C.~W.~J. Granger.
 H.~Owhadi and G.~R. Yoo.
 \newblock Kernel flows: from learning kernels from data into the abyss.
 \newblock \emph{Journal of Computational Physics}, 389:22--47, 2019.
+
+\bibitem{vermote}
+E.~F. Vermote, D.~Tanr\'e, J.~L. Deuz\'e, M.~Herman, and J.-J. Morcrette.
+\newblock Second simulation of the satellite signal in the solar spectrum, 6S: an overview.
+\newblock \emph{IEEE Transactions on Geoscience and Remote Sensing}, 35(3):675--686, 1997.
+
+\bibitem{mayer}
+B.~Mayer and A.~Kylling.
+\newblock Technical note: the {libRadtran} software package for radiative transfer
+calculations --- description and examples of use.
+\newblock \emph{Atmospheric Chemistry and Physics}, 5:1855--1877, 2005.
+
+\bibitem{emde}
+C.~Emde, R.~Buras-Schnell, A.~Kylling, B.~Mayer, J.~Gasteiger, U.~Hamann, J.~Kylling,
+B.~Richter, C.~Pause, T.~Dowling, and L.~Bugliaro.
+\newblock The {libRadtran} software package for radiative transfer calculations (version 2.0.1).
+\newblock \emph{Geoscientific Model Development}, 9:1647--1672, 2016.
+
+\bibitem{modtran}
+A.~Berk, P.~Conforti, R.~Kennett, T.~Perkins, F.~Hawes, and J.~van~den~Bosch.
+\newblock {MODTRAN6}: a major upgrade of the {MODTRAN} radiative transfer code.
+\newblock In \emph{Proceedings of SPIE 9088, Algorithms and Technologies for Multispectral,
+Hyperspectral, and Ultraspectral Imagery XX}, 2014.
+
+\bibitem{rodgers}
+C.~D. Rodgers.
+\newblock \emph{Inverse Methods for Atmospheric Sounding: Theory and Practice}.
+\newblock World Scientific, 2000.
+
+\bibitem{eldering}
+A.~Eldering, C.~W. O'Dell, P.~O. Wennberg, D.~Crisp, M.~R. Gunson, et~al.
+\newblock The {Orbiting Carbon Observatory-2}: first 18 months of science data products.
+\newblock \emph{Atmospheric Measurement Techniques}, 10:549--563, 2017.
+
+\bibitem{crisp}
+D.~Crisp, H.~R. Pollock, R.~Rosenberg, L.~Chapsky, R.~A.~M. Lee, et~al.
+\newblock The on-orbit performance of the {Orbiting Carbon Observatory-2} instrument and its
+radiometrically calibrated products.
+\newblock \emph{Atmospheric Measurement Techniques}, 10:59--81, 2017.
+
+\bibitem{connor}
+B.~J. Connor, H.~Boesch, G.~Toon, B.~Sen, C.~Miller, and D.~Crisp.
+\newblock Orbiting {Carbon} {Observatory}: inverse method and prospective error analysis.
+\newblock \emph{Journal of Geophysical Research: Atmospheres}, 113:D05305, 2008.
+
+\bibitem{odell}
+C.~W. O'Dell, B.~Connor, H.~Bosch, D.~O'Brien, C.~Frankenberg, et~al.
+\newblock The {ACOS} {CO$_2$} retrieval algorithm --- part 1: description and validation
+against synthetic observations.
+\newblock \emph{Atmospheric Measurement Techniques}, 5:99--121, 2012.
+
+\bibitem{cawse}
+K.~Cawse-Nicholson, P.~A. Townsend, D.~Schimel, A.~M. Assiri, P.~L. Blake, et~al.
+\newblock {NASA} surface biology and geology designated observable: a perspective on surface
+imaging algorithms.
+\newblock \emph{Remote Sensing of Environment}, 257:112349, 2021.
+
+\bibitem{chevallier}
+F.~Chevallier, F.~Ch\'eruy, N.~A. Scott, and A.~Ch\'edin.
+\newblock A neural network approach for a fast and accurate computation of a longwave
+radiative budget.
+\newblock \emph{Journal of Applied Meteorology}, 37:1385--1397, 1998.
+
+\bibitem{krasnopolsky}
+V.~M. Krasnopolsky, M.~S. Fox-Rabinovitz, and D.~V. Chalikov.
+\newblock New approach to calculation of atmospheric model physics: accurate and fast neural
+network emulation of longwave radiation in a climate model.
+\newblock \emph{Monthly Weather Review}, 133:1370--1383, 2005.
+
+\bibitem{veerman}
+M.~A. Veerman, R.~Pincus, R.~Stoffer, C.~M. van~Leeuwen, D.~Podareanu, and
+C.~C. van~Heerwaarden.
+\newblock Predicting atmospheric optical properties for radiative transfer computations using
+neural networks.
+\newblock \emph{Philosophical Transactions of the Royal Society A}, 379:20200095, 2021.
+
+\bibitem{ukkonen}
+P.~Ukkonen.
+\newblock Exploring pathways to more accurate machine learning emulation of atmospheric
+radiative transfer.
+\newblock \emph{Journal of Advances in Modeling Earth Systems}, 14:e2021MS002875, 2022.
+
+\bibitem{rasp}
+S.~Rasp, M.~S. Pritchard, and P.~Gentine.
+\newblock Deep learning to represent subgrid processes in climate models.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 115(39):9684--9689, 2018.
+
+\bibitem{brenowitz}
+N.~D. Brenowitz and C.~S. Bretherton.
+\newblock Prognostic validation of a neural network unified physics parameterization.
+\newblock \emph{Geophysical Research Letters}, 45:6289--6298, 2018.
+
+\bibitem{rivera}
+J.~P. Rivera, J.~Verrelst, J.~G\'omez-Dans, J.~Mu\~noz-Mar\'i, J.~Moreno, and G.~Camps-Valls.
+\newblock An emulator toolbox to approximate radiative transfer models with statistical
+learning.
+\newblock \emph{Remote Sensing}, 7(7):9347--9370, 2015.
+
+\bibitem{verrelst}
+J.~Verrelst, N.~Sabater, J.~P. Rivera, J.~Mu\~noz-Mar\'i, J.~Vicent, G.~Camps-Valls, and
+J.~Moreno.
+\newblock Emulation of leaf, canopy and atmosphere radiative transfer models for fast global
+sensitivity analysis.
+\newblock \emph{Remote Sensing}, 8(8):673, 2016.
+
+\bibitem{gomezdans}
+J.~L. G\'omez-Dans, P.~E. Lewis, and M.~Disney.
+\newblock Efficient emulation of radiative transfer codes using {Gaussian} processes and
+application to land surface parameter inferences.
+\newblock \emph{Remote Sensing}, 8(2):119, 2016.
+
+\bibitem{campsvalls}
+G.~Camps-Valls, J.~Verrelst, J.~Mu\~noz-Mar\'i, V.~Laparra, F.~Mateo-Jim\'enez, and
+J.~G\'omez-Dans.
+\newblock A survey on {Gaussian} processes for earth-observation data analysis.
+\newblock \emph{IEEE Geoscience and Remote Sensing Magazine}, 4(2):58--78, 2016.
+
+\bibitem{sacks}
+J.~Sacks, W.~J. Welch, T.~J. Mitchell, and H.~P. Wynn.
+\newblock Design and analysis of computer experiments.
+\newblock \emph{Statistical Science}, 4(4):409--423, 1989.
+
+\bibitem{kennedyohagan}
+M.~C. Kennedy and A.~O'Hagan.
+\newblock Predicting the output from a complex computer code when fast approximations are
+available.
+\newblock \emph{Biometrika}, 87(1):1--13, 2000.
+
+\bibitem{kennedycalib}
+M.~C. Kennedy and A.~O'Hagan.
+\newblock Bayesian calibration of computer models.
+\newblock \emph{Journal of the Royal Statistical Society: Series B}, 63(3):425--464, 2001.
+
+\bibitem{perdikaris}
+P.~Perdikaris, M.~Raissi, A.~Damianou, N.~D. Lawrence, and G.~E. Karniadakis.
+\newblock Nonlinear information fusion algorithms for data-efficient multi-fidelity modelling.
+\newblock \emph{Proceedings of the Royal Society A}, 473:20160751, 2017.
+
+\bibitem{peherstorfer}
+B.~Peherstorfer, K.~Willcox, and M.~Gunzburger.
+\newblock Survey of multifidelity methods in uncertainty propagation, inference, and
+optimization.
+\newblock \emph{SIAM Review}, 60(3):550--591, 2018.
+
+\bibitem{aronszajn}
+N.~Aronszajn.
+\newblock Theory of reproducing kernels.
+\newblock \emph{Transactions of the American Mathematical Society}, 68:337--404, 1950.
+
+\bibitem{kimeldorf}
+G.~Kimeldorf and G.~Wahba.
+\newblock Some results on {Tchebycheffian} spline functions.
+\newblock \emph{Journal of Mathematical Analysis and Applications}, 33(1):82--95, 1971.
+
+\bibitem{wahba}
+G.~Wahba.
+\newblock \emph{Spline Models for Observational Data}.
+\newblock SIAM, 1990.
+
+\bibitem{representer}
+B.~Sch\"olkopf, R.~Herbrich, and A.~J. Smola.
+\newblock A generalized representer theorem.
+\newblock In \emph{Proceedings of the 14th Annual Conference on Computational Learning
+Theory}, pages 416--426, 2001.
+
+\bibitem{scholkopf}
+B.~Sch\"olkopf and A.~J. Smola.
+\newblock \emph{Learning with Kernels}.
+\newblock MIT Press, 2002.
+
+\bibitem{steinwart}
+I.~Steinwart and A.~Christmann.
+\newblock \emph{Support Vector Machines}.
+\newblock Springer, 2008.
+
+\bibitem{stein}
+M.~L. Stein.
+\newblock \emph{Interpolation of Spatial Data: Some Theory for Kriging}.
+\newblock Springer, 1999.
+
+\bibitem{smalezhou}
+S.~Smale and D.-X. Zhou.
+\newblock Learning theory estimates via integral operators and their approximations.
+\newblock \emph{Constructive Approximation}, 26:153--172, 2007.
+
+\bibitem{hoerl}
+A.~E. Hoerl and R.~W. Kennard.
+\newblock Ridge regression: biased estimation for nonorthogonal problems.
+\newblock \emph{Technometrics}, 12(1):55--67, 1970.
+
+\bibitem{engl}
+H.~W. Engl, M.~Hanke, and A.~Neubauer.
+\newblock \emph{Regularization of Inverse Problems}.
+\newblock Kluwer, 1996.
+
+\bibitem{micchelli}
+C.~A. Micchelli and M.~Pontil.
+\newblock On learning vector-valued functions.
+\newblock \emph{Neural Computation}, 17(1):177--204, 2005.
+
+\bibitem{alvarez}
+M.~A. \'Alvarez, L.~Rosasco, and N.~D. Lawrence.
+\newblock Kernels for vector-valued functions: a review.
+\newblock \emph{Foundations and Trends in Machine Learning}, 4(3):195--266, 2012.
+
+\bibitem{owhadibnh}
+H.~Owhadi.
+\newblock Bayesian numerical homogenization.
+\newblock \emph{Multiscale Modeling \& Simulation}, 13(3):812--828, 2015.
+
+\bibitem{owhadiscovel}
+H.~Owhadi and C.~Scovel.
+\newblock \emph{Operator-Adapted Wavelets, Fast Solvers, and Numerical Homogenization}.
+\newblock Cambridge University Press, 2019.
+
+\bibitem{chenowhadi}
+Y.~Chen, B.~Hosseini, H.~Owhadi, and A.~M. Stuart.
+\newblock Solving and learning nonlinear {PDEs} with {Gaussian} processes.
+\newblock \emph{Journal of Computational Physics}, 447:110668, 2021.
+
+\bibitem{hamziowhadi}
+B.~Hamzi and H.~Owhadi.
+\newblock Learning dynamical systems from data: a simple cross-validation perspective, part I:
+parametric kernel flows.
+\newblock \emph{Physica D: Nonlinear Phenomena}, 421:132817, 2021.
+
+\bibitem{nystrom}
+C.~K.~I. Williams and M.~Seeger.
+\newblock Using the {Nystr\"om} method to speed up kernel machines.
+\newblock In \emph{Advances in Neural Information Processing Systems 13}, pages 682--688, 2001.
+
+\bibitem{drineas}
+P.~Drineas and M.~W. Mahoney.
+\newblock On the {Nystr\"om} method for approximating a {Gram} matrix for improved
+kernel-based learning.
+\newblock \emph{Journal of Machine Learning Research}, 6:2153--2175, 2005.
+
+\bibitem{bachlowrank}
+F.~Bach.
+\newblock Sharp analysis of low-rank kernel matrix approximations.
+\newblock In \emph{Proceedings of the 26th Annual Conference on Learning Theory}, pages
+185--209, 2013.
+
+\bibitem{rahimirecht}
+A.~Rahimi and B.~Recht.
+\newblock Random features for large-scale kernel machines.
+\newblock In \emph{Advances in Neural Information Processing Systems 20}, pages 1177--1184,
+2008.
+
+\bibitem{nelsenstuart}
+N.~H. Nelsen and A.~M. Stuart.
+\newblock The random feature model for input-output maps between {Banach} spaces.
+\newblock \emph{SIAM Journal on Scientific Computing}, 43(5):A3212--A3243, 2021.
+
+\bibitem{falkon}
+A.~Rudi, L.~Carratino, and L.~Rosasco.
+\newblock {FALKON}: an optimal large scale kernel method.
+\newblock In \emph{Advances in Neural Information Processing Systems 30}, 2017.
+
+\bibitem{meanti}
+G.~Meanti, L.~Carratino, L.~Rosasco, and A.~Rudi.
+\newblock Kernel methods through the roof: handling billions of points efficiently.
+\newblock In \emph{Advances in Neural Information Processing Systems 33}, 2020.
+
+\bibitem{quinonero}
+J.~Qui\~nonero-Candela and C.~E. Rasmussen.
+\newblock A unifying view of sparse approximate {Gaussian} process regression.
+\newblock \emph{Journal of Machine Learning Research}, 6:1939--1959, 2005.
+
+\bibitem{titsias}
+M.~K. Titsias.
+\newblock Variational learning of inducing variables in sparse {Gaussian} processes.
+\newblock In \emph{Proceedings of the 12th International Conference on Artificial Intelligence
+and Statistics}, pages 567--574, 2009.
+
+\bibitem{hensman}
+J.~Hensman, N.~Fusi, and N.~D. Lawrence.
+\newblock {Gaussian} processes for big data.
+\newblock In \emph{Proceedings of the 29th Conference on Uncertainty in Artificial
+Intelligence}, pages 282--290, 2013.
+
+\bibitem{kissgp}
+A.~G. Wilson and H.~Nickisch.
+\newblock Kernel interpolation for scalable structured {Gaussian} processes.
+\newblock In \emph{Proceedings of the 32nd International Conference on Machine Learning},
+pages 1775--1784, 2015.
+
+\bibitem{gpytorch}
+J.~R. Gardner, G.~Pleiss, D.~Bindel, K.~Q. Weinberger, and A.~G. Wilson.
+\newblock {GPyTorch}: blackbox matrix-matrix {Gaussian} process inference with {GPU}
+acceleration.
+\newblock In \emph{Advances in Neural Information Processing Systems 31}, 2018.
+
+\bibitem{wilsonadams}
+A.~G. Wilson and R.~P. Adams.
+\newblock {Gaussian} process kernels for pattern discovery and extrapolation.
+\newblock In \emph{Proceedings of the 30th International Conference on Machine Learning},
+pages 1067--1075, 2013.
+
+\bibitem{additivegp}
+D.~Duvenaud, H.~Nickisch, and C.~E. Rasmussen.
+\newblock Additive {Gaussian} processes.
+\newblock In \emph{Advances in Neural Information Processing Systems 24}, 2011.
+
+\bibitem{duvenaudstructure}
+D.~Duvenaud, J.~R. Lloyd, R.~Grosse, J.~B. Tenenbaum, and Z.~Ghahramani.
+\newblock Structure discovery in nonparametric regression through compositional kernel search.
+\newblock In \emph{Proceedings of the 30th International Conference on Machine Learning},
+pages 1166--1174, 2013.
+
+\bibitem{lanckriet}
+G.~R.~G. Lanckriet, N.~Cristianini, P.~Bartlett, L.~El~Ghaoui, and M.~I. Jordan.
+\newblock Learning the kernel matrix with semidefinite programming.
+\newblock \emph{Journal of Machine Learning Research}, 5:27--72, 2004.
+
+\bibitem{gonen}
+M.~G\"onen and E.~Alpayd\i{}n.
+\newblock Multiple kernel learning algorithms.
+\newblock \emph{Journal of Machine Learning Research}, 12:2211--2268, 2011.
+
+\bibitem{cristianini}
+N.~Cristianini, J.~Shawe-Taylor, A.~Elisseeff, and J.~Kandola.
+\newblock On kernel-target alignment.
+\newblock In \emph{Advances in Neural Information Processing Systems 14}, pages 367--373, 2002.
+
+\bibitem{cortesalign}
+C.~Cortes, M.~Mohri, and A.~Rostamizadeh.
+\newblock Algorithms for learning kernels based on centered alignment.
+\newblock \emph{Journal of Machine Learning Research}, 13:795--828, 2012.
+
+\bibitem{stonecv}
+M.~Stone.
+\newblock Cross-validatory choice and assessment of statistical predictions.
+\newblock \emph{Journal of the Royal Statistical Society: Series B}, 36(2):111--147, 1974.
+
+\bibitem{gcv}
+G.~H. Golub, M.~Heath, and G.~Wahba.
+\newblock Generalized cross-validation as a method for choosing a good ridge parameter.
+\newblock \emph{Technometrics}, 21(2):215--223, 1979.
+
+\bibitem{arlot}
+S.~Arlot and A.~Celisse.
+\newblock A survey of cross-validation procedures for model selection.
+\newblock \emph{Statistics Surveys}, 4:40--79, 2010.
+
+\bibitem{esl}
+T.~Hastie, R.~Tibshirani, and J.~Friedman.
+\newblock \emph{The Elements of Statistical Learning}.
+\newblock Springer, second edition, 2009.
+
+\bibitem{hoeffding}
+W.~Hoeffding.
+\newblock Probability inequalities for sums of bounded random variables.
+\newblock \emph{Journal of the American Statistical Association}, 58(301):13--30, 1963.
+
+\bibitem{hornik}
+K.~Hornik, M.~Stinchcombe, and H.~White.
+\newblock Multilayer feedforward networks are universal approximators.
+\newblock \emph{Neural Networks}, 2(5):359--366, 1989.
+
+\bibitem{adam}
+D.~P. Kingma and J.~Ba.
+\newblock {Adam}: a method for stochastic optimization.
+\newblock In \emph{International Conference on Learning Representations}, 2015.
+
+\bibitem{adamw}
+I.~Loshchilov and F.~Hutter.
+\newblock Decoupled weight decay regularization.
+\newblock In \emph{International Conference on Learning Representations}, 2019.
+
+\bibitem{prechelt}
+L.~Prechelt.
+\newblock Early stopping --- but when?
+\newblock In \emph{Neural Networks: Tricks of the Trade}, volume 1524 of \emph{Lecture Notes
+in Computer Science}, pages 55--69. Springer, 1998.
+
+\bibitem{dropout}
+N.~Srivastava, G.~Hinton, A.~Krizhevsky, I.~Sutskever, and R.~Salakhutdinov.
+\newblock Dropout: a simple way to prevent neural networks from overfitting.
+\newblock \emph{Journal of Machine Learning Research}, 15:1929--1958, 2014.
+
+\bibitem{neal}
+R.~M. Neal.
+\newblock \emph{Bayesian Learning for Neural Networks}.
+\newblock Springer, 1996.
+
+\bibitem{chosaul}
+Y.~Cho and L.~K. Saul.
+\newblock Kernel methods for deep learning.
+\newblock In \emph{Advances in Neural Information Processing Systems 22}, pages 342--350, 2009.
+
+\bibitem{leenngp}
+J.~Lee, Y.~Bahri, R.~Novak, S.~S. Schoenholz, J.~Pennington, and J.~Sohl-Dickstein.
+\newblock Deep neural networks as {Gaussian} processes.
+\newblock In \emph{International Conference on Learning Representations}, 2018.
+
+\bibitem{matthews}
+A.~G. de~G. Matthews, M.~Rowland, J.~Hron, R.~E. Turner, and Z.~Ghahramani.
+\newblock {Gaussian} process behaviour in wide deep neural networks.
+\newblock In \emph{International Conference on Learning Representations}, 2018.
+
+\bibitem{ntk}
+A.~Jacot, F.~Gabriel, and C.~Hongler.
+\newblock Neural tangent kernel: convergence and generalization in neural networks.
+\newblock In \emph{Advances in Neural Information Processing Systems 31}, 2018.
+
+\bibitem{arora}
+S.~Arora, S.~S. Du, W.~Hu, Z.~Li, R.~Salakhutdinov, and R.~Wang.
+\newblock On exact computation with an infinitely wide neural net.
+\newblock In \emph{Advances in Neural Information Processing Systems 32}, 2019.
+
+\bibitem{belkin}
+M.~Belkin, S.~Ma, and S.~Mandal.
+\newblock To understand deep learning we need to understand kernel learning.
+\newblock In \emph{Proceedings of the 35th International Conference on Machine Learning},
+pages 541--549, 2018.
+
+\bibitem{kolmogorov}
+A.~N. Kolmogorov.
+\newblock On the representation of continuous functions of several variables by superpositions
+of continuous functions of one variable and addition.
+\newblock \emph{Doklady Akademii Nauk SSSR}, 114:953--956, 1957.
+
+\bibitem{kan}
+Z.~Liu, Y.~Wang, S.~Vaidya, F.~Ruehle, J.~Halverson, M.~Solja\v{c}i\'c, T.~Y. Hou, and
+M.~Tegmark.
+\newblock {KAN}: {Kolmogorov--Arnold} networks.
+\newblock arXiv:2404.19756, 2024.
+
+\bibitem{kovachki}
+N.~Kovachki, Z.~Li, B.~Liu, K.~Azizzadenesheli, K.~Bhattacharya, A.~Stuart, and
+A.~Anandkumar.
+\newblock Neural operator: learning maps between function spaces with applications to {PDEs}.
+\newblock \emph{Journal of Machine Learning Research}, 24(89):1--97, 2023.
+
+\bibitem{lufair}
+L.~Lu, X.~Meng, S.~Cai, Z.~Mao, S.~Goswami, Z.~Zhang, and G.~E. Karniadakis.
+\newblock A comprehensive and fair comparison of two neural operators (with practical
+extensions) based on {FAIR} data.
+\newblock \emph{Computer Methods in Applied Mechanics and Engineering}, 393:114778, 2022.
+
+\bibitem{pinn}
+M.~Raissi, P.~Perdikaris, and G.~E. Karniadakis.
+\newblock Physics-informed neural networks: a deep learning framework for solving forward and
+inverse problems involving nonlinear partial differential equations.
+\newblock \emph{Journal of Computational Physics}, 378:686--707, 2019.
+
+\bibitem{golubvanloan}
+G.~H. Golub and C.~F. Van~Loan.
+\newblock \emph{Matrix Computations}.
+\newblock Johns Hopkins University Press, fourth edition, 2013.
+
+\bibitem{higham}
+N.~J. Higham.
+\newblock \emph{Accuracy and Stability of Numerical Algorithms}.
+\newblock SIAM, second edition, 2002.
+
+\bibitem{stewartsun}
+G.~W. Stewart and J.-G. Sun.
+\newblock \emph{Matrix Perturbation Theory}.
+\newblock Academic Press, 1990.
 
 \end{thebibliography}
 

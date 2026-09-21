@@ -1,0 +1,42 @@
+{
+ "mk_emit_Y1_s102": {
+  "seconds": 453.8,
+  "rc": 0
+ },
+ "mk_emit_Y2_s102": {
+  "seconds": 444.9,
+  "rc": 0
+ },
+ "mk_emit_Y3_s102": {
+  "seconds": 443.0,
+  "rc": 0
+ },
+ "mk_emit_Y4_s102": {
+  "seconds": 433.9,
+  "rc": 0
+ },
+ "mk_emit_Y1_s103": {
+  "seconds": 440.6,
+  "rc": 0
+ },
+ "mk_emit_Y2_s103": {
+  "seconds": 441.1,
+  "rc": 0
+ },
+ "mk_emit_Y3_s103": {
+  "seconds": 444.1,
+  "rc": 0
+ },
+ "mk_emit_Y4_s103": {
+  "seconds": 304.7,
+  "rc": 1
+ },
+ "rs_emit_s102": {
+  "seconds": 253.0,
+  "rc": 0
+ },
+ "rs_emit_s103": {
+  "seconds": 246.2,
+  "rc": 0
+ }
+}

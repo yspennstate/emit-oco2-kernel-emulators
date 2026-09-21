@@ -29,6 +29,17 @@ configurations. The correction-coefficient corpus uses eight state/wavelength
 inputs (eleven with low-fidelity coefficients) and a 0.05 denominator floor in
 its relative-error metric.
 
+## Revision of 21 September 2026
+
+The manuscript now carries a theory section and six measurement sections that read the
+quantities it names: retrieval error conditioned on transmission, ten kernels on the state
+inputs with three combiners, a regularisation suite for the network, the ridge path and the
+perturbation bounds, a synthetic reference, the correction-coefficient benchmark rescored
+under its own protocol, and OCO-2 rerun with the selection carried out through the Gram
+matrix of its design. [What changed and which script produced it](docs/REVISION_2026-09-21.md);
+the records are under `results/e2bc`, `results/oco2`, `results/pkanrtm`, `results/ridge` and
+`results/tc`.
+
 ## Reproduction
 
 Python 3.11, the analysis requirements and a TeX installation are needed for the
@@ -39,6 +50,7 @@ python -m pip install -r requirements-revision.txt
 python -m unittest discover -s code -p 'test_publication_revision.py' -v
 python code/make_revision_tables.py
 python code/make_tables.py
+python code/make_v2_tables.py
 latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
 ```
 

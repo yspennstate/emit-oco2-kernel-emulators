@@ -1,0 +1,235 @@
+{
+ "band": "o2",
+ "heads": [
+  "dkr_flat",
+  "dkr_radx",
+  "dkr_wnum",
+  "kernel_ard",
+  "kernel_raw",
+  "mean_flat",
+  "mean_radx",
+  "mean_wnum",
+  "ridge_flat",
+  "ridge_radx",
+  "ridge_wnum"
+ ],
+ "n_val": 2000,
+ "n_te": 2000,
+ "singles": {
+  "dkr_flat": {
+   "reduced": 4.114299798529269,
+   "radiance": 0.07433340330227943
+  },
+  "dkr_radx": {
+   "reduced": 20.106019056884925,
+   "radiance": 0.035108898162478336
+  },
+  "dkr_wnum": {
+   "reduced": 22.082591018743788,
+   "radiance": 0.032799840918123414
+  },
+  "kernel_ard": {
+   "reduced": 30.008193432849552,
+   "radiance": 0.3298333007124792
+  },
+  "kernel_raw": {
+   "reduced": 40.43074064330591,
+   "radiance": 0.23964766048011044
+  },
+  "mean_flat": {
+   "reduced": 4.455470036107973,
+   "radiance": 0.16590538416499637
+  },
+  "mean_radx": {
+   "reduced": 59.195066324693315,
+   "radiance": 0.05132219502810499
+  },
+  "mean_wnum": {
+   "reduced": 49.57121386425427,
+   "radiance": 0.04358870565118796
+  },
+  "ridge_flat": {
+   "reduced": 4.726522264530722,
+   "radiance": 0.20850367392455843
+  },
+  "ridge_radx": {
+   "reduced": 44.39652213680035,
+   "radiance": 0.0554564787263103
+  },
+  "ridge_wnum": {
+   "reduced": 45.40605480775015,
+   "radiance": 0.05300100373643686
+  }
+ },
+ "rules": {
+  "select_reduced": {
+   "winners": [
+    "dkr_wnum",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "ridge_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat"
+   ],
+   "reduced": 4.139703474130087,
+   "radiance": 0.030228137453796256
+  },
+  "select_radiance": {
+   "winners": [
+    "dkr_wnum",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat",
+    "dkr_flat"
+   ],
+   "val_radiance_check": {
+    "incremental": 0.0010835101469366681,
+    "direct": 0.0010835101469366681
+   },
+   "reduced": 4.113916595408651,
+   "radiance": 0.030228133247682976
+  },
+  "stack_reduced": {
+   "reduced": 4.133204819061305,
+   "radiance": 0.027904447608757828
+  },
+  "stack_radiance": {
+   "kkt_gap": 1.0290549198543886e-05,
+   "iterations": 106482,
+   "reduced": 18.29996393747324,
+   "radiance": 0.02719010378235178
+  }
+ },
+ "record": {
+  "kernel_flow": {
+   "reduced": 16.8891,
+   "radiance": 0.0448
+  },
+  "kernel_raw": {
+   "reduced": 40.4307,
+   "radiance": 0.2396
+  },
+  "kernel_ard": {
+   "reduced": 30.0082,
+   "radiance": 0.3298
+  },
+  "mean_flat": {
+   "reduced": 4.4555,
+   "radiance": 0.1659
+  },
+  "dkr_flat": {
+   "reduced": 4.1143,
+   "radiance": 0.0743
+  },
+  "ridge_flat": {
+   "reduced": 4.7265,
+   "radiance": 0.2085
+  },
+  "mean_wnum": {
+   "reduced": 49.5712,
+   "radiance": 0.0436
+  },
+  "dkr_wnum": {
+   "reduced": 22.0826,
+   "radiance": 0.0328
+  },
+  "ridge_wnum": {
+   "reduced": 45.4061,
+   "radiance": 0.053
+  },
+  "mean_radx": {
+   "reduced": 59.1951,
+   "radiance": 0.0513
+  },
+  "dkr_radx": {
+   "reduced": 20.106,
+   "radiance": 0.0351
+  },
+  "ridge_radx": {
+   "reduced": 44.3965,
+   "radiance": 0.0555
+  },
+  "combined": {
+   "reduced": 4.1185,
+   "radiance": 0.0302
+  },
+  "combined_plus_ridge": {
+   "reduced": 4.1397,
+   "radiance": 0.0302
+  },
+  "combined_w": {
+   "reduced": 4.1185,
+   "radiance": 0.0302
+  }
+ },
+ "minutes": 0.98
+}

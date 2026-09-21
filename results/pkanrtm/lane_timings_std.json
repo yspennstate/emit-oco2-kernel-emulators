@@ -1,0 +1,32 @@
+{
+ "pkanrtm_s0_cats_off": {
+  "seconds": 2330.4,
+  "rc": 0,
+  "children_max_rss_gb_so_far": 11.87
+ },
+ "pkanrtm_s0_lowfi_cats_off": {
+  "seconds": 2594.1,
+  "rc": 0,
+  "children_max_rss_gb_so_far": 12.05
+ },
+ "pkanrtm_s1_cats_off": {
+  "seconds": 2252.1,
+  "rc": 0,
+  "children_max_rss_gb_so_far": 12.05
+ },
+ "pkanrtm_s1_lowfi_cats_off": {
+  "seconds": 2503.1,
+  "rc": 0,
+  "children_max_rss_gb_so_far": 12.05
+ },
+ "pkanrtm_s2_cats_off": {
+  "seconds": 2398.1,
+  "rc": 0,
+  "children_max_rss_gb_so_far": 12.05
+ },
+ "pkanrtm_s2_lowfi_cats_off": {
+  "seconds": 2708.1,
+  "rc": 0,
+  "children_max_rss_gb_so_far": 12.05
+ }
+}

@@ -1,0 +1,22 @@
+{
+ "mk_emit_Y1_s101": {
+  "seconds": 110.2,
+  "rc": 1
+ },
+ "mk_emit_Y2_s101": {
+  "seconds": 100.3,
+  "rc": 1
+ },
+ "mk_emit_Y3_s101": {
+  "seconds": 100.2,
+  "rc": 1
+ },
+ "mk_emit_Y4_s101": {
+  "seconds": 100.7,
+  "rc": 1
+ },
+ "rs_emit_s101": {
+  "seconds": 238.2,
+  "rc": 0
+ }
+}

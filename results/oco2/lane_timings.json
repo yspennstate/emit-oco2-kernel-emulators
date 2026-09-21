@@ -1,0 +1,38 @@
+{
+ "oco_o2_s0": {
+  "seconds": 403.7,
+  "rc": 0
+ },
+ "oco_wco2_s0": {
+  "seconds": 410.7,
+  "rc": 0
+ },
+ "oco_sco2_s0": {
+  "seconds": 406.6,
+  "rc": 0
+ },
+ "oco_o2_s1": {
+  "seconds": 403.1,
+  "rc": 0
+ },
+ "oco_wco2_s1": {
+  "seconds": 401.0,
+  "rc": 0
+ },
+ "oco_sco2_s1": {
+  "seconds": 403.1,
+  "rc": 0
+ },
+ "oco_o2_s2": {
+  "seconds": 412.4,
+  "rc": 0
+ },
+ "oco_wco2_s2": {
+  "seconds": 406.6,
+  "rc": 0
+ },
+ "oco_sco2_s2": {
+  "seconds": 407.1,
+  "rc": 0
+ }
+}

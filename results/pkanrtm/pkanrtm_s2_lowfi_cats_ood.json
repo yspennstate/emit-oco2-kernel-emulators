@@ -1,0 +1,196 @@
+{
+ "tag": "pkanrtm_s2_lowfi_cats_ood",
+ "kind": "bench",
+ "corpus": "pkanrtm",
+ "seed": 2,
+ "n": 375723,
+ "d": 20,
+ "q": 3,
+ "exact": false,
+ "epochs": 120,
+ "width": 384,
+ "smoke": false,
+ "conformal": {
+  "head": "stack",
+  "n_cal": 1000,
+  "n_eval": 166640,
+  "score": "relative L2 per case",
+  "a0.1": {
+   "target": 0.9,
+   "q": 0.027176988398232575,
+   "coverage": 0.9063490158425348
+  },
+  "a0.05": {
+   "target": 0.95,
+   "q": 0.05696741612663822,
+   "coverage": 0.9569911185789727
+  }
+ },
+ "wide_grid": false,
+ "centers": 6000,
+ "scale_grid": [
+  0.5,
+  1.0,
+  2.0,
+  4.0
+ ],
+ "nug_grid": [
+  1e-08,
+  1e-06,
+  0.0001,
+  0.01
+ ],
+ "results": {
+  "ridge": {
+   "val": 26.664353978748778,
+   "test": 45.10929097689967,
+   "test_rmse": 0.08048054837990655,
+   "test_smape_pct": 29.064104640550937,
+   "test_nrmse_mean": 0.43850582716405073
+  },
+  "krr": {
+   "val": 7.6683284645864065,
+   "test": 11.018915042882226,
+   "test_rmse": 0.029085765393881143,
+   "test_smape_pct": 11.220590109711537,
+   "test_nrmse_mean": 0.16281992318688018
+  },
+  "lowfi_only": {
+   "val": 31.204549574770546,
+   "test": 53.25649207660086,
+   "test_rmse": 0.1144784331879566,
+   "test_smape_pct": 36.666060598713514,
+   "test_nrmse_mean": 0.6756206740126439
+  },
+  "lowfi_resid": {
+   "val": 7.6584750029306035,
+   "test": 10.964034562122507,
+   "test_rmse": 0.029050910046785044,
+   "test_smape_pct": 11.383335473148879,
+   "test_nrmse_mean": 0.16232826804077513
+  },
+  "mlp": {
+   "val": 1.6873699453318614,
+   "test": 2.1754015135335374,
+   "test_rmse": 0.006755937404627368,
+   "test_smape_pct": 4.308376867801752,
+   "test_nrmse_mean": 0.053728220659311765
+  },
+  "mlp_ens": {
+   "val": 1.2379497880164485,
+   "test": 1.569651163296936,
+   "test_rmse": 0.0060116586684966465,
+   "test_smape_pct": 2.9081682449309234,
+   "test_nrmse_mean": 0.048450815000956805
+  },
+  "mlp_resid": {
+   "val": 1.1107147695116,
+   "test": 1.4496127724171732,
+   "test_rmse": 0.005793991131688827,
+   "test_smape_pct": 2.847205310877018,
+   "test_nrmse_mean": 0.04760326077627263
+  },
+  "dkr": {
+   "val": 1.3118177216955473,
+   "test": 2.4792559464285278,
+   "test_rmse": 0.007119125375467542,
+   "test_smape_pct": 3.5694945698288154,
+   "test_nrmse_mean": 0.05640407620341297
+  },
+  "select": {
+   "val": 1.1107147695116,
+   "test": 1.4496127724171732,
+   "test_rmse": 0.005793991131688827,
+   "test_smape_pct": 2.847205310877018,
+   "test_nrmse_mean": 0.04760326077627263
+  },
+  "stack": {
+   "val": 1.0523709726079598,
+   "test": 1.5735561428294198,
+   "test_rmse": 0.0058798179557989745,
+   "test_smape_pct": 2.820045726860794,
+   "test_nrmse_mean": 0.04846073838126403
+  }
+ },
+ "hyper": {
+  "ridge": {},
+  "krr": {
+   "scale": 6.257816718350132,
+   "nugget": 1e-06,
+   "med": 6.257816718350132,
+   "val_sub": 0.10166396668097645,
+   "exact": false,
+   "wide_grid": false,
+   "centers": 6000,
+   "scale_edge": "",
+   "nug_edge": ""
+  },
+  "lowfi_only": {},
+  "lowfi_resid": {
+   "scale": 6.257816718350132,
+   "nugget": 1e-06,
+   "med": 6.257816718350132,
+   "val_sub": 0.10060335349293534,
+   "exact": false,
+   "wide_grid": false,
+   "centers": 6000,
+   "scale_edge": "",
+   "nug_edge": ""
+  },
+  "mlp": {
+   "epochs": 46
+  },
+  "mlp_ens": {},
+  "mlp_resid": {
+   "scale": 3.128908359175066,
+   "nugget": 0.01,
+   "med": 6.257816718350132,
+   "val_sub": 0.011369540538361938,
+   "exact": false,
+   "wide_grid": false,
+   "centers": 6000,
+   "scale_edge": "lo",
+   "nug_edge": "hi"
+  },
+  "dkr": {
+   "scale": 53.83312703417828,
+   "nugget": 1e-06,
+   "med": 26.91656351708914,
+   "val_sub": 0.018643828257684503,
+   "exact": false,
+   "wide_grid": false,
+   "centers": 6000,
+   "scale_edge": "",
+   "nug_edge": ""
+  },
+  "select": {
+   "picks": {
+    "krr": 0,
+    "lowfi_resid": 0,
+    "mlp": 0,
+    "mlp_ens": 0,
+    "mlp_resid": 3,
+    "dkr": 0
+   }
+  },
+  "stack": {
+   "weights": {
+    "krr": 0.0,
+    "lowfi_resid": 0.0083,
+    "mlp": 0.0,
+    "mlp_ens": 0.0,
+    "mlp_resid": 0.6889,
+    "dkr": 0.3029
+   }
+  }
+ },
+ "extra": {
+  "err_floor": 0.05,
+  "frac_below_floor_te": 0.017561441183488426,
+  "extra_metrics_lowfi": {
+   "rmse_6s": 0.11447843318834229,
+   "rel_floor_6s": 0.5325649207659695
+  }
+ },
+ "minutes": 38.4
+}

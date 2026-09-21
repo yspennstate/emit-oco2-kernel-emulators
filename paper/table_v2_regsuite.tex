@@ -1,0 +1,12 @@
+% seeds [101, 102, 103]; cells: mean component rel. L2 [%] / radiance rel. L2 [%] on the test rows
+\begin{tabular}{lccc}
+\toprule
+predictor & alone & + residual kernel & kernel on features \\
+\midrule
+input-scaled kernel & 0.941$\pm$0.109 / 0.284$\pm$0.078 & -- & -- \\
+\midrule
+network, control & 2.266$\pm$0.031 / 0.809$\pm$0.029 & 1.903$\pm$0.055 / 0.617$\pm$0.033 & 0.955$\pm$0.038 / 0.153$\pm$0.052 \\
+network, weight decay & 2.269$\pm$0.027 / 0.820$\pm$0.014 & 1.880$\pm$0.072 / 0.618$\pm$0.040 & 0.948$\pm$0.048 / 0.154$\pm$0.048 \\
+network, early stopping & 2.716$\pm$0.445 / 1.293$\pm$0.373 & 1.949$\pm$0.073 / 0.789$\pm$0.127 & 0.986$\pm$0.032 / 0.147$\pm$0.054 \\
+\bottomrule
+\end{tabular}
