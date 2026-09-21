@@ -1,22 +1,16 @@
-"""Generate the LaTeX tables of the new results sections from the results JSONs (plan v4).
+"""Regenerate supported supplementary tables from public JSON records.
 
-Every table is written to paper/manuscript_v2/<name>.tex; when its inputs are missing the file is written with a
-single comment line so that \\IfFileExists in the manuscript skips it. Inputs (all optional):
-  results/tc/<tag>_tc.json          transmission diagnostics per lane (transmission_conditioned.py v4)
-  results/stack/<tag>_stack.json    joint stacks per lane (joint_stack.py v4)
-  results/e2a/<tag>.json            campaign records of the three-member lanes (emit_campaign_v2)
-  results/sharpness_synthetic.json  the synthetic reference
-  results/kernel_perturbation_Y2_n2000.json and results/ridge/*_featpert.json   perturbation bounds
-  results/ridge/*_ridge.json        ridge-path diagnostics
-  results/pkanrtm/rescored_pkanrtm.json   the matched benchmark
-  results/oco2/*_select.json        the OCO-2 selections
-Numbers are formatted with the digits the manuscript uses; nothing is rounded before the mean over seeds.
+Default output is paper/. Missing campaign inputs are reported and existing historical
+aggregate tables are retained, never deleted or silently replaced by fewer runs.
+The transmission comparison uses the common float64 cohort, seeds 104--107.
+The legacy seed-101 float32 experiment is recorded separately in the publication manifest.
+Use code/format_publication_tables.py after this command for readable table layouts.
 """
 import glob, io, json, os, re, sys
 import numpy as np
 
 W = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RES = os.path.join(W, "results"); OUT = os.path.join(W, "paper", "manuscript_v2")
+RES = os.path.join(W, "results"); OUT = os.path.join(W, "paper")
 
 
 def load(p):
@@ -25,10 +19,11 @@ def load(p):
 
 def write(name, body, pending=False):
     p = os.path.join(OUT, name)
-    if pending:                                    # no file at all, so \IfFileExists skips the table
-        if os.path.exists(p):
-            os.remove(p)
-        print("pending " + name); return
+    if pending:
+        if not os.path.exists(p):
+            raise FileNotFoundError(f"No public inputs or retained table for {name}")
+        print("retained historical aggregate (inputs absent): " + name)
+        return
     io.open(p, "w", encoding="utf-8", newline="\n").write(body)
     print("wrote   " + name)
 
@@ -61,7 +56,13 @@ if tc_files:
     per_fam = {}
     seeds = []
     for f in tc_files:
-        d = load(f); seeds.append(d["seed"])
+        d = load(f)
+        if d["seed"] not in (104, 105, 106, 107):
+            print("excluded from common float64 cohort: " + os.path.basename(f))
+            continue
+        if d.get("float32_opt_in") or any(dt != ["float64"] for dt in d["prediction_dtypes"].values()):
+            raise ValueError(f"Precision mismatch in common cohort: {f}")
+        seeds.append(d["seed"])
         for fam, v in d["families"].items():
             x = v["rhos"].get("0.7")
             if not x:
@@ -80,7 +81,7 @@ if tc_files:
                      g("fail", 2, 100) + " / " + g("clipR", 2, 100), g("emin", 3), str(sum(r["viol"] for r in L)), g("ratio", 1)])
     hdr = ("family & $\\varepsilon_R$ & $2\\nu$ (obs.) & raw inverse p95 / p99 & constrained p95 / p99 & failures / clipped at $R$ [\\%] "
            "& $\\E\\min\\{R^2,e_R^2/t^2\\}$ & violations & bound / MSE")
-    cap = f"% seeds {sorted(set(seeds))}\n"
+    cap = f"% common float64 cohort; seeds {sorted(set(seeds))}; four records per head\n"
     write("table_v2_transmission.tex", cap + tabular("lcccccccc", hdr, rows))
 else:
     write("table_v2_transmission.tex", "", pending=True)
@@ -127,8 +128,13 @@ if st_files:
     order = [k for k in per if k[0] == "single"] + [k for k in per if k[0] == "paper_norm"] + [k for k in per if k[0] == "paper"] + [k for k in per if k[0] == "theorem"]
     for k in order:
         L = per[k]
-        name = {"single": FAM_NAMES.get(k[1], k[1]), "paper_norm": "stack, mean relative norm", "paper": "stack, row-relative squared error",
-                "theorem": f"stack, $J_\\tau$ at $\\tau = {'\\infty' if k[1] == 'inf' else k[1]}$"}[k[0]]
+        if k[0] == "theorem":
+            name = ("stack, unweighted component square" if k[1] == "inf"
+                    else "stack, $J'_\\tau$ at $\\tau = " + k[1] + "$")
+        else:
+            name = {"single": FAM_NAMES.get(k[1], k[1]),
+                    "paper_norm": "stack, mean relative norm",
+                    "paper": "stack, row-relative squared error"}[k[0]]
         rows.append([name, msd([a[0] for a in L], 4, 100), msd([a[1] for a in L], 4), msd([a[2] for a in L], 3) + " / " + msd([a[3] for a in L], 2), msd([a[4] for a in L], 3)])
     hdr = "predictor & radiance rel.\\ $L^2$ [\\%] & $\\varepsilon_R$ & constrained p95 / p99 & raw inverse p95"
     write("table_v2_stacks.tex", f"% lanes {len(st_files)}\n" + tabular("lcccc", hdr, rows))
@@ -151,6 +157,16 @@ else:
 K = load(os.path.join(RES, "kernel_perturbation_Y2_n2000.json"))
 fp = sorted(glob.glob(os.path.join(RES, "ridge", "*_featpert.json")))
 rows = []
+if K is None:
+    retained = os.path.join(OUT, "table_v2_perturbation.tex")
+    if not os.path.exists(retained):
+        raise FileNotFoundError("State-input perturbation JSON and retained table are both absent")
+    for line in io.open(retained, encoding="utf-8"):
+        if line.startswith("state inputs &"):
+            rows.append([cell.strip() for cell in line.strip().removesuffix(r"\\").split(" & ")])
+    if len(rows) != 14:
+        raise ValueError("Expected fourteen archived state-input perturbation rows")
+    print("retained state-input perturbation rows: generating JSON absent")
 if K and K["systems"] and "bound_b_median_ratio" in K["systems"][0]:
     for s in K["systems"]:
         if s["mean"] != "zero":
@@ -237,8 +253,10 @@ if P and P.get("lanes"):
     for tag, lane in P["lanes"].items():
         split = "OOD" if "_ood" in tag else "standard"; lowfi = "with 6S inputs" if lane["lowfi"] else "state only"
         sig = _lane_sigma(tag, lane["heads"])
+        if sig is None or not np.all(np.isfinite(sig[1]) & (sig[1] > 0)):
+            raise ValueError(f"Cannot reconstruct uniform-average R2 for {tag}; refusing convention fallback")
         for h, m in lane["heads"].items():
-            r2 = _uniform_r2(sig, m) if sig else m["r2"]
+            r2 = _uniform_r2(sig, m)
             groups.setdefault((split, lowfi, h), []).append((m["rmse"], m["mae"], r2, m["smape_pct"]))
     for (split, lowfi, h), L in sorted(groups.items()):
         rows.append([split, lowfi, h.replace("_", "\\_"), msd([a[0] for a in L], 5), msd([a[1] for a in L], 5), msd([a[2] for a in L], 5), msd([a[3] for a in L], 3)])

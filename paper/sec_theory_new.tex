@@ -1,13 +1,3 @@
-% New theory material, v4. Proposition 1 (frozen residual correction and error alignment) and the conditional
-% stability bound stay as published in residual_analysis.tex and reflectance_stability.tex, with one sentence of
-% Proposition 1 corrected (see sec:sensitivity, first paragraph). This file adds the conditional sensitivity
-% statement, the split-sample bias-variance identity, the finite-class selection guarantee, the constant-one
-% transfer theorem with its matching construction, the conditional error-profile theorem, the signed-spectrum and
-% residual-action perturbation bounds, the explicit chain to the kernel paper's power-function bound, the stacking
-% objective and the objective the stacks actually minimise. It is \input after sec:stability.
-% Environments: proposition and theorem (existing); add \newtheorem{corollary}[proposition]{Corollary} if absent.
-% Macros: \Prob, \E, \1 (indicator) - define if absent.
-
 \subsection{Sensitivity of the correction}\label{sec:sensitivity}
 
 For a common frozen operator $R=I-S_\lambda$ and the norm of Section~\ref{sec:identity}, the exact criterion
@@ -16,11 +6,13 @@ the standalone kernel, since $\|Rf-Rh\|^2<\|Rf\|^2$ is that inequality rearrange
 norms is neither necessary nor sufficient. Write the design values of the targets, of the fitted mean and of the
 corrected predictor as $y$, $h_X$ and $\widehat y$, with $\widehat y=h_X+S_\lambda(y-h_X)$ and
 $S_\lambda=K(K+\lambda I)^{-1}$; in the nugget convention of the experiments, $\lambda=n\gamma$. The mean is trained
-on the same labels, so $h_X=h_X(y)$.
+on the same labels, so $h_X=h_X(y)$. In the following Jacobian calculation,
+$K$ and $\lambda$ are held fixed; label-dependent feature or kernel selection would add
+terms involving derivatives of $S_\lambda$.
 
 \begin{proposition}\label{prop:sensitivity}
 \begin{enumerate}
-\item If $h_X$ is differentiable in $y$, the Jacobian of the trained pipeline is
+\item If $h_X$ is differentiable in $y$, the Jacobian of this fixed-kernel pipeline is
 $J_{\widehat y}=S_\lambda+(I-S_\lambda)J_{h}$. In particular the correction stage alone does not bound the
 sensitivity of the pipeline: with $K=I$, $\lambda=1$ and $h_X(y)=2y$ one has $\widehat y=\tfrac32 y$ although
 $\|S_\lambda\|_{\mathrm{op}}=\tfrac12$; and if the mean interpolates the training labels, $h_X(y)=y$, then
@@ -49,8 +41,9 @@ fits that depend on the correction noise is outside the hypothesis of (iii).
 
 \subsection{A finite-class selection guarantee}\label{sec:damped}
 
-Every predictor below is chosen on held-out rows rather than by an information criterion
-\cite{stonecv,gcv,arlot}, so what has to be bounded is the price of that choice.
+A finite comparison on a genuinely independent selection sample has a simple risk bound
+\cite{stonecv,gcv,arlot}. The independence assumption is stronger than reusing the same
+validation rows for training decisions and combination weights.
 
 \begin{proposition}\label{prop:selection}
 Let $p_1,\dots,p_M$ be predictors frozen before an independent selection sample of $m$ i.i.d.\ units, let the loss
@@ -62,13 +55,17 @@ R(\widehat p)\le\min_{1\le j\le M}R(p_j)+2B\sqrt{\frac{\log(2M/\delta)}{2m}} .
 \end{proposition}
 
 \noindent\emph{Proof in Appendix~\ref{app:proofs}.}
-The squared error of the constrained retrieval of Section~\ref{sec:transfer} is bounded by $R^2$, so the guarantee
-covers it. It covers the damped correction
-$p_{\alpha,\lambda}(x)=h(x)+\alpha\,k(x,X_n)(K+\lambda I)^{-1}(y-h_X)$ at finitely many $\alpha\in[0,1]$, with
-$\alpha=0$ and the standalone kernel among the candidates. It does not cover a stack whose weights are optimised;
-the stacks of Section~\ref{sec:joint} are therefore fitted on development rows, frozen as a small collection, and
-selected on an independent state-level sample, with bands and prescribed reflectances averaged within each state,
-so that $m$ is the number of independent states.
+The squared constrained-retrieval loss is bounded by $R^2$. Thus the proposition can
+compare a finite set of frozen corrections or stacks, with bands and prescribed
+reflectances averaged within each independent state. For example, a finite grid of
+damped corrections $h+\alpha k(x,X_n)(K+\lambda I)^{-1}(y-h_X)$ can include $\alpha=0$;
+the standalone kernel must be added as a separate candidate when it is not already in
+the grid. To apply the result to stacks, one first fits their weights on development
+rows and then compares a frozen finite collection on an independent state-level sample.
+The experiments below reuse validation rows for early stopping, kernel tuning and
+combination; they do not implement this additional independent-selection stage.
+Proposition~\ref{prop:selection} therefore specifies a possible protocol, not a
+probabilistic certificate for the reported stacks or overlapping partitions.
 
 \subsection{Transfer of component error into retrieval error}\label{sec:transfer}
 
@@ -125,10 +122,13 @@ For every $\beta>0$, every $0<c<r_0<R$ and every $\tau\in(0,1)$ there are an eva
 satisfying \eqref{eq:transfer-hyp} with $S=0$ and $F_t(u)=u^\beta$ on $(0,1)$, namely $\rho=r_0$, $a=s=0$,
 $\widehat t=t$, $\widehat s=0$ and $\widehat a=ct\,\1\{t\le\tau\}$, for which $\bar\rho=r_0-c\,\1\{t\le\tau\}$,
 \[
-\varepsilon_R^2=\frac{c^2\beta}{\beta+2}\,\tau^{\beta+2},\qquad
-\E_P|\bar\rho-\rho|^2=c^2\tau^\beta,
-\qquad\text{so}\qquad
-\E_P|\bar\rho-\rho|^2=c^{4/(\beta+2)}\Bigl(\frac{\beta+2}{\beta}\Bigr)^{\beta/(\beta+2)}\varepsilon_R^{2\beta/(\beta+2)} .
+\begin{aligned}
+\varepsilon_R^2&=\frac{c^2\beta}{\beta+2}\,\tau^{\beta+2},
+&\E_P|\bar\rho-\rho|^2&=c^2\tau^\beta,\\
+\E_P|\bar\rho-\rho|^2
+&=c^{4/(\beta+2)}\Bigl(\frac{\beta+2}{\beta}\Bigr)^{\beta/(\beta+2)}
+\varepsilon_R^{2\beta/(\beta+2)} .
+\end{aligned}
 \]
 \end{proposition}
 
@@ -137,7 +137,7 @@ This is sharpness of the transfer inequality for the physical inverse, not a min
 algorithms. What decides the rate is where the errors sit relative to the transmission.
 
 \begin{theorem}[conditional error profile]\label{thm:profile}
-Suppose $\E_P[e_R^2\mid t]\le\sigma^2t^{2\nu}$ $P$-almost surely for some $0\le\nu\le1$. Then
+Under \eqref{eq:transfer-hyp}, suppose $\E_P[e_R^2\mid t]\le\sigma^2t^{2\nu}$ $P$-almost surely for some $0\le\nu\le1$. Then
 \[
 \E_P|\bar\rho-\rho|^2\le\E_P\min\{R^2,\;\sigma^2t^{-2(1-\nu)}\} .
 \]
@@ -183,7 +183,11 @@ $W$ and the label shift $U$ separate, which is what makes it readable on data.
 
 \begin{proposition}[same-data perturbation]\label{prop:perturb}
 \begin{enumerate}
-\item $\widetilde p(x)-p(x)=\bigl(\widetilde h(x)-h(x)\bigr)+v^{\top}W-(Q\widetilde g)^{\top}(BW+U)$.
+\item The exact difference is
+\[
+\widetilde p(x)-p(x)=\widetilde h(x)-h(x)+v^{\top}W
+                  -(Q\widetilde g)^{\top}(BW+U).
+\]
 \item $\|\widetilde p(x)-p(x)\|_2\le\|\widetilde h(x)-h(x)\|_2+\|W^{\top}v\|_2
 +\|Q\widetilde g\|_2\,\|BW+U\|_{\mathrm{op}}$.
 \item $\|\widetilde p(x)-p(x)\|_2\le\|\widetilde h(x)-h(x)\|_2
@@ -194,10 +198,11 @@ $\|\widetilde p(x)-p(x)\|_2\le\|g\|_2\|W\|_F\,s/(\lambda_{\min}(H)+s)$.
 \end{proposition}
 
 \noindent\emph{Proof in Appendix~\ref{app:proofs}.}
-Only positive definiteness of $\widetilde H$ is needed: a large positive eigenvalue of $B$, from a larger ridge or an
-approximation that dominates the exact Gram matrix nowhere, does not make the bound vacuous. Item (ii) keeps the
-interaction between the perturbation and the residual: with $v=0$, $U=0$ and $BW=0$ the predictor does not move
-however large $\|B\|$ is. The bounds are stated in the residual $W$, not in $Y$, they use no independence between
+Only positive definiteness of $\widetilde H$ is needed. A large positive eigenvalue of $B$,
+as can arise from increasing the ridge, does not invalidate the bound. The bound can
+nonetheless be numerically large, especially when the least eigenvalue approaches $-1$. Item (ii) keeps the
+interaction between the perturbation and the residual: with $v=0$, $U=0$ and $BW=0$ the kernel correction does not move, however large $\|B\|$ is; the full predictor is
+unchanged as well when $\widetilde h(x)=h(x)$. The bounds are stated in the residual $W$, not in $Y$, they use no independence between
 the representation, the mean, the ridge and $Y$, and they transfer between fitted predictors without being
 generalisation statements.
 
@@ -205,11 +210,19 @@ For component $j$ the physical target at band $b$ is $f_{j,b}=\mu_{j,b}+\sum_\el
 with $A_j$ the standardiser scale times the retained PCA basis and $\pi_j$ the truncation residual, and the
 pipeline predicts the retained coordinates. For a frozen realised system
 $p_\ell(x)=h_\ell(x)+a_x^{\top}(y_\ell-h_{\ell,X})$ with $y_\ell=f_{\ell,X}+\varepsilon_\ell$, the conditional
-power-function bound of the kernel paper gives
+RKHS evaluation bound \cite{rw,nmkc} gives
 \begin{equation}\label{eq:chain-coord}
 |p_\ell(x)-f_\ell(x)|\le B_\ell\widetilde P_\lambda(x)+|a_x^{\top}\varepsilon_\ell|,
 \end{equation}
-with $B_\ell$ the residual RKHS norm, a hypothesis and not an observed certificate, and the second term zero for
+where, writing $k_x=k(X_n,x)$ and $a_x=(K+\lambda I)^{-1}k_x$,
+\[
+\widetilde P_\lambda(x)^2
+ =k(x,x)-2a_x^\top k_x+a_x^\top K a_x
+ =k(x,x)-k_x^\top(K+\lambda I)^{-1}k_x-\lambda\|a_x\|_2^2.
+\]
+This follows by applying the RKHS Cauchy--Schwarz inequality to the residual and
+$k(x,\cdot)-\sum_i(a_x)_i k(x_i,\cdot)$.
+Here $B_\ell$ is a bound on the residual RKHS norm, a hypothesis and not an observed certificate, and the second term zero for
 deterministic simulator targets, which is the form used for EMIT. A perturbed system adds the bound
 $\Delta_\ell(x)$ of Proposition~\ref{prop:perturb}. If $|\widehat z_{j,\ell}-z_{j,\ell}|\le u_{j,\ell}$, then
 \begin{equation}\label{eq:chain-recon}
@@ -219,48 +232,98 @@ and a change of basis or standardiser between two systems adds its own reconstru
 $e_R=|e_a|+R|e_t|+R^2t|e_s|$ from \eqref{eq:chain-recon} for the three physical components and applying
 Theorem~\ref{thm:transfer} closes the chain. If the inverse is evaluated at $L_{\mathrm{obs}}=L+\eta$, the proof of
 Theorem~\ref{thm:transfer} goes through with $e_a$ replaced by $e_a-\eta$, so
-$|\bar\rho-\rho|\le\min\{R,(|e_a-\eta|+R|e_t|+R^2t|e_s|)/t\}$. The theorem is an exact-arithmetic statement:
-forming $L=a+\rho t/q$ in floating point loses the term $\rho t/q$ once $t$ is below $2^{-52}a$, and the operational
-inverse then returns zero even with exact components; the tables separate the operational computation from an
-exact-arithmetic check on those entries.
+$|\bar\rho-\rho|\le\min\{R,(|e_a-\eta|+R|e_t|+R^2t|e_s|)/t\}$. The theorem is an exact-arithmetic statement. In floating point, the added term
+$\rho t/q$ can be lost when it is small relative to the spacing of representable numbers
+near $a$. Its loss depends on $\rho$, $q$, magnitude and rounding, not on a universal
+threshold $t<2^{-52}a$. A rounded radiance may then give zero for $L-a$ even with the
+tabulated components. The archived operational diagnostics do not implement an arbitrary-
+precision verification of these entries, so a numerical violation count is not a proof
+of the exact-arithmetic inequality.
 
 \subsection{The stacking objective}\label{sec:joint}
 
-With every base head projected first ($\widehat t\mapsto\max\{\widehat t,0\}$, $\widehat s\mapsto\Pi_{[0,S]}\widehat s$)
-and combined by simplex weights $w$ per component, the combination stays in the constraint set, its predictions are
-affine in $w$, and
+\paragraph{Affine fitting predictions and projected retrieval.}
+Let $w$ denote simplex weights, with one simplex for each component being combined.
+Write $\widetilde a_w$, $\widetilde t_w$ and $\widetilde s_w$ for the affine combinations
+used in fitting, and $\widetilde e_a=\widetilde a_w-a$, $\widetilde e_t=\widetilde t_w-t$,
+$\widetilde e_s=\widetilde s_w-s$ for their errors. Retrieval uses
+$\widehat t_w=\max\{\widetilde t_w,0\}$ and
+$\widehat s_w=\Pi_{[0,S]}\widetilde s_w$, followed by \eqref{eq:rhobar}.
+Base predictions may instead be projected before combination, provided the values
+entering the fitting objective remain affine in $w$. In either case, projection during
+retrieval does not increase flux or albedo error under \eqref{eq:transfer-hyp}.
+
+For a fixed finite threshold $\tau>0$, the total-flux raw-error surrogate is
 \begin{equation}\label{eq:Jtau}
-J_\tau(w)=\E_P\Bigl[\frac{e_a(w)^2+R^2e_t(w)^2+R^4t^2e_s(w)^2}{(t\vee\tau)^2}\Bigr]
+J_\tau(w)=\E_P\!\left[
+\frac{\widetilde e_a^2+R^2\widetilde e_t^2+R^4t^2\widetilde e_s^2}
+     {(t\vee\tau)^2}\right].
 \end{equation}
-is a convex quadratic in $w$. By Theorem~\ref{thm:transfer}(i) and
-$e_R^2\le3(e_a^2+R^2e_t^2+R^4t^2e_s^2)$,
+It is a convex quadratic: the errors are affine in the weights and the entry weights
+are nonnegative and independent of $w$. Its empirical version replaces the expectation
+by the validation average. Theorem~\ref{thm:transfer} and Cauchy--Schwarz imply
 \begin{equation}\label{eq:Jtau-bound}
-\E_P|\bar\rho_w-\rho|^2\le R^2F_t(\tau)+3J_\tau(w) .
+\E_P|\bar\rho_w-\rho|^2\le R^2F_t(\tau)+3J_\tau(w).
 \end{equation}
-Projecting an unrestricted combination inside the loss would destroy the convexity. The threshold $\tau$ is fixed
-before any test read under a declared coverage requirement, because a threshold can make the task easier by
-discounting the difficult bands.
+Indeed, projection gives
+$e_R\le|\widetilde e_a|+R|\widetilde e_t|+R^2t|\widetilde e_s|$; split the
+expectation at $t=\tau$ and apply the three-term square bound on $\{t>\tau\}$.
+This inequality holds for every feasible $w$, not only an optimizer.
 
-The stacks measured below minimise a separable form of \eqref{eq:Jtau}. Writing $e_2$ and $e_3$ for the errors of
-the two flux components, whose sum is $e_t$, that form is
+\paragraph{The implemented separable surrogate.}
+The diagnostic driver \texttt{code/joint\_stack.py} combines $Y_2$ and $Y_3$ with
+separate weight vectors. It projects each base albedo onto $[0,S]$ before fitting but
+leaves the base fluxes unprojected. With
+$\widetilde e_j=\widetilde Y_j-Y_j$ for $j=2,3$, its finite-threshold fitting objective is
 \begin{equation}\label{eq:Jtau-sep}
-J'_\tau(w)=\E_P\Bigl[\frac{e_a(w)^2+R^2e_2(w)^2+R^2e_3(w)^2+R^4t^2e_s(w)^2}{(t\vee\tau)^2}\Bigr],
+J'_\tau(w)=\E_P\!\left[
+\frac{\widetilde e_a^2+R^2\widetilde e_2^2+R^2\widetilde e_3^2
+      +R^4t^2\widetilde e_s^2}{(t\vee\tau)^2}\right].
 \end{equation}
-which scores the two fluxes separately and so drops the cross term $2R^2e_2e_3$ that \eqref{eq:Jtau} carries; it
-also applies the flux projection when a combination is scored rather than to the base heads before they are
-combined. It is convex in $w$ for the same reason. The bound it comes with has the same shape with one more term
-in the Cauchy--Schwarz step: from Theorem~\ref{thm:transfer}(i) and
-$e_R\le|e_a|+R|e_2|+R|e_3|+R^2t|e_s|$, so that $e_R^2\le4(e_a^2+R^2e_2^2+R^2e_3^2+R^4t^2e_s^2)$,
+This is also a convex quadratic. It omits the cross term
+$2R^2\widetilde e_2\widetilde e_3$ present in $J_\tau$.
+Crucially, the flux floor is applied \emph{after fitting}, to the combined total flux
+when retrieval is scored. It is not inside the fitted loss.
+Since $t\ge0$,
+\[
+|\max\{\widetilde Y_2+\widetilde Y_3,0\}-t|
+ \le|\widetilde e_2+\widetilde e_3|
+ \le|\widetilde e_2|+|\widetilde e_3|.
+\]
+The same argument now uses four squared terms and gives
 \begin{equation}\label{eq:Jtau-sep-bound}
-\E_P|\bar\rho_w-\rho|^2\le R^2F_t(\tau)+4J'_\tau(w) .
+\E_P|\bar\rho_w-\rho|^2\le R^2F_t(\tau)+4J'_\tau(w).
 \end{equation}
-The stacks reported in Section~\ref{sec:results-representation} therefore carry
-\eqref{eq:Jtau-sep-bound}; \eqref{eq:Jtau-bound} is the bound for the unseparated objective \eqref{eq:Jtau},
-which a stack minimising the cross term as well would carry.
+The factor-three statement is therefore not the bound for the reported separable fit.
+Both statements require the physical hypotheses on the distribution being averaged;
+full-table statistics that include entries outside those hypotheses are not certificates
+of either bound.
 
-Proposition~\ref{prop:selection} requires the candidates to be frozen before an independent selection sample. The
-combinations and per-coordinate selections below are fitted on the campaign's validation rows, which also served
-for early stopping and for the kernels' hyperparameters, so the proposition states the protocol a deployment
-should follow and does not certify the constants of those particular numbers. What the experiments do preserve is
-the weaker discipline that matters for the comparison: every threshold, weight and selection is fixed on
-validation rows, and the test rows are read once.
+Putting projection \emph{inside} a squared fitting loss is a different problem and need
+not preserve convexity. On $0\le w\le1$, for example,
+$g(w)=(\max\{2w-1,0\}-1)^2$ satisfies
+$g(1/2)=1>(g(0)+g(1))/2=1/2$. This counterexample does not apply to the raw-error
+quadratic actually fitted by the driver.
+
+\paragraph{Numerical weights and threshold convention.}
+The historical driver solves a nonnegative least-squares problem with a heavily weighted
+row penalizing $\sum_h w_h-1$, then normalizes the nonnegative weights to sum to one.
+This yields feasible simplex weights but is not an exact solution of the equality-
+constrained quadratic program. Its mean-relative-norm arm uses six iteratively reweighted
+least-squares sweeps from the squared-loss solution; no convergence or global-optimality
+certificate is recorded. We therefore describe these as approximate fits, without
+changing the archived predictions or attributing a new optimizer to them.
+
+The driver expresses a finite threshold as $\tau=uT_{\rm train}$, where $T_{\rm train}>0$
+is a training-data flux scale. Table~\ref{tab:v2-stacks} reports $u$, not a flux in physical
+units. Its legacy \texttt{inf} option is an unweighted physical-component squared-error
+baseline; it is \emph{not} the limit of \eqref{eq:Jtau-sep} as $\tau\to\infty$. Its
+stored zero coverage field is a sentinel, not a measured tail probability.
+The threshold ladder is a sensitivity analysis. Selecting a deployment threshold
+requires an advance coverage rule; minimizing a diagnostic bound over test thresholds
+does not establish validation-selected retrieval performance.
+
+The stack candidates in this study are fitted on validation rows already used for other
+model decisions. Proposition~\ref{prop:selection} does not certify these fitted weights.
+Moreover, the broader study used exploratory test feedback. Fixing a particular fit
+before its test evaluation does not make the study an untouched confirmation experiment.

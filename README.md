@@ -29,16 +29,18 @@ configurations. The correction-coefficient corpus uses eight state/wavelength
 inputs (eleven with low-fidelity coefficients) and a 0.05 denominator floor in
 its relative-error metric.
 
-## Revision of 21 September 2026
+## Publication revision of 21 September 2026
 
-The manuscript now carries a theory section and six measurement sections that read the
-quantities it names: retrieval error conditioned on transmission, ten kernels on the state
-inputs with three combiners, a regularisation suite for the network, the ridge path and the
-perturbation bounds, a synthetic reference, the correction-coefficient benchmark rescored
-under its own protocol, and OCO-2 rerun with the selection carried out through the Gram
-matrix of its design. [What changed and which script produced it](docs/REVISION_2026-09-21.md);
-the records are under `results/e2bc`, `results/oco2`, `results/pkanrtm`, `results/ridge` and
-`results/tc`.
+The revised paper separates the raw quadratic used to fit stacks from projection during
+retrieval scoring, derives the corresponding factor-four bound, and documents the
+historical approximate weighting solver. It preserves the principal ten-split model
+results, narrows the finite-profile interpretation, and makes the reproducibility limits
+explicit. The transmission comparison now uses the common four-record float64 cohort;
+the separate float32 experiment is not pooled. Long tables have readable multipage layouts.
+
+[Detailed revision notes](docs/PUBLICATION_REVISION_2026-09-21.md) ·
+[Record-level inventory](results/revision_20260921/reanalysis.json).
+The earlier additions are described in [the original 21 September notes](docs/REVISION_2026-09-21.md).
 
 ## Reproduction
 
@@ -47,15 +49,19 @@ checks, table generation and PDF build:
 
 ```sh
 python -m pip install -r requirements-revision.txt
-python -m unittest discover -s code -p 'test_publication_revision.py' -v
+python -m unittest discover -s code -p 'test_*.py' -v
 python code/make_revision_tables.py
 python code/make_tables.py
 python code/make_v2_tables.py
+python code/format_publication_tables.py
+python code/revision_manifest.py
 latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
 ```
 
-These commands check the finite identities and regenerate tables from the public
-run summaries. They do not retrain the models. The GitHub workflow runs the same
+These commands run 22 synthetic regression tests and regenerate the tables supported
+by public records. The concatenation and joint-stacking aggregates, and the state-input
+perturbation rows, are explicitly retained because their generating JSONs are absent.
+They do not retrain the models. The GitHub workflow runs the same
 checks and archives the compiled paper, sources and build provenance.
 
 ## Data and scope
@@ -69,8 +75,9 @@ Simulator-generation details and data access are required for full reproduction.
 Model development and evaluation used the same finite table. The overlapping
 partitions describe split sensitivity, not independent external validation. The
 conditioned-reflectance diagnostic reports common-mask coverage and failures when
-sample-level arrays are provided. The reported EMIT results are all-band errors;
-no operational retrieval or matched-throughput benchmark is supplied.
+sample-level arrays are provided. The primary EMIT results are all-band errors. Supplementary transmission summaries
+include entries outside the theorem's physical domain and are not certified all-band
+retrieval bounds. No operational retrieval or matched-throughput benchmark is supplied.
 
 ## Contributions and sources
 

@@ -9,6 +9,9 @@
 \newcommand{\Prob}{\mathbb{P}}
 \newcommand{\1}{\mathbf{1}}
 \usepackage{booktabs}
+\usepackage{array,longtable,pdflscape}
+\usepackage{microtype}
+\newcommand{\thead}[1]{\shortstack{#1}}
 \usepackage[hidelinks]{hyperref}
 \hypersetup{pdftitle={Learned representations and kernel corrections for radiative-transfer emulation},pdfauthor={Yitzchak Shmalo}}
 \graphicspath{{../figures/}}
@@ -22,93 +25,111 @@
 
 \begin{abstract}
 We compare neural networks, exact Mat\'ern regression and their combinations on a
-six-dimensional radiative-transfer table over the 285-band EMIT grid. Across ten random
-splits, with validation-based selection and 18{,}884 training samples, an input-scaled
-kernel reaches $0.095\%$ mean relative radiance error against $0.76\%$ for cubic regression
-and $0.39\%$ for a neural network; residual correction takes the network to $0.14\%$, and a
-kernel on wider-network features to $0.079\%$. The forward gain does not carry to the
-inverse problem: a convex stack of all heads raises the mean within-split 95th-percentile
-reflectance error from $7.57$ to $22.71$ percentage points. We prove that the reflectance
-error of a physically constrained retrieval is bounded, with constant one, by a
-transmission-weighted component error divided by the transmission, that the loss of rate
-where the transmission vanishes is unavoidable, and that it disappears when the conditional
-component error falls with the transmission. Under the protocol of a published
-multi-fidelity benchmark the residual-corrected network improves on the published values in
-all four metrics on both of its splits.
+six-dimensional radiative-transfer table over the 285-band EMIT grid. Across ten partitions
+with 18{,}884 training samples and validation-based selection, an input-scaled kernel gives
+$0.095\%$ mean relative radiance error, compared with $0.760\%$ for cubic regression and
+$0.387\%$ for a neural network. Residual correction reduces the network error to $0.141\%$;
+a kernel on wider-network features reaches $0.079\%$. The wide convex stack improves the
+mean radiance error by only $0.0006$ percentage points while increasing the mean within-split
+95th-percentile reflectance error from $7.57$ to $22.71$ points, with a larger tail at every
+split. For a physically constrained retrieval, we prove a constant-one bound by the
+transmission-weighted component error divided by the transmission. We give a sharp
+worst-case transfer exponent under a transmission-tail hypothesis and conditional-error
+conditions that retain the component-error rate. We also distinguish the raw-error quadratic
+used to fit retrieval-weighted stacks from the projected, nonlinear retrieval used to score
+them. The experiments concern interpolation of one adaptively explored table: overlapping
+partitions and finite-range transmission profiles do not establish independent validation
+or asymptotic learning rates. Supplementary OCO-2 and multi-fidelity comparisons illustrate
+how the evaluation metric and input representation change the relative performance of the
+specified model families.
 \end{abstract}
 
 \section{Introduction}
 
-Atmospheric correction for imaging spectroscopy requires repeated evaluations of a
-radiative-transfer model. Learned emulators reduce this computational cost by approximating
-the map from atmospheric and viewing conditions to spectral coefficients. Neural emulators
-have been incorporated into reflectance-retrieval systems \cite{srtmnet,isofit}, while
-Gaussian-process methods provide accurate surrogates for the OCO-2 forward model
-\cite{lamminpaa}. Physics-guided multi-fidelity models offer another approach
-\cite{pkan}. These applications raise a practical question: when is it preferable to fit a
-kernel directly on the atmospheric state, learn a neural representation, or combine both?
+Atmospheric correction for imaging spectroscopy uses radiative-transfer calculations to
+relate atmospheric and viewing conditions to measured radiance. Learned emulators replace
+repeated simulator evaluations with a fitted map to spectral coefficients. Neural
+emulators have been incorporated into reflectance-retrieval systems \cite{srtmnet,isofit};
+Gaussian-process emulators have also been developed for the OCO-2 forward model
+\cite{lamminpaa}. Physics-guided multi-fidelity models use lower-fidelity calculations as
+additional information \cite{pkan}. These approaches motivate two distinct questions:
+which representation gives an accurate forward emulator, and which errors matter when
+that emulator is used in an inverse calculation?
 
-Kernel methods are competitive with neural architectures on a range of operator-learning
-benchmarks \cite{batlle}. Networks such as DeepONet and Fourier neural operators learn
-representations for high-dimensional inputs and outputs \cite{deeponet,fno}; kernel
-regression instead specifies a metric and solves a regularized interpolation problem
-\cite{rw}. Their combination can take several forms. Deep kernel learning jointly trains a
-representation and a kernel \cite{wilson}, and kernel flows can regularize intermediate
-network layers \cite{yoo}. Here we use the construction of \cite{nmkc}: a trained network
-supplies either a mean whose residual is fitted by a kernel, or fixed features on which a
-kernel regresses the target. We compare these predictors with direct kernel regression,
-polynomial regression, coordinatewise selection and convex stacking.
+We study direct kernel regression, neural networks and two post-hoc combinations. In
+residual correction, the network supplies a mean and a kernel fits its training residual.
+In feature regression, the network supplies a frozen representation and a kernel fits the
+target on that representation \cite{nmkc}. These constructions differ from jointly trained
+deep kernel learning \cite{wilson} and from regularizing intermediate network layers with
+kernel flows \cite{yoo}. Their comparison complements work on kernel competitors for
+operator learning \cite{batlle}, neural representations such as DeepONet and Fourier
+neural operators \cite{deeponet,fno}, and classical kernel regression \cite{rw}.
 
-The main dataset contains 23{,}313 radiative-transfer evaluations over the 285-band EMIT
-wavelength grid \cite{green}. Its six-dimensional input and low-rank spectral output make
-exact kernel regression feasible at the full training size. Ten random partitions provide
-matched comparisons of the model families, followed by experiments varying training size,
-output rank, network width and kernel tuning. Input-specific length scales substantially
-improve the direct kernel. Wider-network features further reduce radiance error, even
-though the corresponding network has a larger standalone error under the tested optimizer
-and training budget.
+The principal experiment uses 23{,}313 tabulated radiative-transfer evaluations on the
+285-band EMIT wavelength grid \cite{green}. The input has six coordinates and the
+standardized outputs have a small principal-component representation, making a dense
+kernel solve feasible at the full training size. Ten common partitions compare the model
+families. Additional experiments vary training size, output rank, input scaling, network
+width and kernel selection. The input-scaled kernel is substantially more accurate than
+the isotropic kernel. A wider network has a larger standalone error under the tested
+training configuration but supplies features on which a kernel predicts more accurately.
+These findings concern the fitted implementations and budgets, not an intrinsic ordering
+of kernels and networks.
 
-The forward and inverse objectives give different model rankings. A convex stack slightly
-reduces the wide feature kernel's mean radiance error, but increases its 95th-percentile
-reflectance error at every split. We derive exact finite-perturbation identities that relate
-this distinction to the denominator of the reflectance inverse. We also give an exact
-error-alignment criterion for residual correction and separate its kernel-regression error
-from principal-component truncation. These calculations complement the empirical
-comparison by identifying the quantities required for improvement in a specified metric.
+The central empirical result is a forward--inverse reversal. The wide stack's mean
+radiance improvement over its feature kernel is $0.0006$ percentage points, whereas its
+mean within-split 95th-percentile reflectance error rises from $7.57$ to $22.71$ points.
+The reflectance tail increases at all ten partitions. These are all-band diagnostics at
+surface reflectance $0.7$, including poorly conditioned absorption entries; they are not
+estimates of operational retrieval accuracy. The result shows that a small forward gain
+can accompany a substantial change in an inverse-error tail.
 
-\paragraph{What this gives someone building an emulator.} Three things, in the order they bite.
-A forward error is not a retrieval error: the model with the lowest radiance error here has the
-worse reflectance tail, and the quantity that decides which is which is the error conditioned on
-transmission, not an average over all bands. The representation matters more than the kernel: ten
-kernels on the raw state fall within a factor of a few of each other, while the same kernel on a
-trained network's features is better than all of them, so effort spent choosing a covariance
-function is better spent on what the covariance is computed from. And an approximation can be
-checked before it is trusted: the perturbation bound of Section~\ref{sec:perturb} is evaluated at
-held-out rows and stays finite where a bound in the norm of the Gram perturbation does not, which
-is what a practitioner needs before replacing an exact solve by a cheaper one.
+Our analysis separates three levels of explanation. Exact finite-perturbation identities
+relate radiance and reflectance errors through the inverse denominator. A constant-one
+transfer inequality controls a physically constrained retrieval by component error relative
+to transmission. Population tail and conditional-error assumptions then yield rate bounds,
+including a sharp worst-case exponent for this inverse. The transmission profiles measured
+on a finite table are diagnostics of the error-amplification mechanism, not verification of
+those assumptions arbitrarily close to zero. For residual correction, a separate
+Hilbert-space identity gives the exact error-alignment criterion, while a PCA decomposition
+keeps truncation error distinct from kernel-regression error.
 
-The paper runs as follows. Section~\ref{sec:related} places these constructions beside the
-literature they come from. Section~\ref{sec:data} describes the data and the evaluation protocol.
-Sections~\ref{sec:methods} to~\ref{sec:scaling} present the models, the comparison and the
-ablations, and Section~\ref{sec:identity} analyses residual correction. Section~\ref{sec:theory}
-proves three things: that component error transfers into retrieval error with constant one, that
-the loss of rate where the transmission vanishes cannot be avoided in the worst case over the
-class, and how far a learned representation, a changed ridge or a kernel approximation can move a
-corrected predictor fitted to the same data. Sections~\ref{sec:results-transfer}
-to~\ref{sec:results-benchmarks} measure the quantities those statements name, compare ten kernels
-and three combination rules, and rescore a published multi-fidelity benchmark under its own
-protocol. Sections~\ref{sec:oco2} and~\ref{sec:corpora} carry the comparison to OCO-2 and to ten
-further emulation configurations. The proofs are in Appendix~\ref{app:proofs}.
-The study concerns interpolation of a fixed radiative-transfer table; the implications for
-retrieval and computational cost are discussed in Section~\ref{sec:discussion}.
+The stacking analysis is implementation-specific. We distinguish a total-flux quadratic
+from the separable direct- and diffuse-flux quadratic used by the diagnostic driver.
+Projection is applied to the summed flux during retrieval scoring, not inside the fitted
+quadratic. The latter therefore remains convex, but the numerical weighting routine is an
+approximation to simplex-constrained least squares rather than a certified exact optimizer.
+The retrieval bound holds for any feasible weights on its stated physical domain; it does
+not assert that minimizing a validation surrogate improves every test metric.
+
+\paragraph{Scope of the evidence.}
+The main comparisons have complete per-split summaries, but model development included
+inspection of test results from this same table. The overlapping partitions quantify
+within-table split sensitivity rather than ten independent confirmation experiments.
+Secondary evidence has unequal replication and archival completeness. We distinguish
+recomputable summaries, retained aggregate tables and experiments requiring unavailable
+sample-level arrays. The published benchmark comparison uses the benchmark's stated
+metrics and archived scores; it is not a retraining of its reference model under a matched
+computational budget.
+
+Section~\ref{sec:related} reviews the relevant constructions, and
+Section~\ref{sec:data} specifies the data and evaluation protocol.
+Sections~\ref{sec:methods}--\ref{sec:scaling} give the models, primary comparison and
+ablations. Sections~\ref{sec:identity} and~\ref{sec:theory} develop the residual and
+retrieval analyses. Sections~\ref{sec:results-transfer}--\ref{sec:results-benchmarks}
+report the associated diagnostics and supplementary comparisons; Sections~\ref{sec:oco2}
+and~\ref{sec:corpora} discuss OCO-2 and ten further configurations. The discussion states
+the implications and remaining reproducibility limits. Proofs and extended diagnostic
+tables are collected in the appendices.
 
 \section{Related work}\label{sec:related}
 
 \paragraph{Radiative transfer and its surrogates.}
-The codes being replaced are physical: 6S for the solar spectrum \cite{vermote}, libRadtran for
-the band calculations behind most lookup tables \cite{mayer,emde}, and MODTRAN inside the
-atmospheric-correction tables used here \cite{modtran,isofit}. What is done with those tables is
-optimal estimation in the sense of \cite{rodgers}, and the operational carbon-dioxide product of
+Relevant radiative-transfer codes include 6S \cite{vermote}, libRadtran \cite{mayer,emde}
+and MODTRAN \cite{modtran}; lookup-table calculations enter atmospheric correction
+\cite{isofit} and optimal estimation \cite{rodgers}. These references describe the surrounding
+methodology, not a recovered generation configuration for the EMIT arrays used here.
+The carbon-dioxide product of
 OCO-2 \cite{eldering,crisp} rests on the forward model and inverse method of \cite{connor,odell}.
 Surrogates enter because the forward model is the cost. Neural emulation of longwave radiation
 goes back to \cite{chevallier} and was carried into climate models by \cite{krasnopolsky}; later
@@ -157,14 +178,15 @@ per-coordinate relevance fitted by marginal likelihood \cite{rw} or by cross-val
 \cite{owhadiyoo}. Several kernels can be combined instead of one being chosen, by semidefinite
 programming \cite{lanckriet}, by the algorithms surveyed in \cite{gonen}, or by alignment with the
 target Gram matrix \cite{cristianini,cortesalign}. Combining predictors rather than kernels is
-older still \cite{bates-granger,wolpert,breiman}. Every selection made below is made on held-out
-rows \cite{stonecv,gcv,arlot}, and Section~\ref{sec:damped} bounds what that selection costs.
+older still \cite{bates-granger,wolpert,breiman}. Within each run, selection uses validation rows \cite{stonecv,gcv,arlot}.
+Section~\ref{sec:damped} gives a finite-class guarantee under a stronger independent-selection
+protocol, which the reused validation sets in this study do not satisfy.
 
 \paragraph{Networks, and the kernels they induce.}
 Feedforward networks are universal approximators \cite{hornik}; those trained here use the
 standard adaptive optimizer \cite{adam} with decoupled weight decay \cite{adamw} and early
-stopping \cite{prechelt}, two of the three regularizers compared in
-Section~\ref{sec:results-representation}, the third being dropout \cite{dropout}. In the
+stopping \cite{prechelt}. Dropout is another established regularizer \cite{dropout},
+but is not an arm of the reported regularization table. In the
 infinite-width limit a network is a Gaussian process \cite{neal,leenngp,matthews} whose kernel is
 the arc-cosine kernel of \cite{chosaul}, and gradient descent on a wide network follows the neural
 tangent kernel \cite{ntk,arora}; both enter the kernel comparison of
@@ -200,7 +222,9 @@ radiance,
 \begin{equation}\label{eq:inv}
 \hat\rho \;=\; \frac{L - \hat Y_1}{\hat Y_2 + \hat Y_3 + \hat Y_4 (L - \hat Y_1)},
 \end{equation}
-both evaluated at $\rho = 0.7$.
+both evaluated at $\rho = 0.7$ in the primary comparison. The numerical coordinate ranges
+above are the reported lookup-table description, not independently recovered sample extrema:
+the public records do not include the raw arrays or simulator-generation configuration.
 
 The protocol is the same for every family. The table is split into a test block of 2{,}331
 rows and a remaining block of 20{,}982; 2{,}098 of the latter are held out for validation,
@@ -216,8 +240,9 @@ to the split within this table, rather than independent external validation. The
 sets overlap, and their standard deviations are descriptive, not confidence intervals from
 ten independent datasets. Section~\ref{sec:paired-tails} reports paired differences on
 common splits. Validation rows are shared by early stopping, tuning and model combination.
-Evaluation uses the single surface reflectance $\rho=0.7$; other reflectances and atmospheric
-states outside the table are not tested.
+The primary model comparison uses $\rho=0.7$. Supplementary stored retrieval diagnostics
+also evaluate a prescribed reflectance grid, but no EMIT atmospheric states outside the
+table or independent operational retrievals are tested.
 
 \begin{figure}[t]
 \centering
@@ -443,9 +468,8 @@ band structure, rising by two orders of magnitude in the water-vapour bands near
 and 1870\,nm; the network's is nearly flat across the spectrum and higher in the windows; the
 residual correction keeps the network's floor in the windows and most of the kernel's advantage
 outside them. On the spherical albedo $Y_4$ the three families agree to within a factor of two at
-every wavelength, and all of them degrade towards 2500\,nm. The panels explain the component
-averages of Table~\ref{tab:results}: an average over 285 bands is dominated by the handful in
-which the flux vanishes.}
+every wavelength, and all of them degrade towards 2500\,nm. These bandwise relative-RMSE diagnostics use a different aggregation from the mean
+per-sample relative spectral norm in Table~\ref{tab:results}.}
 \label{fig:band-anatomy}
 \end{figure}
 
@@ -812,21 +836,17 @@ their spread, of order $0.01$ points, measures initialisation and not sampling. 
 and Helmholtz-staircase rows are single runs.
 
 \begin{table}[t]
-\centering\small
-\resizebox{\textwidth}{!}{\input{table_corpora}}
-\caption{Test error [\%] on ten further emulation configurations, mean $\pm$ standard deviation
-over the available runs. Errors are mean relative $L^2$ norms, except the two
-correction-coefficient rows, which use the denominator floor in \eqref{eq:coefficient-floor}. $n$ is the number of examples --- a range
-where the state-level split of the correction-coefficient corpus makes it differ by run --- $d$
-the input dimension the models receive and $q$ the output dimension they regress. The runs are
-random splits except for the turbulent radiative layer, whose three runs share The Well's own
-split and differ in network initialisation, and the two single-run rows. The family set and validation-based selection rule are common across rows; the network budget is not, and is 200 epochs
-at width 512 except on ClimSim (60 at 512) and the two correction-coefficient configurations
-(120 at 384). The ridge column is linear in the inputs the models receive, unlike the cubic
-reference of Table~\ref{tab:results}, and is not a member of the convex stack; its
-Helmholtz-staircase entry is $0.004$, below the two decimals shown. Kernel solves are exact when
-the training block has at most 20{,}000 rows and otherwise use 6{,}000 Nystr\"om landmarks,
-which is the case on ClimSim, the Helmholtz staircase and the two correction-coefficient rows.}
+\centering
+\input{layout_corpora}
+\caption{Ten further configurations: dimensions and run counts (A), reference models (B),
+and combinations (C). Errors are mean relative spectral norms in percent, with the
+0.05 denominator floor of \eqref{eq:coefficient-floor} for the two RT-coefficient rows.
+Spreads are sample standard deviations; the radiative-layer repetitions share one split
+and vary initialization, and two rows are single runs. The network budget is 200 epochs
+at width 512, except ClimSim (60 at 512) and RT coefficients (120 at 384). The linear
+ridge is excluded from the stack; its Helmholtz error is $0.004\%$, rounded in the table.
+Kernel solves above 20,000 training rows use 6,000 Nystr\"om landmarks. Further protocol
+and task-specific limitations are given in the text.}
 \label{tab:corpora}
 \end{table}
 
@@ -881,87 +901,87 @@ specified training and selection procedures, not the optimum attainable by eithe
 
 \section{Discussion}\label{sec:discussion}
 
-Exact kernel regression is effective on this six-dimensional radiative-transfer table.
-Input-specific length scales substantially reduce radiance error relative to the isotropic
-kernel, cubic regression and width-512 network. Residual fitting improves the network under
-the implemented PCA projection. The width-2000 network has larger standalone error under
-the tested training configuration, yet its features support more accurate kernel predictions
-at all ten splits. Since width and training duration change together, this comparison
-concerns the fitted representations rather than an intrinsic effect of width.
+The main EMIT comparison supports the use of both input scaling and learned features.
+The input-scaled Mat\'ern kernel substantially reduces radiance error relative to the
+isotropic kernel, cubic regression and width-512 network. Residual fitting improves the
+network under the implemented PCA projection. The width-2000 network has a larger
+standalone error under the tested optimizer and training budget, yet its features support
+more accurate kernel predictions at every main split. Width and training duration change
+together, so the experiment concerns fitted representations rather than an intrinsic
+benefit of width.
 
-The central result is the difference between forward and inverse rankings. The input-scaled
-kernel has the smallest median reflectance error in the main comparison, whereas the feature
-kernels have smaller 95th-percentile inverse errors. Both narrow and wide convex stacks
-increase those tails at every split relative to their feature kernels. For the wide model,
-the mean radiance gain is only $0.0006$ percentage points, while the mean within-split
-95th-percentile reflectance error increases from $7.57$ to $22.71$ points. A ranking based
-only on mean radiance would obscure this trade-off. The finite-perturbation identities show
-that inversion also requires control of the predicted denominator relative to component
-errors. Retrieval validation should specify a physical passband, report retained coverage
-and invalid inversions, and evaluate a range of surface reflectances.
+Forward and inverse rankings nevertheless differ. The input-scaled kernel has the smallest
+median reflectance error in the main comparison, while the feature kernels have smaller
+95th-percentile errors. Both narrow and wide stacks increase the latter tails at every
+split relative to their feature kernels. For the wide model, a mean radiance gain of
+$0.0006$ percentage points accompanies an increase from $7.57$ to $22.71$ points in the
+mean within-split 95th-percentile reflectance error. Neither a single forward score nor a
+reflectance median summarizes this behavior. The unconditioned inverse also produces
+large finite outliers, so these all-band scores should not be interpreted as retrieval
+accuracy on a specified physical passband.
 
-The residual-error identity yields an exact alignment criterion for improvement in a
-quadratic metric. The PCA decomposition adds the truncation error explicitly. Applying a
-kernel learning-rate bound to the neural residual requires a uniform bound and a separate
-source-norm estimate; the observed learning slopes describe only the measured sample-size
-range. The OCO-2 and additional-corpus comparisons likewise support task-dependent choices
-of representation and kernel metric, rather than a single preferred model family.
+Theorem~\ref{thm:transfer} gives a precise explanation of why such a reversal is possible.
+On its physical domain, the constrained retrieval error is at most $e_R/t$, capped at
+$R$, with constant one. A distributional bound separates the small-transmission mass
+from errors relative to transmission on the remaining entries. Proposition~\ref{prop:attained}
+shows sharpness of the transfer exponent for this inverse under the stated population
+hypotheses, not minimax optimality over all retrieval procedures. Theorem~\ref{thm:profile}
+shows that a conditional root-mean-square component error proportional to transmission
+is sufficient to retain the component-error rate. This is not a necessary condition in
+every distribution: its other cases also allow rate retention for sufficiently light tails.
+The finite transmission profiles do not establish which asymptotic regime applies to EMIT.
 
-Theorem~\ref{thm:transfer} turns the forward--inverse distinction into a quantitative
-statement. The reflectance error of the constrained retrieval is at most the
-transmission-weighted component error divided by the transmission, with constant one, and
-the mean-square error over an evaluation distribution is bounded by the tail mass of the
-transmission plus the mean of that ratio where the transmission is not small. On the EMIT
-table the absolute component errors of every head are not concentrated in the opaque bands;
-the retrieval tails come from dividing ordinary errors by a vanishing transmission, and the
-observed profile exponents are far from the value at which Theorem~\ref{thm:profile} gives a
-rate without loss. Two consequences follow for retrieval validation. On the all-band
-distribution the reflectance tails measure the opaque bands and rank the heads by where
-their small errors happen to sit; on a passband with transmission bounded below, the
-component rate transfers unchanged, and the heads are compared there. Proposition~\ref{prop:perturb}
-adds the other half of the picture: a Nystr\"om approximation \cite{nystrom,falkon}, a compressed representation
-or a changed ridge moves the corrected predictor through its action on the fitted residual,
-so the bound to check before trusting an approximation is the residual-action bound, which
-holds at every held-out row in the experiments and is finite where a bound in the norm of
-the Gram perturbation is not.
+The distinction between fitting and scoring is equally important. The diagnostic stack
+fits a convex quadratic in raw component errors, with direct and diffuse flux treated
+separately, and projects the combined flux only for retrieval. Its deterministic transfer
+bound has factor four. This differs from the factor-three bound for a total-flux quadratic
+that includes the flux cross term. Both bounds require the physical hypotheses and
+errors on the evaluation distribution; neither turns a low validation objective into a
+test guarantee. The implemented equality-penalized NNLS and fixed-sweep IRLS routines
+produce approximate weights. Their recorded predictions remain empirical results, not
+certificates of globally optimal retrieval or forward performance.
 
-The replication at further splits, the ridge path and the two external comparisons sharpen the
-picture in three ways. The concatenated-feature kernel's gain over the single-member kernel
-survives four new splits in the mean and, at these splits, in the reflectance tail as well, so
-the tail cost belongs to the stacking step and not to the wider representation. The correction
-degrades gracefully where its kernel step does not: along the ridge the kernel alone loses an
-order of magnitude before the corrected predictor loses a factor of two, because the network mean
-carries the prediction once the kernel is over-smoothed, which is the content of
-Proposition~\ref{prop:sensitivity} read on data. The kernel on the state inputs is not the limiting
-choice either: across ten of them the best is within two hundredths of a point of the kernel on a
-modest network's features, and what moves the error is combination, the convex stack of all heads
-standing roughly a quarter below the best single head on three of the four components; regularising the network changes its
-error little, and both kernel steps compress the differences between its arms by an order of
-magnitude, the correction doing the work the regulariser could not. And the metric decides the model on the two
-benchmarks in the same way it decides it here: on the correction-coefficient corpus the
-residual-corrected network improves on the published values in all four metrics on both splits,
-with the widest margin out of distribution, while on OCO-2 the heads that win in the reduced
-coordinates lose by a factor of two to three in radiance and vice versa, and the rule that aligns
-the combination with the radiance metric buys its improvement entirely in coordinates that carry
-little radiance.
+For residual correction, the exact alignment identity and PCA decomposition identify
+which error terms can improve and which remain. A learning-rate claim additionally
+requires a uniform regression bound and control of the fitted residual in the relevant
+source norm; the measured learning curves do not establish these conditions.
+Proposition~\ref{prop:perturb} similarly controls movement between two fitted systems
+without asserting generalization. Its residual-action bound can be much smaller than
+the spectrum-only bound, but several reported ratios remain very large. A finite bound
+is not necessarily an adequate approximation tolerance for an application.
 
-Accuracy must also be considered alongside cost. Dense kernel regression stores order
-$n^2$ entries and requires order $n^3$ operations for factorization. One
-$18{,}884\times18{,}884$ double-precision matrix occupies approximately $2.85$ GB before
-factorization workspaces and other arrays. Feature kernels evaluate both the network and
-the kernel against the training design; stacks evaluate each active member. Per-model
-throughput was not measured under matched conditions, so these results do not establish a
-speed advantage over operational emulators such as sRTMnet \cite{srtmnet}.
+The supplementary studies reinforce metric- and task-dependent comparisons rather than
+a universally preferred family. Concatenated features improve mean radiance error on
+three of four follow-up splits and improve their aggregate reflectance tail. The matched
+correction-coefficient scores favor residual-corrected networks relative to the published
+reference values, with the reference not retrained here. OCO-2 coefficient and radiance
+losses select different trade-offs; its quadratic fitting objectives must be distinguished
+from the mean relative norms used for reporting. The further-corpus results concern the
+specified budgets, reductions and kernel approximations, not each corpus's best available
+method.
 
-The ten partitions quantify within-table split sensitivity. Model development used the same
-table, and the partitions do not provide an untouched confirmation set. The two principal
-EMIT comparisons have complete per-split summaries; individual records are incomplete for
-some secondary ablations. Access to the raw arrays and simulator configuration is required
-to reproduce the training campaign. Within these limits, the results show that neural
-features and exact kernels can complement one another, while a small forward-error gain
-can coincide with a substantially worse inverse-error tail.
+Accuracy must also be considered alongside cost. A dense kernel matrix uses order $n^2$
+storage and its factorization order $n^3$ operations. One
+$18{,}884\times18{,}884$ double-precision matrix occupies about $2.85$ GB before workspaces
+and other arrays. Feature kernels require both neural evaluation and a kernel prediction
+against the training design; a stack evaluates every active head. No matched throughput
+measurement establishes a speed advantage over operational emulators such as sRTMnet
+\cite{srtmnet}.
 
+The principal empirical limitation is the adaptively explored, fixed table. Overlapping
+partitions are not independent external validation. The principal reproducibility
+limitation is that public summaries do not replace raw arrays, full-precision predictions
+and simulator provenance. Additional transmission summaries include nonpositive-flux and
+albedo-out-of-range entries; their all-band diagnostic expressions are not certified
+population bounds. A deployment evaluation should fix the application passband and
+coverage requirement before comparison, separate physical failures from numerical
+failures, and report both the raw and constrained inverse. Within the scope actually
+tested, neural features and exact kernels complement one another, while a small forward
+gain can coexist with a substantially worse inverse-error tail.
+
+\clearpage
 \input{appendix_proofs}
+\input{appendix_diagnostics}
 
 \section*{Acknowledgements}
 
@@ -993,35 +1013,52 @@ combiners, the regularisation suite, the ridge-path and perturbation measurement
 synthetic reference, the matched benchmark rescoring, and the OCO-2 selection through the
 Gram matrix of its design; it also generated every table of those sections from the stored
 run records and wrote their text. The author supplied the data, set the questions and
-reviewed the results.
+reviewed the results. The present revision used ChatGPT to reconcile the manuscript with
+the archived implementation, separate precision cohorts, add synthetic regression tests,
+and rebuild the manuscript; this work did not rerun the trained-model campaigns.
 
 \section*{Data and code availability}
 
-The manuscript, model drivers, run summaries and table-generation scripts are available at
+The manuscript, model drivers, run summaries and reconstruction scripts are available at
 \url{https://github.com/yspennstate/emit-oco2-kernel-emulators}.
+The reproduction documentation distinguishes rebuilding a table from recorded metrics,
+rerunning a synthetic check, and reproducing model training from raw data.
 
-The width-512 and width-2000 EMIT experiments each contain ten per-split records with
-array digests, selected hyperparameters, split sizes and evaluation metrics. These twenty
-records reproduce Tables~\ref{tab:results}, \ref{tab:wide}, \ref{tab:paired} and
-\ref{tab:tails}. Reproduction commands and the file inventory are given in the repository documentation.
+The main width-512 and width-2000 EMIT comparisons each have ten per-split records with
+array digests, hyperparameters, split sizes and evaluation metrics. These twenty records
+reproduce Tables~\ref{tab:results}, \ref{tab:wide}, \ref{tab:paired} and~\ref{tab:tails}.
+The hashes identify recorded arrays; regenerating these tables does not independently
+verify the unavailable arrays or retrain their models. Secondary learning-size, width and
+tuning experiments retain ten-run aggregate summaries but incomplete individual archives:
+one isotropic and one input-scaled 8{,}000-row record are absent, width 1000 has three
+individual records, and full-data tuning has five. The original three-member experiment
+uses three splits and the width-4000 experiment two.
 
-Secondary learning-curve, width and tuning summaries contain ten-run aggregates. The public individual archive lacks
-one isotropic and one input-scaled record at 8{,}000 rows; it contains three width-1000
-records and five full-data-tuning records. The three-member wide-feature comparison uses
-three splits, and width 4{,}000 uses two. The corresponding aggregate tables and individual
-records are distinguished in the reproduction manifest.
+For the later diagnostics, four float64 transmission records at seeds 104--107 are
+summarized together; the separate seed-101 float32 record is identified as a
+precision-altered experiment and is not pooled into that comparison. The public archive
+also contains twelve multi-kernel component/seed records, three regularization records,
+eight feature-perturbation records, four ridge-path records, nine OCO-2 selection records
+and the matched-benchmark scoring records. The four-split concatenation table and the
+joint-stacking table are retained historical aggregates: their generating campaign and
+stack JSON files are absent from the public archive. The state-input part of the
+perturbation table likewise lacks its generating JSON, whereas the feature rows can be
+regenerated. These distinctions are recorded by table label in the reproduction manifest;
+missing records are not replaced by smaller or differently defined experiments.
 
 The EMIT arrays, identified as \texttt{data\_EMIT\_24k} and attributed to the Jet Propulsion
-Laboratory, are not redistributed. Raw arrays, trained weights and prediction files are
-available from the author on request. The public archive does not specify the simulator
-version, generation configuration or redistribution permissions. Scoring uses float64;
-prediction archives stored as float32 cannot reproduce cancellation-sensitive inverse errors
-at the same precision. The conditioning utility requires explicit approval of
-precision-altered inputs. Its tests use synthetic arrays; the EMIT results reported here
-are all-band statistics rather than conditioned evaluations.
+Laboratory, are not redistributed. The author offers raw arrays, trained weights and
+prediction files on request. The public archive does not establish the simulator version,
+generation configuration or redistribution permissions. These remain requirements for
+independent reproduction of the training campaign. Scoring in float64 does not recover
+information lost when a prediction was stored in float32. Precision-altered inputs
+therefore require an explicit opt-in in the diagnostic drivers. The primary comparisons
+are all-band scores; supplementary common-mask and transmission diagnostics do not
+constitute a validated operational retrieval protocol.
 
 The OCO-2 arrays and reference predictions are from the release accompanying
-\cite{lamminpaa}. The additional configurations use the cited public releases.
+\cite{lamminpaa}. The other configurations use the cited releases. No new trained EMIT,
+OCO-2 or multi-fidelity model is introduced by the present manuscript revision.
 
 \begin{thebibliography}{99}
 

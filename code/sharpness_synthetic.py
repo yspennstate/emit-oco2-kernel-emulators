@@ -45,18 +45,23 @@ def run(beta, r0=0.5, c=0.25, n=2_000_000, seed=0):
     t = rng.random(n) ** (1.0 / beta)
     L = r0 * t
     R = 0.9
-    out = dict(beta=beta, r0=r0, c=c, n=n, R=R, average_family=[], uniform_family=[], profile_family=[])
+    out = dict(beta=beta, r0=r0, c=c, n=n, seed=seed, R=R, average_family=[], uniform_family=[], profile_family=[])
     viol = 0
+    # For the average family, e_R/t = c * 1{t <= tau}.  Sorted empirical
+    # CDF values give the same threshold bounds without repeatedly scanning
+    # millions of entries for each (tau, threshold) pair.
+    ladder = np.geomspace(1e-3, 1.0, 61)
+    sorted_t = np.sort(t)
+    cdf_ladder = np.searchsorted(sorted_t, ladder, side="right") / n
     for tau in (0.4, 0.2, 0.1, 0.05, 0.025, 0.0125):
         a_hat = c * t * (t <= tau)
         rho, fails = constrained_retrieval(L, a_hat, t, np.zeros_like(t), R=R)
         eR = np.abs(a_hat)                                       # R|e_t| = R^2 t|e_s| = 0 here
         viol += int(np.sum(np.abs(rho - r0) > np.minimum(R, eR / t) * (1 + 1e-9) + 1e-15))
         eps2 = float(np.mean(eR ** 2)); mse = float(np.mean((rho - r0) ** 2)); events = int(np.sum(t <= tau))
-        ladder = np.geomspace(1e-3, 1.0, 61)
-        Ft = lambda u: float(np.mean(t <= u))
-        bound_last = min(R * R * Ft(u) + eps2 / (u * u) for u in ladder)
-        bound_middle = min(R * R * Ft(u) + float(np.mean(np.where(t > u, (eR / t) ** 2, 0.0))) for u in ladder)
+        bound_last = float(np.min(R * R * cdf_ladder + eps2 / ladder ** 2))
+        bound_middle = float(np.min(R * R * cdf_ladder
+                                    + c * c * np.maximum(events / n - cdf_ladder, 0.0)))
         out["average_family"].append(dict(tau=tau, events=events, eps2=eps2, eps2_exact=c * c * beta * tau ** (beta + 2) / (beta + 2),
                                           mse=mse, mse_exact=c * c * tau ** beta, bound_last_inf=bound_last, bound_middle_inf=bound_middle,
                                           bound_last_over_mse=bound_last / mse if mse > 0 else None, bound_middle_over_mse=bound_middle / mse if mse > 0 else None,

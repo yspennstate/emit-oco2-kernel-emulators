@@ -1,23 +1,20 @@
-"""Joint radiance-reflectance combination (theory v4, E3): stacks fitted on the validation twins, read once on test.
+"""Retrieval-weighted combinations fitted on validation predictions, scored on test.
 
-The campaign NPZ carries, for every head with a validation twin (krr, dnn, dnn_ens, dnn_corr, ens_corr, dkr, dkr_cat),
-val_<head>_<component> on idx_val and <head>_<component> on idx_te, both in physical units. Three arms:
+Historical fitting contract (see paper/sec_theory_new.tex):
+* Clip each base Y4 to [0,S] before fitting; leave Y2 and Y3 unprojected.
+* The finite-threshold ``theorem`` arm fits J'_tau, the separated raw-error
+  quadratic, NOT the total-flux J_tau. Its deterministic transfer factor is four
+  on the theorem's physical domain. Total-flux projection occurs only in scoring.
+* ``theorem`` with tau=inf is a distinct unweighted-component baseline.
+* ``paper`` fits row-relative squared component errors; ``paper_norm`` uses six
+  IRLS sweeps for mean row-relative norms. Neither is an exact retrieval objective.
+* simplex_weights uses equality-penalized NNLS then renormalization. Feasible
+  weights do not establish exact optimality of the equality-constrained QP.
 
-  theorem   every base head is PROJECTED first (t_hat -> max(t_hat, 0) applied to the two flux components' sum
-            through Y2 and Y3 kept as predicted but their sum floored at zero in scoring, s_hat -> [0, S]); then per
-            component a simplex combination minimises the convex quadratic surrogate
-              J_tau(w) = mean[ (e_a^2 + R^2 e_t^2 + R^4 t^2 e_s^2) / (t v tau)^2 ]
-            on the validation rows (Theorem 4 gives E|rho_bar_w - rho|^2 <= R^2 F_t(tau) + 3 J_tau(w)); tau is a
-            multiple of the training flux scale with its validation coverage F_t(tau) reported, and tau = inf is the
-            unweighted physical-unit stack.
-  paper     the same simplex combination under the campaign stack's own objective, a row-relative squared error
-            per component (every validation row divided by its norm), for comparison with the published stack.
-  select    the best single head per component on the validation objective of each arm.
-
-Every arm is frozen on validation and read once on the test rows: component and radiance errors, eps_R, the raw
-inverse and its failures, the constrained retrieval and its tails, the paper's conditioned masks; single heads
-beside the stacks. State-level losses (mean over bands and prescribed reflectances within a state) are written so
-that a finite-class selection on an independent state sample can be made later. numpy only.
+Raw and constrained retrieval statistics are reported separately. Legacy all-band
+statistics may include entries outside the theorem's hypotheses. Reusing validation
+rows for earlier model selection does not meet independent-selection assumptions.
+The revision adds objective/precision metadata without changing the weight algorithm.
 """
 from __future__ import annotations
 import argparse, hashlib, json, sys
@@ -27,6 +24,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import conditioned_reflectance as cr
 from transmission_conditioned import split, digest, retrieval
+from stacking_contract import component_weights, require_scoring_precision, physical_domain
 
 COMPONENTS = ("Y1", "Y2", "Y3", "Y4")
 HEADS = ("krr", "dnn", "dnn_ens", "dnn_corr", "ens_corr", "dkr", "dkr_cat")
@@ -56,7 +54,7 @@ def nnls(A, b, iters=3000):
 
 
 def simplex_weights(Ph, y, wts):
-    """w >= 0, sum w = 1, minimising sum_i wts_i (sum_h w_h P_h,i - y_i)^2; the sum constraint as a heavy row."""
+    """w >= 0, sum w = 1, approximately fitting weighted squared error; the equality constraint is a penalty row, then weights are normalized."""
     sq = np.sqrt(wts)[:, None]
     big = 1e3 * np.sqrt(np.mean(wts)) * np.sqrt(len(wts))
     A = np.vstack([Ph * sq, big * np.ones((1, Ph.shape[1]))])
@@ -125,12 +123,29 @@ def main():
         heads = [h for h in (args.heads or HEADS) if all(f"val_{h}_{c}" in P.files and f"{h}_{c}" in P.files for c in COMPONENTS)]
         if len(heads) < 2:
             raise ValueError(f"need at least two heads with validation twins; found {heads}")
-        if any(P[f"{h}_{c}"].dtype.itemsize < 8 for h in heads for c in COMPONENTS) and not args.allow_float32:
-            raise ValueError("float32 prediction dump; pass --allow-float32 to score it as a precision experiment")
+        require_scoring_precision(
+            {key: P[key] for h in heads for c in COMPONENTS
+             for key in (f"val_{h}_{c}", f"{h}_{c}")},
+            allow_precision_altered=args.allow_float32)
+        out["schema_version"] = 2
+        out["precision_altered_opt_in"] = bool(args.allow_float32)
+        out["prediction_dtypes"] = {
+            key: str(P[key].dtype) for h in heads for c in COMPONENTS
+            for key in (f"val_{h}_{c}", f"{h}_{c}")}
+        out["fit_contract"] = {
+            "finite_threshold": "separated raw-component quadratic J_prime_tau",
+            "projection": "base albedo before fit; total flux only during retrieval scoring",
+            "solver": "equality-penalized NNLS followed by simplex renormalization",
+            "mean_norm_solver": "six fixed IRLS sweeps; no convergence certificate",
+            "infinite_threshold": "unweighted component square; not a threshold limit",
+            "theorem_scope": "requires full physical domain; all-band metrics are descriptive"}
+        out["physical_domain_entries_by_rho"] = {
+            str(rho): int(physical_domain(t_te, s_te, rho=rho, R=R, S=S_used).sum())
+            for rho in args.rhos}
         out["heads"] = heads
         VA = {c: {h: np.asarray(P[f"val_{h}_{c}"], dtype=np.float64) for h in heads} for c in COMPONENTS}
         TE = {c: {h: np.asarray(P[f"{h}_{c}"], dtype=np.float64) for h in heads} for c in COMPONENTS}
-    # project the base heads first: the albedo onto [0, S]; the flux floor acts on the SUM, so it is applied at scoring
+    # Only albedo heads are projected before the affine quadratic fit. The total-flux floor is downstream scoring.
     for h in heads:
         VA["Y4"][h] = np.clip(VA["Y4"][h], 0.0, S_used); TE["Y4"][h] = np.clip(TE["Y4"][h], 0.0, S_used)
     for h in heads:
@@ -143,11 +158,7 @@ def main():
         for tau in taus:
             key = "inf" if np.isinf(tau) else str(tau)
             if arm == "theorem":
-                if np.isinf(tau):
-                    cond_at, cond_s = np.ones_like(tv), np.ones_like(tv)
-                else:
-                    tt = np.maximum(tv, tau * scale); cond_at = 1.0 / tt ** 2; cond_s = (tv / tt) ** 2
-                wts = {"Y1": cond_at, "Y2": R * R * cond_at, "Y3": R * R * cond_at, "Y4": R ** 4 * cond_s}
+                wts = component_weights(tv, R, tau, scale)
                 coverage = float(np.mean(tv <= tau * scale)) if not np.isinf(tau) else 0.0
             else:
                 wts = {c: np.broadcast_to(rownorm[c], tv.shape).copy() for c in COMPONENTS}; coverage = None
