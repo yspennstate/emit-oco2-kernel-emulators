@@ -1,0 +1,22 @@
+name: Revision source snapshot
+on:
+  push:
+    branches: ['revision/publication-2026-09-21']
+    paths: ['.github/workflows/revision-workbench.yml']
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record source identity
+        run: git rev-parse HEAD > SOURCE_COMMIT.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: revision-source
+          include-hidden-files: true
+          path: |
+            .
+            !.git/**
+          retention-days: 7
