@@ -25,20 +25,22 @@
 
 \begin{abstract}
 We compare neural networks, exact Mat\'ern regression and their combinations on a
-six-dimensional radiative-transfer table over the 285-band EMIT grid. Over ten partitions of
-18{,}884 training rows, an input-scaled kernel gives $0.095\%$ mean relative radiance error
-against $0.760\%$ for cubic regression and $0.387\%$ for a network; residual correction
-brings the network to $0.141\%$ and a kernel on wider features to $0.079\%$. The wide convex
-stack improves the radiance error by $0.0006$ percentage points while raising the mean
-within-split 95th-percentile reflectance error from $7.57$ to $22.71$ points, at every
-split. For the constrained retrieval we prove a bound with constant one, the
-transmission-weighted component error divided by the transmission, exhibit a predictor
-attaining the worst-case transfer exponent, and give conditional-error conditions under
-which no rate is lost. Measured on the tabulated truth, $0.16\%$ of entries violate the
-hypotheses of those statements; on the admissible domain, at $99.5\%$ coverage, the
-exact-component inversion is accurate to nine digits, against a root-mean-square
-reflectance error of $7.4\times10^{-3}$ over all bands. The table is one adaptively
-explored grid, and overlapping partitions do not establish independent validation.
+six-dimensional radiative-transfer table over the 285-band EMIT grid. Over ten partitions
+with 18{,}884 training rows, an input-scaled kernel gives $0.095\%$ mean relative radiance
+error, against $0.760\%$ for cubic regression and $0.387\%$ for a network. Residual
+correction reduces the network error to $0.141\%$; a kernel on wider learned features
+reaches $0.079\%$. The wide stack gains $0.0006$ radiance percentage points on average,
+but raises the mean within-split 95th-percentile reflectance error from $7.57$ to $22.71$
+points, with a larger reflectance tail at every split. For a physically constrained
+retrieval, we prove a sharp constant-one bound in component error relative to transmission,
+construct a predictor attaining the worst-case transfer exponent, and give conditional-error
+conditions under which no rate is lost. A retained tabulation audit places $0.156\%$ of
+entries outside the stated physical screen. Its exact-component round-trip RMSE decreases
+from $7.38\times10^{-3}$ to $1.08\times10^{-9}$ on a reported $99.516\%$-coverage screen;
+this is a numerical diagnostic, not a universal accuracy guarantee. A separate one-split
+refit retains a forward--inverse reversal after screening, but lacks the records needed
+for a matched reproduction. Training-target sensitivity remains untested. The adaptively
+explored table and overlapping partitions do not establish independent validation.
 \end{abstract}
 
 \section{Introduction}
@@ -107,7 +109,10 @@ Secondary evidence has unequal replication and archival completeness. We disting
 recomputable summaries, retained aggregate tables and experiments requiring unavailable
 sample-level arrays. The published benchmark comparison uses the benchmark's stated
 metrics and archived scores; it is not a retraining of its reference model under a matched
-computational budget.
+computational budget. The original training pipeline does not remove the out-of-domain
+targets identified in Section~\ref{sec:constrained}. Screening test entries afterward
+cannot determine their influence on preprocessing or fitted representations; the separate
+refit is supporting evidence with incomplete provenance, not a resolution of that issue.
 
 Section~\ref{sec:related} reviews the relevant constructions, and
 Section~\ref{sec:data} specifies the data and evaluation protocol.
@@ -165,8 +170,10 @@ features \cite{rahimirecht} and their operator-learning counterpart \cite{nelsen
 preconditioned solvers at large scale \cite{falkon,meanti}, inducing-point and variational
 Gaussian processes \cite{quinonero,titsias,hensman}, and structured interpolation with
 hardware-aware linear algebra \cite{kissgp,gpytorch}. At $n = 18{,}884$ the exact factorization is
-affordable, so approximation enters this study only as a perturbation whose size is measured
-(Section~\ref{sec:results-transfer}).
+affordable for the principal full-data EMIT fits. The subset baseline and larger-corpus
+capped fits are different configurations with their own approximation choices. The
+perturbation diagnostics additionally measure changes between fitted systems
+(Section~\ref{sec:results-representation}).
 
 \paragraph{Choosing and combining kernels.}
 A kernel can be built rather than picked: spectral mixtures \cite{wilsonadams}, additive structure
@@ -234,6 +241,16 @@ and principal components are fitted only on each split's training rows. Hyperpar
 checkpoints, coordinatewise selections and combination weights use that split's validation
 rows. Each fitted family is then evaluated on that split's test rows. Unless stated otherwise,
 tables report the mean and sample standard deviation over the ten splits.
+
+The archived training driver standardizes and fits the supplied targets without a
+physical-domain or fill-value screen. Thus train-only preprocessing prevents test leakage
+but does not remove target-quality concerns. The reported numbers describe that original
+pipeline. The training-only screening options added in this revision are a separate,
+prospective sensitivity experiment, not a change retroactively applied to these results.
+The source archive contains affine metadata as well as target arrays; reproducing an
+export must verify its orientation, units and recorded array digests rather than assuming
+an undocumented conversion. Section~\ref{sec:constrained} distinguishes the retained
+truth audit, the separate refit and the still-unperformed clean-target comparison.
 
 The model families and ablations were chosen during exploratory analysis of the same table,
 including inspection of test-set results. Repeated partitions therefore measure sensitivity
@@ -456,7 +473,9 @@ Albedo has the largest relative error for every family. Its small short-wave-inf
 values make relative errors sensitive to absolute prediction errors in that region. The
 width-512 stack achieves $1.94\%$ albedo error. The learning curves below show little
 improvement with sample size on this component; the experiments do not isolate whether
-the plateau arises from approximation, optimization or the relative-error weighting.
+the plateau arises from approximation, optimization, relative-error weighting or the
+out-of-domain training targets. In particular, the training-stage screening sensitivity
+in Section~\ref{sec:constrained} has not been measured.
 
 \input{paired_and_tail_results}
 \begin{figure}[t]
@@ -521,7 +540,7 @@ $\log$ error against $\log n$ over the six rungs lie between $-0.38$ and $-0.61$
 the network, the corrected network and the feature kernel on $Y_1$, $Y_2$ and $Y_3$, while on the
 albedo every slope lies between $-0.09$ and $+0.01$: the albedo shows no sustained decrease over this budget range. This plateau does not
 distinguish approximation bias, optimization, relative-error weighting or limitations of the
-training data.
+training data, including the invalid targets retained by the original preprocessing.
 
 \begin{table}[t]
 \centering\small
@@ -604,7 +623,9 @@ projection identity in Section~\ref{sec:identity} separates these two error term
 the $3\times512$ one, at the same ten splits: the network (one member, up to 500 epochs under the
 same optimizer, learning rate and early stopping), its residual correction, the exact kernel on
 its last-layer features, and the per-coordinate selection and convex stack over the wide
-pipeline's heads (the isotropic kernel, the network, its correction and its feature kernel),
+pipeline's four distinct predictors (the isotropic kernel, network, correction and feature
+kernel); the stored six-slot pool retains duplicate ensemble and ensemble-correction
+slots when there is only one network member,
 beside the corresponding rows of Table~\ref{tab:results}; mean $\pm$ standard deviation over the
 ten splits.}
 \label{tab:wide}
@@ -621,7 +642,7 @@ kernel on its last-layer features reaches $0.079\%$ on the radiance against $0.0
 $512$-unit features, below the per-input kernel's $0.095\%$ at all ten seeds and below the convex
 stack of Table~\ref{tab:results} at nine of them, and on the two flux components, at $0.13\%$ and
 $0.08\%$, it is at or below every row of that table. The convex stack over the wide pipeline's
-heads, which puts $0.88$ to $0.96$ of its weight on that feature kernel, has the lowest mean radiance error in the ten-split comparison at $0.078\%$ on the radiance and $0.043$ reflectance points, below the stack of
+heads, whose weights are component-dependent, has the lowest mean radiance error in the ten-split comparison at $0.078\%$ on the radiance and $0.043$ reflectance points, below the stack of
 Table~\ref{tab:results} at nine of the ten seeds; the per-coordinate selection over the same
 heads does not transfer here either. The residual correction of the wider network is a little
 worse than that of the narrower one, although that ordering is not guaranteed merely because its base network is worse
@@ -745,7 +766,12 @@ $0.0006$ percentage points accompanies an increase from $7.57$ to $22.71$ points
 mean within-split 95th-percentile reflectance error. Neither a single forward score nor a
 reflectance median summarizes this behavior. The unconditioned inverse also produces
 large finite outliers, so these all-band scores should not be interpreted as retrieval
-accuracy on a specified physical passband.
+accuracy on a specified physical passband. In the separate one-split aggregate of
+Section~\ref{sec:constrained}, the stack-to-feature 95th-percentile ratio is about $6.1$
+over all bands and $5.0$ after the declared screen. This is a limited within-refit
+observation, not a matched conditioned reanalysis of the ten original splits. Physical
+inadmissibility, algebraic non-identifiability and numerical cancellation are not
+interchangeable explanations of an error tail.
 
 Theorem~\ref{thm:transfer} gives a precise explanation of why such a reversal is possible.
 On its physical domain, the constrained retrieval error is at most $e_R/t$, capped at
@@ -795,16 +821,19 @@ against the training design; a stack evaluates every active head. No matched thr
 measurement establishes a speed advantage over operational emulators such as sRTMnet
 \cite{srtmnet}.
 
-The principal empirical limitation is the adaptively explored, fixed table. Overlapping
-partitions are not independent external validation. The principal reproducibility
-limitation is that public summaries do not replace raw arrays, full-precision predictions
-and simulator provenance. Additional transmission summaries include nonpositive-flux and
-albedo-out-of-range entries; their all-band diagnostic expressions are not certified
-population bounds. A deployment evaluation should fix the application passband and
-coverage requirement before comparison, separate physical failures from numerical
-failures, and report both the raw and constrained inverse. Within the scope actually
-tested, neural features and exact kernels complement one another, while a small forward
-gain can coexist with a substantially worse inverse-error tail.
+Training-data quality remains unresolved: the fill-like and out-of-range targets entered
+preprocessing and fitting. Test masking cannot determine their training-stage influence.
+The original, screened and matched-size training options implement a sensitivity test,
+but its EMIT results are not reported. The separate refit's neural discrepancy and
+missing configuration also prevent a matched-reproduction claim.
+
+The adaptively explored table and overlapping partitions do not provide independent
+external validation. Raw arrays, full-precision predictions and simulator provenance
+remain necessary for reproduction. All-band diagnostics outside the physical hypotheses
+are not certified bounds. An operational evaluation must prespecify its passband and
+coverage, separate physical and numerical failures, and report raw and constrained
+retrievals. Within the tested scope, neural features and kernels complement one another,
+but small forward gains can accompany larger inverse-error tails.
 
 \clearpage
 \input{appendix_proofs}
@@ -987,6 +1016,7 @@ retuning can also increase test error. The columns of Table~\ref{tab:corpora} de
 specified training and selection procedures, not the optimum attainable by either family.
 
 
+\clearpage
 \section*{Acknowledgements}
 
 The research presented in this paper was supported by the European Research Council (ERC) under
@@ -1019,7 +1049,11 @@ Gram matrix of its design; it also generated every table of those sections from 
 run records and wrote their text. The author supplied the data, set the questions and
 reviewed the results. The present revision used ChatGPT to reconcile the manuscript with
 the archived implementation, separate precision cohorts, add synthetic regression tests,
-and rebuild the manuscript; this work did not rerun the trained-model campaigns.
+and rebuild the manuscript; this work did not rerun the trained-model campaigns. The subsequent review revision corrected the physical-domain
+interpretation and the separate-refit claims, implemented training-target sensitivity
+options and common-mask safeguards, and tested those changes on synthetic inputs.
+It did not obtain new simulator evaluations, rerun the EMIT training campaigns or replace
+archived empirical values with unobserved results.
 
 \section*{Data and code availability}
 
@@ -1032,9 +1066,11 @@ The main width-512 and width-2000 EMIT comparisons each have ten per-split recor
 array digests, hyperparameters, split sizes and evaluation metrics. These twenty records
 reproduce Tables~\ref{tab:results}, \ref{tab:wide}, \ref{tab:paired} and~\ref{tab:tails}.
 The hashes identify recorded arrays; regenerating those tables from the records is a
-consistency check and not a retraining. The results of
-Section~\ref{sec:constrained} are of the other kind: they are computed from the tabulated
-arrays themselves, and the released code refits the families from the table.
+consistency check and not a retraining. The truth audit, round-trip errors and separate
+one-split refit in Section~\ref{sec:constrained} are retained reported results. Their
+sample-level inputs and generating manifests are absent from the repository; they have
+not been regenerated here. The public driver operates on exported NumPy arrays, but its
+presence does not establish the configuration or recover the predictions of that refit.
 Secondary learning-size, width and
 tuning experiments retain ten-run aggregate summaries but incomplete individual archives:
 one isotropic and one input-scaled 8{,}000-row record are absent, width 1000 has three
@@ -1054,18 +1090,25 @@ regenerated. These distinctions are recorded by table label in the reproduction 
 missing records are not replaced by smaller or differently defined experiments.
 
 The EMIT table is the file \texttt{data\_EMIT\_24k.jld2}, a JLD2 (HDF5) archive of
-213{,}761{,}068 bytes with SHA-256
-\texttt{344a6d0e6d77b9c152de18505befb10c6e7566bcb5ff9bc00e10d260a048c6de}, generated at the
-Jet Propulsion Laboratory and dated 24 June 2024. Its root holds the state matrix
+213{,}761{,}068 bytes, attributed in the supplied materials to the Jet Propulsion
+Laboratory and dated 24 June 2024. Its recorded SHA-256 is
+\begin{center}
+{\small\ttfamily 344a6d0e6d77b9c152de18505befb10c6\allowbreak
+\hspace{0pt}e7566bcb5ff9bc00e10d260a048c6de}
+\end{center}
+This revision did not independently rehash the unavailable raw archive. Its root holds the state matrix
 \texttt{X} ($6\times23{,}313$), the four components \texttt{Y1}--\texttt{Y4}
 ($285\times23{,}313$ each), the wavelength grid \texttt{wls}, the index vectors
 \texttt{inputdims} $=(1,3,2,7,5,6)$ and \texttt{outputcomps} $=(11,14,13,2)$ identifying
 the lookup table's input and component columns, and the per-component affine vectors
-\texttt{offsets} and \texttt{scalevecs}. The drivers that refit every family of
-Table~\ref{tab:results} from this archive are in the repository above, and refitting
-reproduces the published rows: the cubic row at $0.754\%$ radiance relative $L^2$ error
-against the $0.760\pm0.011$ of Table~\ref{tab:results}, and the linear diagnostic at
-pooled validation $R^2 = 0.8344$ against the $0.83$ of Section~\ref{sec:data}. The archive
+\texttt{offsets} and \texttt{scalevecs}. The public campaign driver expects
+\texttt{X.npy} and \texttt{Y1.npy}--\texttt{Y4.npy} in state-by-coordinate or
+state-by-band orientation. An exact archive-to-driver export, including the interpretation
+of the affine metadata, must be checked against the recorded NumPy-array digests.
+The separately reported cubic error of $0.754\%$ is close to the main mean
+$0.760\pm0.011\%$, and the reported pooled linear-validation $R^2=0.8344$ is close
+to $0.83$. Agreement of these two baseline summaries does not reproduce all families,
+identify the refit's neural configuration or validate an undocumented export. The archive
 itself and the per-split predictions are available to the editor and referees on request,
 and are held for deposit; redistribution is subject to permission from the originating
 laboratory, which has not been established.
