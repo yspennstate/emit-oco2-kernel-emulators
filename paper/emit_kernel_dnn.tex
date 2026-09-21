@@ -745,7 +745,11 @@ $0.0006$ percentage points accompanies an increase from $7.57$ to $22.71$ points
 mean within-split 95th-percentile reflectance error. Neither a single forward score nor a
 reflectance median summarizes this behavior. The unconditioned inverse also produces
 large finite outliers, so these all-band scores should not be interpreted as retrieval
-accuracy on a specified physical passband.
+accuracy on a specified physical passband. Section~\ref{sec:constrained} separates the two
+effects: on a refit of all six families the reversal appears over all bands by a factor of
+$6.1$ in the 95th-percentile reflectance error and by a factor of $5.0$ on the admissible
+domain, so it is a property of the emulators and not of the entries where the inverse is
+undefined.
 
 Theorem~\ref{thm:transfer} gives a precise explanation of why such a reversal is possible.
 On its physical domain, the constrained retrieval error is at most $e_R/t$, capped at
