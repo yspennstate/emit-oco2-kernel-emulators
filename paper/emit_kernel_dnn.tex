@@ -729,6 +729,91 @@ whereas the gradient construction selects one exponent for all four components.
 
 \input{sec_results_new}
 
+\section{Discussion}\label{sec:discussion}
+
+The main EMIT comparison supports the use of both input scaling and learned features.
+The input-scaled Mat\'ern kernel substantially reduces radiance error relative to the
+isotropic kernel, cubic regression and width-512 network. Residual fitting improves the
+network under the implemented PCA projection. The width-2000 network has a larger
+standalone error under the tested optimizer and training budget, yet its features support
+more accurate kernel predictions at every main split. Width and training duration change
+together, so the experiment concerns fitted representations rather than an intrinsic
+benefit of width.
+
+Forward and inverse rankings nevertheless differ. The input-scaled kernel has the smallest
+median reflectance error in the main comparison, while the feature kernels have smaller
+95th-percentile errors. Both narrow and wide stacks increase the latter tails at every
+split relative to their feature kernels. For the wide model, a mean radiance gain of
+$0.0006$ percentage points accompanies an increase from $7.57$ to $22.71$ points in the
+mean within-split 95th-percentile reflectance error. Neither a single forward score nor a
+reflectance median summarizes this behavior. The unconditioned inverse also produces
+large finite outliers, so these all-band scores should not be interpreted as retrieval
+accuracy on a specified physical passband.
+
+Theorem~\ref{thm:transfer} gives a precise explanation of why such a reversal is possible.
+On its physical domain, the constrained retrieval error is at most $e_R/t$, capped at
+$R$, with constant one. A distributional bound separates the small-transmission mass
+from errors relative to transmission on the remaining entries. Proposition~\ref{prop:attained}
+shows sharpness of the transfer exponent for this inverse under the stated population
+hypotheses, not minimax optimality over all retrieval procedures. Theorem~\ref{thm:profile}
+shows that a conditional root-mean-square component error proportional to transmission
+is sufficient to retain the component-error rate. This is not a necessary condition in
+every distribution: its other cases also allow rate retention for sufficiently light tails.
+The finite transmission profiles do not establish which asymptotic regime applies to EMIT.
+
+The distinction between fitting and scoring is equally important. The diagnostic stack
+fits a convex quadratic in raw component errors, with direct and diffuse flux treated
+separately, and projects the combined flux only for retrieval. Its deterministic transfer
+bound has factor four. This differs from the factor-three bound for a total-flux quadratic
+that includes the flux cross term. Both bounds require the physical hypotheses and
+errors on the evaluation distribution; neither turns a low validation objective into a
+test guarantee. The implemented equality-penalized NNLS and fixed-sweep IRLS routines
+produce approximate weights. Their recorded predictions remain empirical results, not
+certificates of globally optimal retrieval or forward performance.
+
+For residual correction, the exact alignment identity and PCA decomposition identify
+which error terms can improve and which remain. A learning-rate claim additionally
+requires a uniform regression bound and control of the fitted residual in the relevant
+source norm; the measured learning curves do not establish these conditions.
+Proposition~\ref{prop:perturb} similarly controls movement between two fitted systems
+without asserting generalization. Its residual-action bound can be much smaller than
+the spectrum-only bound, but several reported ratios remain very large. A finite bound
+is not necessarily an adequate approximation tolerance for an application.
+
+The supplementary studies reinforce metric- and task-dependent comparisons rather than
+a universally preferred family. Concatenated features improve mean radiance error on
+three of four follow-up splits and improve their aggregate reflectance tail. The matched
+correction-coefficient scores favor residual-corrected networks relative to the published
+reference values, with the reference not retrained here. OCO-2 coefficient and radiance
+losses select different trade-offs; its quadratic fitting objectives must be distinguished
+from the mean relative norms used for reporting. The further-corpus results concern the
+specified budgets, reductions and kernel approximations, not each corpus's best available
+method.
+
+Accuracy must also be considered alongside cost. A dense kernel matrix uses order $n^2$
+storage and its factorization order $n^3$ operations. One
+$18{,}884\times18{,}884$ double-precision matrix occupies about $2.85$ GB before workspaces
+and other arrays. Feature kernels require both neural evaluation and a kernel prediction
+against the training design; a stack evaluates every active head. No matched throughput
+measurement establishes a speed advantage over operational emulators such as sRTMnet
+\cite{srtmnet}.
+
+The principal empirical limitation is the adaptively explored, fixed table. Overlapping
+partitions are not independent external validation. The principal reproducibility
+limitation is that public summaries do not replace raw arrays, full-precision predictions
+and simulator provenance. Additional transmission summaries include nonpositive-flux and
+albedo-out-of-range entries; their all-band diagnostic expressions are not certified
+population bounds. A deployment evaluation should fix the application passband and
+coverage requirement before comparison, separate physical failures from numerical
+failures, and report both the raw and constrained inverse. Within the scope actually
+tested, neural features and exact kernels complement one another, while a small forward
+gain can coexist with a substantially worse inverse-error tail.
+
+\clearpage
+\input{appendix_proofs}
+\input{appendix_diagnostics}
+
+% --- supplementary comparisons, moved out of the body ---
 \section{Comparison with OCO-2}\label{sec:oco2}
 
 The companion paper \cite{nmkc} applies the same construction to the OCO-2 radiative-transfer
@@ -904,89 +989,6 @@ reported kernel error is pessimistic or that a reported gap is an upper bound: v
 retuning can also increase test error. The columns of Table~\ref{tab:corpora} describe the
 specified training and selection procedures, not the optimum attainable by either family.
 
-\section{Discussion}\label{sec:discussion}
-
-The main EMIT comparison supports the use of both input scaling and learned features.
-The input-scaled Mat\'ern kernel substantially reduces radiance error relative to the
-isotropic kernel, cubic regression and width-512 network. Residual fitting improves the
-network under the implemented PCA projection. The width-2000 network has a larger
-standalone error under the tested optimizer and training budget, yet its features support
-more accurate kernel predictions at every main split. Width and training duration change
-together, so the experiment concerns fitted representations rather than an intrinsic
-benefit of width.
-
-Forward and inverse rankings nevertheless differ. The input-scaled kernel has the smallest
-median reflectance error in the main comparison, while the feature kernels have smaller
-95th-percentile errors. Both narrow and wide stacks increase the latter tails at every
-split relative to their feature kernels. For the wide model, a mean radiance gain of
-$0.0006$ percentage points accompanies an increase from $7.57$ to $22.71$ points in the
-mean within-split 95th-percentile reflectance error. Neither a single forward score nor a
-reflectance median summarizes this behavior. The unconditioned inverse also produces
-large finite outliers, so these all-band scores should not be interpreted as retrieval
-accuracy on a specified physical passband.
-
-Theorem~\ref{thm:transfer} gives a precise explanation of why such a reversal is possible.
-On its physical domain, the constrained retrieval error is at most $e_R/t$, capped at
-$R$, with constant one. A distributional bound separates the small-transmission mass
-from errors relative to transmission on the remaining entries. Proposition~\ref{prop:attained}
-shows sharpness of the transfer exponent for this inverse under the stated population
-hypotheses, not minimax optimality over all retrieval procedures. Theorem~\ref{thm:profile}
-shows that a conditional root-mean-square component error proportional to transmission
-is sufficient to retain the component-error rate. This is not a necessary condition in
-every distribution: its other cases also allow rate retention for sufficiently light tails.
-The finite transmission profiles do not establish which asymptotic regime applies to EMIT.
-
-The distinction between fitting and scoring is equally important. The diagnostic stack
-fits a convex quadratic in raw component errors, with direct and diffuse flux treated
-separately, and projects the combined flux only for retrieval. Its deterministic transfer
-bound has factor four. This differs from the factor-three bound for a total-flux quadratic
-that includes the flux cross term. Both bounds require the physical hypotheses and
-errors on the evaluation distribution; neither turns a low validation objective into a
-test guarantee. The implemented equality-penalized NNLS and fixed-sweep IRLS routines
-produce approximate weights. Their recorded predictions remain empirical results, not
-certificates of globally optimal retrieval or forward performance.
-
-For residual correction, the exact alignment identity and PCA decomposition identify
-which error terms can improve and which remain. A learning-rate claim additionally
-requires a uniform regression bound and control of the fitted residual in the relevant
-source norm; the measured learning curves do not establish these conditions.
-Proposition~\ref{prop:perturb} similarly controls movement between two fitted systems
-without asserting generalization. Its residual-action bound can be much smaller than
-the spectrum-only bound, but several reported ratios remain very large. A finite bound
-is not necessarily an adequate approximation tolerance for an application.
-
-The supplementary studies reinforce metric- and task-dependent comparisons rather than
-a universally preferred family. Concatenated features improve mean radiance error on
-three of four follow-up splits and improve their aggregate reflectance tail. The matched
-correction-coefficient scores favor residual-corrected networks relative to the published
-reference values, with the reference not retrained here. OCO-2 coefficient and radiance
-losses select different trade-offs; its quadratic fitting objectives must be distinguished
-from the mean relative norms used for reporting. The further-corpus results concern the
-specified budgets, reductions and kernel approximations, not each corpus's best available
-method.
-
-Accuracy must also be considered alongside cost. A dense kernel matrix uses order $n^2$
-storage and its factorization order $n^3$ operations. One
-$18{,}884\times18{,}884$ double-precision matrix occupies about $2.85$ GB before workspaces
-and other arrays. Feature kernels require both neural evaluation and a kernel prediction
-against the training design; a stack evaluates every active head. No matched throughput
-measurement establishes a speed advantage over operational emulators such as sRTMnet
-\cite{srtmnet}.
-
-The principal empirical limitation is the adaptively explored, fixed table. Overlapping
-partitions are not independent external validation. The principal reproducibility
-limitation is that public summaries do not replace raw arrays, full-precision predictions
-and simulator provenance. Additional transmission summaries include nonpositive-flux and
-albedo-out-of-range entries; their all-band diagnostic expressions are not certified
-population bounds. A deployment evaluation should fix the application passband and
-coverage requirement before comparison, separate physical failures from numerical
-failures, and report both the raw and constrained inverse. Within the scope actually
-tested, neural features and exact kernels complement one another, while a small forward
-gain can coexist with a substantially worse inverse-error tail.
-
-\clearpage
-\input{appendix_proofs}
-\input{appendix_diagnostics}
 
 \section*{Acknowledgements}
 
