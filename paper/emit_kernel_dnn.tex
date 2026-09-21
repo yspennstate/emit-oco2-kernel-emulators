@@ -749,7 +749,12 @@ accuracy on a specified physical passband. Section~\ref{sec:constrained} separat
 effects: on a refit of all six families the reversal appears over all bands by a factor of
 $6.1$ in the 95th-percentile reflectance error and by a factor of $5.0$ on the admissible
 domain, so it is a property of the emulators and not of the entries where the inverse is
-undefined.
+undefined. On a block of $3{,}497$ states drawn with a seed used in no development run and
+read once, the same factors are $6.60$ and $5.54$ (Section~\ref{sec:confirm}). The
+pre-registered statement of the finding is not supported in full: its second clause
+required the stack's all-band $95$th percentile to exceed the residual-corrected network's,
+and it falls short by $0.25$ points. The qualitative reversal reproduces; the ordering among
+the intermediate families does not separate at this sample size.
 
 Theorem~\ref{thm:transfer} gives a precise explanation of why such a reversal is possible.
 On its physical domain, the constrained retrieval error is at most $e_R/t$, capped at

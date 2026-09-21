@@ -114,3 +114,43 @@ that core each family adds bands in proportion to its own inaccuracy: 42 in tota
 kernel on learned features, 54 for the input-scaled kernel, 66 for the network, 133 for the
 cubic ridge, of a 133-band union. Under the conditioning floor the common core is what is
 removed, and what remains is closer to what the component errors predict.
+
+\subsection{A frozen confirmation on untouched states}
+\label{sec:confirm}
+
+Every number above is computed on splits that were inspected while the models were being
+chosen. To separate the finding from that inspection, the model list, the hyperparameters,
+the admissible-domain constants $\tau$ and $\kappa$, and one hypothesis were fixed in a
+pre-registration; a block of $3{,}497$ states was drawn with a seed used in no development
+run, held out of every fit, and read once.
+
+The hypothesis fixed in advance was that the family with the lowest radiance error does not
+have the lowest all-band $95$th-percentile reflectance error, and that its all-band
+$95$th percentile is strictly larger than that of the residual-corrected network.
+
+\IfFileExists{table_confirmation.tex}{%
+\begin{table}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{table_confirmation}}
+\caption{The confirmation block: $3{,}497$ states drawn with a seed used in no development
+run, read once. Admissible coverage $99.5327\%$; $4{,}657$ of $996{,}645$ entries excluded;
+no non-finite inversion in any family.}
+\label{tab:confirm}
+\end{table}}{}
+
+The reversal reproduces. The convex stack has the lowest radiance error of the six
+($0.0687\%$) and the fourth-lowest reflectance tail; the kernel on learned features has a
+larger radiance error ($0.0828\%$) and an all-band $95$th percentile smaller by a factor of
+$6.60$, and by $5.54$ on the admissible domain. Both factors are slightly larger than the
+$6.13$ and $4.99$ measured during development, so the effect is not an artefact of the
+splits that were looked at.
+
+The pre-registered hypothesis is nonetheless not supported, and the second of its two
+clauses is why. The stack's all-band $95$th percentile is $25.82$ points and the
+residual-corrected network's is $26.07$, so the stack's tail is smaller by $0.25$ points
+where the hypothesis required it to be strictly larger. The first clause holds and the
+ranking reversal it describes is reproduced; the second clause named one particular
+comparator and fails on it by a quarter of a percentage point. The distinction worth
+drawing is between the qualitative statement, which survives a single read of untouched
+data, and the specific ordering among the four intermediate families, which does not
+separate at this sample size.

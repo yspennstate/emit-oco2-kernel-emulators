@@ -1,0 +1,14 @@
+\begin{tabular}{lrrrrrr}
+\toprule
+family & radiance rel.\ $L_2$ [\%] & \multicolumn{3}{c}{all bands [pp]} & \multicolumn{2}{c}{admissible [pp]} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-7}
+ & & median & $p_{95}$ & $p_{99}$ & median & $p_{95}$ \\
+\midrule
+cubic ridge & 0.7544 & 0.475 & 70.72 & 129.1 & 0.468 & 70.67 \\
+network $3\times512$ & 0.1719 & 0.106 & 41.83 & 84.1 & 0.105 & 28.07 \\
+network + residual kernel & 0.0978 & 0.061 & 26.07 & 80.5 & 0.061 & 16.87 \\
+input-scaled Mat\'ern kernel & 0.0900 & 0.028 & 26.89 & 189.4 & 0.027 & 19.38 \\
+kernel on learned features & 0.0828 & 0.034 & 3.91 & 129.2 & 0.034 & 2.94 \\
+convex stack & 0.0687 & 0.044 & 25.82 & 89.6 & 0.044 & 16.30 \\
+\bottomrule
+\end{tabular}
