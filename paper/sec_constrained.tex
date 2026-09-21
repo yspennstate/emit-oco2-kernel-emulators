@@ -78,8 +78,11 @@ $L-\widehat{L}$ at $\rho=0.7$; the reflectance residual over all bands; and the 
 reflectance residual restricted to the admissible domain with the conditioning floor. The
 last two columns share a vertical scale, so the difference between them is the contribution
 of the excluded entries. The first two columns are smooth in wavelength and differ between
-families mainly in amplitude; the last two are not, and their walls sit at the same
-wavelengths in every family.}
+families mainly in amplitude. The last two are not: every family's reflectance envelope
+leaves the panel over a common core of 42 bands, at 1357--1447, 1804--1952 and
+2441--2493\,nm, and each family adds further bands of its own in proportion to its
+inaccuracy --- 42 for the kernel on learned features, 66 for the network, 133 for the cubic
+ridge.}
 \label{fig:bands}
 \end{figure}}{}
 
@@ -98,10 +101,16 @@ bands. Under the conditioning floor that factor is $5.0$. Restricting the evalua
 the domain on which the retrieval statements hold narrows the gap and leaves it in place.
 
 Two features of Figure~\ref{fig:bands} do not appear in the aggregates. The component
-residual of every family is smooth in wavelength and widens where the transmitted flux is
-small, so the families differ mainly in the amplitude of a shared shape. The reflectance
-residual does not inherit that shape: over all bands its outer envelopes open into vertical
-walls at the water-vapour features near 1380 and 1900\,nm and at the long-wave edge, in
-every family and at the same wavelengths, because those walls are set by the denominator
-and not by the emulator. Under the conditioning floor the walls narrow, and what remains is
-closer to what the component errors predict.
+residual is smooth in wavelength and widens where the transmitted flux is small, so the
+families differ mainly in the amplitude of a shared shape; on the direct flux no family
+except the cubic ridge has a band whose 95th-percentile error exceeds half the band's own
+scale.
+
+The reflectance residual does not inherit that shape. Over all bands its outer envelopes
+open into vertical walls, and those walls have two parts. A common core of 42 bands ---
+1357--1447, 1804--1952 and 2441--2493\,nm --- is a wall for every family including the
+most accurate, because there the denominator and not the emulator sets the width. Outside
+that core each family adds bands in proportion to its own inaccuracy: 42 in total for the
+kernel on learned features, 54 for the input-scaled kernel, 66 for the network, 133 for the
+cubic ridge, of a 133-band union. Under the conditioning floor the common core is what is
+removed, and what remains is closer to what the component errors predict.
