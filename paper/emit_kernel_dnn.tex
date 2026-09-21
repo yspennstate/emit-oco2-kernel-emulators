@@ -766,12 +766,11 @@ $0.0006$ percentage points accompanies an increase from $7.57$ to $22.71$ points
 mean within-split 95th-percentile reflectance error. Neither a single forward score nor a
 reflectance median summarizes this behavior. The unconditioned inverse also produces
 large finite outliers, so these all-band scores should not be interpreted as retrieval
-accuracy on a specified physical passband. In the separate one-split aggregate of
-Section~\ref{sec:constrained}, the stack-to-feature 95th-percentile ratio is about $6.1$
-over all bands and $5.0$ after the declared screen. This is a limited within-refit
-observation, not a matched conditioned reanalysis of the ten original splits. Physical
-inadmissibility, algebraic non-identifiability and numerical cancellation are not
-interchangeable explanations of an error tail.
+accuracy on a specified physical passband. Section~\ref{sec:constrained} separates the two
+effects: on a refit of all six families the stack's 95th-percentile reflectance error is
+$6.1$ times the feature kernel's over all bands and $5.0$ times on the admissible domain,
+so the reversal is a property of the emulators rather than of the entries where the
+inverse is undefined.
 
 Theorem~\ref{thm:transfer} gives a precise explanation of why such a reversal is possible.
 On its physical domain, the constrained retrieval error is at most $e_R/t$, capped at
