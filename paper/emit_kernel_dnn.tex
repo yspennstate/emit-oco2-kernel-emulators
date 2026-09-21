@@ -1034,7 +1034,7 @@ reproduce Tables~\ref{tab:results}, \ref{tab:wide}, \ref{tab:paired} and~\ref{ta
 The hashes identify recorded arrays; regenerating those tables from the records is a
 consistency check and not a retraining. The results of
 Section~\ref{sec:constrained} are of the other kind: they are computed from the tabulated
-arrays themselves, and the deposited code refits the families from the table.
+arrays themselves, and the released code refits the families from the table.
 Secondary learning-size, width and
 tuning experiments retain ten-run aggregate summaries but incomplete individual archives:
 one isotropic and one input-scaled 8{,}000-row record are absent, width 1000 has three
@@ -1061,12 +1061,14 @@ Jet Propulsion Laboratory and dated 24 June 2024. Its root holds the state matri
 ($285\times23{,}313$ each), the wavelength grid \texttt{wls}, the index vectors
 \texttt{inputdims} $=(1,3,2,7,5,6)$ and \texttt{outputcomps} $=(11,14,13,2)$ identifying
 the lookup table's input and component columns, and the per-component affine vectors
-\texttt{offsets} and \texttt{scalevecs}. The archive, the derived arrays and the per-split
-predictions are deposited with the manuscript, and the deposited drivers refit every family
-of Table~\ref{tab:results} from the archive; the cubic row reproduces at
-$0.754\%$ radiance relative $L^2$ error against the $0.760\pm0.011$ of
-Table~\ref{tab:results}, and the linear diagnostic at pooled validation $R^2=0.8344$
-against the $0.83$ of Section~\ref{sec:data}.
+\texttt{offsets} and \texttt{scalevecs}. The drivers that refit every family of
+Table~\ref{tab:results} from this archive are in the repository above, and refitting
+reproduces the published rows: the cubic row at $0.754\%$ radiance relative $L^2$ error
+against the $0.760\pm0.011$ of Table~\ref{tab:results}, and the linear diagnostic at
+pooled validation $R^2 = 0.8344$ against the $0.83$ of Section~\ref{sec:data}. The archive
+itself and the per-split predictions are available to the editor and referees on request,
+and are held for deposit; redistribution is subject to permission from the originating
+laboratory, which has not been established.
 
 The archive is a record of the tabulation and not of the run that produced it: it carries
 no simulator identifier, version string, line list or generation configuration, and the
