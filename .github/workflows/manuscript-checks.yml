@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Remove checked-in PDF before verification
+        run: rm -f paper/emit_kernel_dnn.pdf
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -34,6 +36,7 @@ jobs:
           python code/make_v2_tables.py
           python code/format_publication_tables.py
           python code/revision_manifest.py
+          python code/audit_retained_refit.py
       - name: Install TeX
         run: |
           sudo apt-get update -qq
@@ -59,7 +62,7 @@ jobs:
           if test -f paper/emit_kernel_dnn.pdf; then sha256sum paper/emit_kernel_dnn.pdf > build/pdf-sha256.txt; fi
           if test -f paper/emit_kernel_dnn.log; then cp paper/emit_kernel_dnn.log build/latex.log; fi
       - name: Archive manuscript, sources and diagnostics
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: verified-manuscript
@@ -77,3 +80,12 @@ jobs:
             requirements-revision.txt
           retention-days: 30
           if-no-files-found: error
+      - name: Archive failed-build diagnostics without a PDF
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manuscript-build-failure-logs
+          path: |
+            build/
+            paper/*.log
+          retention-days: 7
