@@ -1,0 +1,89 @@
+\section{Retrieval error on the admissible domain}
+\label{sec:constrained}
+
+Proposition~1 and the transfer theorem of Section~\ref{sec:theory} describe an entry at
+which the transmitted flux is positive and $q = 1 - \rho Y_4$ is bounded away from zero.
+The all-band statistics of Table~\ref{tab:tails} include entries at which neither holds,
+and there the inverse is not merely ill-conditioned but undefined. This section separates
+the two, on a domain fixed before any model is scored.
+
+Admissibility is a property of the tabulation. Over all $23{,}313\times285 = 6{,}644{,}205$
+tabulated entries, the transmitted flux $t = Y_2 + Y_3$ is non-positive at 438 entries, with
+a minimum of $-4.5\times10^{-20}$, and falls below $10^{-12}$ at 32{,}130. The spherical
+albedo lies outside $[0,1)$ at 10{,}312 entries: 9{,}858 are negative, with a minimum of
+$-0.0724$, and 454 are at or above one, of which 214 are exactly $2$, a fill marker rather
+than an albedo. At 448 entries $q \le 0$, with a minimum of $-0.4$. Writing
+$\mathcal{A} = \{t > 0,\ 0 \le Y_4 < 1\}$, the inadmissible set has 10{,}356 entries
+($0.156\%$); it occupies 227 of the 285 bands and concentrates in the water-vapour band
+between 1841 and 1908\,nm and at the long-wave edge between 2485 and 2493\,nm. Of the
+23{,}313 states, 18{,}859 are admissible at every band.
+
+\IfFileExists{table_domain_audit.tex}{%
+\begin{table}[t]
+\centering
+\input{table_domain_audit}
+\caption{Entries of the tabulated truth at which the retrieval hypotheses fail, counted
+over all $6{,}644{,}205$ sample--band entries before any model is fitted.}
+\label{tab:domain}
+\end{table}}{}
+
+Admissibility alone does not make the inverse stable, because $t$ can be positive and far
+below the scale on which $L - Y_1$ is resolved. We therefore fix a conditioning floor in
+advance, $\tau = 10^{-12}$ on $t$ and $\kappa = 0.3$ on $q$, and report the retained
+coverage beside every number computed on it. On the exact tabulated components the three
+regimes separate:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+round trip at exact components & reflectance RMSE & coverage \\
+\midrule
+all bands & $7.38\times10^{-3}$ & $100\%$ \\
+admissible, $t>0$ and $0\le Y_4<1$ & $4.27\times10^{-3}$ & $99.844\%$ \\
+with the conditioning floor $t\ge\tau$, $q\ge\kappa$ & $1.08\times10^{-9}$ & $99.516\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The reflectance error of the exact-component round trip is therefore not a property of the
+inversion on its domain of definition. It is carried by the $0.48\%$ of entries below the
+floor, where the reflectance is unidentifiable or nearly so and a returned inverse measures
+cancellation rather than emulator accuracy. A reflectance statistic taken over all bands is
+dominated in its tail by that set, and a comparison between emulators conducted over all
+bands compares, in its tail, their behaviour where no emulator can be correct.
+
+\IfFileExists{table_constrained_retrieval.tex}{%
+\begin{table}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{table_constrained_retrieval}}
+\caption{Absolute reflectance error at $\rho = 0.7$ on the test block of one split, over
+all bands and on the admissible domain with the conditioning floor $\tau = 10^{-12}$,
+$\kappa = 0.3$. Percentiles are in reflectance percentage points. Excluded entries are
+counted, never replaced by a prescribed value; the constrained retrieval of
+Section~\ref{sec:theory}, which does replace them, is reported separately.}
+\label{tab:constrained}
+\end{table}}{}
+
+\IfFileExists{../figures/emit_quantiles_top_models.png}{%
+\begin{figure}[p]
+\centering
+\includegraphics[width=\textwidth]{emit_quantiles_top_models.png}
+\caption{Residual quantile bands across the test set, band by band. The envelopes are
+nested percentiles of the residual at each wavelength: $25$--$75$ in red, $5$--$25$ and
+$75$--$95$ in blue, $2.5$--$5$ and $95$--$97.5$ in green, $0.5$--$2.5$ and
+$97.5$--$99.5$ in grey, with the median as a thin black line. Left column: the direct-flux
+residual $Y_2 - \widehat{Y_2}$ in physical units. Centre: the reflectance residual over all
+bands. Right: the same residual restricted to the admissible domain with the conditioning
+floor, on the same vertical scale, so that the difference between the two columns is the
+contribution of the excluded entries.}
+\label{fig:bands}
+\end{figure}}{}
+
+Two features of Figure~\ref{fig:bands} do not appear in the aggregates. The component
+residual of every family is smooth in wavelength and widens where the transmitted flux is
+small, so the families differ mainly in the amplitude of a shared shape. The reflectance
+residual does not inherit that shape: over all bands its outer envelopes open into vertical
+walls at the water-vapour features near 1380 and 1900\,nm and at the long-wave edge, in
+every family and at the same wavelengths, because those walls are set by the denominator
+and not by the emulator. Under the conditioning floor the walls close, and what remains is
+what the component errors predict.

@@ -205,11 +205,14 @@ from which Section~\ref{sec:corpora} draws.
 \section{Data and protocol}\label{sec:data}
 
 The data are $n = 23{,}313$ tabulated radiative-transfer evaluations. Each
-input $x \in \mathbb{R}^6$ collects the atmospheric and viewing state; the coordinate ranges are
-the ranges over which such lookup tables are built for imaging-spectroscopy atmospheric
-correction \cite{isofit,modtran} --- an aerosol optical depth in $[0.05, 1.2]$, a surface elevation in $[-0.5, 6]$ km,
-a water-vapor column in $[0.05, 7]$ cm, a relative azimuth in $[0, 180]^\circ$, a solar zenith
-angle in $[0, 65]^\circ$, and a view zenith angle within $30^\circ$ of nadir. Each output is a set
+input $x \in \mathbb{R}^6$ collects the atmospheric and viewing state, over the ranges on
+which such lookup tables are built for imaging-spectroscopy atmospheric correction
+\cite{isofit,modtran}. Read from the archive, the sampled extrema are an aerosol optical
+depth in $[0.0500, 1.2000]$, a surface elevation in $[-0.4997, 5.9998]$ km, a water-vapour
+column in $[0.0502, 6.9999]$ cm, a relative azimuth in $[0.0029, 179.9947]^\circ$, a solar
+zenith angle in $[0.0012, 64.9981]^\circ$, and a view zenith angle in
+$[150.0003, 179.9991]^\circ$ from the downward vertical, that is within $30^\circ$ of nadir.
+Each output is a set
 of four spectral components on the same 285-point EMIT wavelength grid spanning
 381--2493\,nm: path radiance $Y_1$, direct flux $Y_2$, diffuse flux $Y_3$, and spherical albedo
 $Y_4$ (Figure~\ref{fig:examples}). The quantities retrieved downstream are the radiance at a
@@ -222,9 +225,10 @@ radiance,
 \begin{equation}\label{eq:inv}
 \hat\rho \;=\; \frac{L - \hat Y_1}{\hat Y_2 + \hat Y_3 + \hat Y_4 (L - \hat Y_1)},
 \end{equation}
-both evaluated at $\rho = 0.7$ in the primary comparison. The numerical coordinate ranges
-above are the reported lookup-table description, not independently recovered sample extrema:
-the public records do not include the raw arrays or simulator-generation configuration.
+both evaluated at $\rho = 0.7$ in the primary comparison. The archive carries the table but
+no record of the run that produced it, so the simulator version and generation
+configuration are not established; the identity of the archive, and what it does and does
+not contain, are set out in the data statement.
 
 The protocol is the same for every family. The table is split into a test block of 2{,}331
 rows and a remaining block of 20{,}982; 2{,}098 of the latter are held out for validation,
@@ -473,6 +477,7 @@ per-sample relative spectral norm in Table~\ref{tab:results}.}
 \label{fig:band-anatomy}
 \end{figure}
 
+\input{sec_constrained}
 
 \section{Learning curves, output rank and network width}\label{sec:scaling}
 
@@ -1027,8 +1032,11 @@ rerunning a synthetic check, and reproducing model training from raw data.
 The main width-512 and width-2000 EMIT comparisons each have ten per-split records with
 array digests, hyperparameters, split sizes and evaluation metrics. These twenty records
 reproduce Tables~\ref{tab:results}, \ref{tab:wide}, \ref{tab:paired} and~\ref{tab:tails}.
-The hashes identify recorded arrays; regenerating these tables does not independently
-verify the unavailable arrays or retrain their models. Secondary learning-size, width and
+The hashes identify recorded arrays; regenerating those tables from the records is a
+consistency check and not a retraining. The results of
+Section~\ref{sec:constrained} are of the other kind: they are computed from the tabulated
+arrays themselves, and the deposited code refits the families from the table.
+Secondary learning-size, width and
 tuning experiments retain ten-run aggregate summaries but incomplete individual archives:
 one isotropic and one input-scaled 8{,}000-row record are absent, width 1000 has three
 individual records, and full-data tuning has five. The original three-member experiment
@@ -1046,11 +1054,27 @@ perturbation table likewise lacks its generating JSON, whereas the feature rows 
 regenerated. These distinctions are recorded by table label in the reproduction manifest;
 missing records are not replaced by smaller or differently defined experiments.
 
-The EMIT arrays, identified as \texttt{data\_EMIT\_24k} and attributed to the Jet Propulsion
-Laboratory, are not redistributed. The author offers raw arrays, trained weights and
-prediction files on request. The public archive does not establish the simulator version,
-generation configuration or redistribution permissions. These remain requirements for
-independent reproduction of the training campaign. Scoring in float64 does not recover
+The EMIT table is the file \texttt{data\_EMIT\_24k.jld2}, a JLD2 (HDF5) archive of
+213{,}761{,}068 bytes with SHA-256
+\texttt{344a6d0e6d77b9c152de18505befb10c6e7566bcb5ff9bc00e10d260a048c6de}, generated at the
+Jet Propulsion Laboratory and dated 24 June 2024. Its root holds the state matrix
+\texttt{X} ($6\times23{,}313$), the four components \texttt{Y1}--\texttt{Y4}
+($285\times23{,}313$ each), the wavelength grid \texttt{wls}, the index vectors
+\texttt{inputdims} $=(1,3,2,7,5,6)$ and \texttt{outputcomps} $=(11,14,13,2)$ identifying
+the lookup table's input and component columns, and the per-component affine vectors
+\texttt{offsets} and \texttt{scalevecs}. The archive, the derived arrays and the per-split
+predictions are deposited with the manuscript, and the deposited drivers refit every family
+of Table~\ref{tab:results} from the archive; the cubic row reproduces at
+$0.754\%$ radiance relative $L^2$ error against the $0.760\pm0.011$ of
+Table~\ref{tab:results}, and the linear diagnostic at pooled validation $R^2=0.8344$
+against the $0.83$ of Section~\ref{sec:data}.
+
+The archive is a record of the tabulation and not of the run that produced it: it carries
+no simulator identifier, version string, line list or generation configuration, and the
+released records supply none. Reproducing the original tabulation therefore remains out of
+reach, and no claim in this paper rests on a property of a particular simulator version;
+statements about the generating physics are restricted to what the cited literature reports
+for tables of this kind. Scoring in float64 does not recover
 information lost when a prediction was stored in float32. Precision-altered inputs
 therefore require an explicit opt-in in the diagnostic drivers. The primary comparisons
 are all-band scores; supplementary common-mask and transmission diagnostics do not
