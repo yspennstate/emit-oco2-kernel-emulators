@@ -130,23 +130,37 @@ These changes describe the retained rows, not a causal decomposition of their er
 \centering
 \includegraphics[height=0.80\textheight,width=\textwidth,keepaspectratio]
 {emit_quantiles_top_models.png}
-\caption{Archived bandwise residual quantiles accompanying the separate refit.
-Rows are the six families in Table~\ref{tab:constrained}; columns show direct-flux
-residual, radiance residual at $\rho=0.7$, all-band reflectance residual and screened
-reflectance residual. Bands are nested percentiles: $25$--$75$ (red), $5$--$25$ and
-$75$--$95$ (blue), $2.5$--$5$ and $95$--$97.5$ (green), $0.5$--$2.5$ and
-$97.5$--$99.5$ (grey), with a median line. The reflectance columns share display limits.
-Envelopes extending beyond an axis indicate display clipping, not counted inversion
-failures or proof that no emulator can be accurate there. The figure is retained, not
-regenerated from available sample-level data.}
+\caption{Residual quantile bands across the test set, band by band. The envelopes are
+nested percentiles of the residual at each wavelength: $25$--$75$ in red, $5$--$25$ and
+$75$--$95$ in blue, $2.5$--$5$ and $95$--$97.5$ in green, $0.5$--$2.5$ and
+$97.5$--$99.5$ in grey, with the median as a thin black line. The columns are, from the
+left: the direct-flux residual $Y_2-\widehat{Y_2}$ in physical units; the radiance residual
+$L-\widehat{L}$ at $\rho=0.7$; the reflectance residual over all bands; and the same
+reflectance residual restricted to the admissible domain with the conditioning floor. The
+last two columns share a vertical scale, so the difference between them is the contribution
+of the excluded entries. The first two columns are smooth in wavelength and differ between
+families mainly in amplitude. The last two are not: every family's reflectance envelope
+leaves the panel over a common core of 42 bands, at 1357--1447, 1804--1952 and
+2441--2493\,nm, and each family adds further bands of its own in proportion to its
+inaccuracy --- 42 for the kernel on learned features, 66 for the network, 133 for the cubic
+ridge.}
 \label{fig:bands}
 \end{figure}
 
-Figure~\ref{fig:bands} shows spectral regions where the reflectance envelopes are much
-wider than the central component-residual envelopes. Their overlap near absorption
-features is consistent with inverse-error amplification. It does not isolate a
-model-independent denominator contribution, and this revision does not infer exact
-band counts or attribute all off-scale envelopes to numerical cancellation.
+Two features of Figure~\ref{fig:bands} do not appear in the aggregates. The component
+residual is smooth in wavelength and widens where the transmitted flux is small, so the
+families differ mainly in the amplitude of a shared shape; on the direct flux no family
+except the cubic ridge has a band whose 95th-percentile error exceeds half the band's own
+scale.
+
+The reflectance residual does not inherit that shape. Over all bands its outer envelopes
+open into vertical walls, and those walls have two parts. A common core of 42 bands ---
+1357--1447, 1804--1952 and 2441--2493\,nm --- is a wall for every family including the
+most accurate, because there the denominator and not the emulator sets the width. Outside
+that core each family adds bands in proportion to its own inaccuracy: 42 in total for the
+kernel on learned features, 54 for the input-scaled kernel, 66 for the network, 133 for the
+cubic ridge, of a 133-band union. Under the conditioning floor the common core is what is
+removed, and what remains is closer to what the component errors predict.
 
 \subsection{Training-stage sensitivity remains a separate experiment}
 Neither screen changes the targets already used for standardization, PCA, network
