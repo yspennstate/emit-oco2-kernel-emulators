@@ -770,7 +770,12 @@ accuracy on a specified physical passband. Section~\ref{sec:constrained} separat
 effects: on a refit of all six families the stack's 95th-percentile reflectance error is
 $6.1$ times the feature kernel's over all bands and $5.0$ times on the admissible domain,
 so the reversal is a property of the emulators rather than of the entries where the
-inverse is undefined.
+inverse is undefined. On a held-out block of $3{,}497$ states, drawn with a seed used in
+no development run and scored once, the two factors are $6.60$ and $5.54$
+(Section~\ref{sec:confirm}). The preregistered hypothesis also required the stack's
+all-band $95$th percentile to exceed that of the residual-corrected network; it falls short
+by $0.25$ points, so the ordering among the intermediate families is not resolved at this
+sample size.
 
 Theorem~\ref{thm:transfer} gives a precise explanation of why such a reversal is possible.
 On its physical domain, the constrained retrieval error is at most $e_R/t$, capped at
