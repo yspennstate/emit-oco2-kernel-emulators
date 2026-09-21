@@ -42,6 +42,19 @@ the separate float32 experiment is not pooled. Long tables have readable multipa
 [Record-level inventory](results/revision_20260921/reanalysis.json).
 The earlier additions are described in [the original 21 September notes](docs/REVISION_2026-09-21.md).
 
+## Review fixes: physical domain and training-target sensitivity
+
+The later review revision corrects the domain/conditioning interpretation and the
+single-split refit ranking, documents the missing refit metadata, and distinguishes
+training-target sensitivity from post-hoc evaluation masking. The main empirical
+scores are retained; no clean-target EMIT training result is claimed. The diagnostic
+now enforces its stated albedo domain and preserves explicit failure accounting.
+The campaign includes raw, admissible-training and matched-size unfiltered policies,
+with preprocessing refitted independently and hashed split indices saved for scoring.
+
+[Changes, remaining experiment and run commands](docs/REVIEW_FIXES_2026-09-21.md) ·
+[Retained-refit arithmetic](results/review_20260921/retained_refit_audit.json).
+
 ## Reproduction
 
 Python 3.11, the analysis requirements and a TeX installation are needed for the
@@ -55,13 +68,16 @@ python code/make_tables.py
 python code/make_v2_tables.py
 python code/format_publication_tables.py
 python code/revision_manifest.py
+python code/audit_retained_refit.py
 latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
 ```
 
-These commands run 22 synthetic regression tests and regenerate the tables supported
+These commands run the synthetic regression tests (the optional training smoke test
+is skipped unless explicitly enabled) and regenerate the tables supported
 by public records. The concatenation and joint-stacking aggregates, and the state-input
 perturbation rows, are explicitly retained because their generating JSONs are absent.
-They do not retrain the models. The GitHub workflow runs the same
+The Section 6 truth audit and separate refit are also retained because their
+generating manifests and sample-level arrays are absent. They do not retrain the models. The GitHub workflow runs the same
 checks and archives the compiled paper, sources and build provenance.
 
 ## Data and scope

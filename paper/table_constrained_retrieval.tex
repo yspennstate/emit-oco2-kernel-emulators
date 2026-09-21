@@ -1,0 +1,14 @@
+\begin{tabular}{lrrrrr}
+\toprule
+ & radiance & \multicolumn{2}{c}{all bands} & \multicolumn{2}{c}{screen $\mathcal C$} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+model & rel.\ $L^2$ [\%] & median [pp] & 95th [pp] & median [pp] & 95th [pp] \\
+\midrule
+cubic ridge & 0.7543 & 0.480 & 70.68 & 0.473 & 70.629 \\
+network $3\times512$ & 0.1741 & 0.111 & 37.50 & 0.111 & 24.109 \\
+network $+$ residual kernel & 0.0938 & 0.065 & 25.54 & 0.065 & 15.650 \\
+input-scaled Mat\'ern kernel & 0.0853 & 0.028 & 24.38 & 0.027 & 16.830 \\
+kernel on learned features & 0.0885 & 0.037 & 4.19 & 0.037 & 3.117 \\
+convex stack & 0.0709 & 0.046 & 25.67 & 0.046 & 15.549 \\
+\bottomrule
+\end{tabular}

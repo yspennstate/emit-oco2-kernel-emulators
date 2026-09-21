@@ -45,7 +45,9 @@ def main():
     syn_path=ROOT/'results/sharpness_synthetic.json'
     syn=json.loads(syn_path.read_text())
     out={
-        'schema_version':1,
+        'schema_version':2,
+        'review_base_commit':'e334bcbf18c93c8beeda1a4cb00cf356dffb457c',
+        'clean_target_training_completed':False,
         'source_manuscript_commit':'9184f0e6f910bd51e290747807a525749f28f588',
         'revision_scope':'Manuscript, source-contract corrections, public-record reanalysis and synthetic rerun; no trained-model rerun',
         'common_float64_transmission_cohort':cohort,
@@ -59,12 +61,16 @@ def main():
                      'violations':sum(v['pointwise_bound_violations'] for v in syn['betas']),
                      'betas':[v['beta'] for v in syn['betas']]},
         'retained_historical_aggregates':[
+            {'table':'tab:domain and exact-component round trip','source':'paper/sec_constrained.tex; paper/table_domain_audit.tex','missing':'raw-array audit manifest and exact mask counts'},
+            {'table':'tab:constrained','source':'paper/table_constrained_retrieval.tex','missing':'refit seed, test indices, full configuration, predictions, test coverage and failures'},
             {'table':'tab:v2-replication','source':'paper/table_v2_replication.tex','missing':'results/e2a/emit_s*_big3.json'},
             {'table':'tab:v2-stacks','source':'paper/table_v2_stacks.tex','missing':'results/stack/*_stack.json'},
             {'table':'tab:v2-perturbation, first fourteen rows','source':'paper/table_v2_perturbation.tex','missing':'results/kernel_perturbation_Y2_n2000.json'}],
         'training_reproduction_gaps':['raw EMIT arrays','full-precision sample-level prediction archives',
             'simulator version and generation configuration','redistribution permissions',
-            'complete individual records for some secondary ablations'],
+            'complete individual records for some secondary ablations',
+            'matched clean-target training sensitivity not run',
+            'verified archive-to-NumPy export including affine metadata'],
         'numeric_tables':{p.name:sha(p) for p in sorted((ROOT/'paper').glob('table_v2_*.tex'))}}
     dest=ROOT/'results/revision_20260921/reanalysis.json';dest.parent.mkdir(parents=True,exist_ok=True)
     dest.write_text(json.dumps(out,indent=2,allow_nan=False)+'\n')

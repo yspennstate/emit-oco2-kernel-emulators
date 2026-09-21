@@ -1,0 +1,92 @@
+{
+  "scope": "Arithmetic on retained rounded values; no fitting or sample-level rescoring",
+  "source": "paper/table_constrained_retrieval.tex",
+  "source_sha256": "cbe5b8aaad0cdb3876d5df5e53f98d7f61a5b00237d7056718d79a701c01cc39",
+  "rows": [
+    {
+      "model": "cubic ridge",
+      "radiance_percent": 0.7543,
+      "all_median_pp": 0.48,
+      "all_p95_pp": 70.68,
+      "screened_median_pp": 0.473,
+      "screened_p95_pp": 70.629,
+      "radiance_percent_rank": 6,
+      "all_p95_pp_rank": 6,
+      "screened_p95_pp_rank": 6,
+      "p95_reduction_percent": 0.07215619694397324
+    },
+    {
+      "model": "network $3\\times512$",
+      "radiance_percent": 0.1741,
+      "all_median_pp": 0.111,
+      "all_p95_pp": 37.5,
+      "screened_median_pp": 0.111,
+      "screened_p95_pp": 24.109,
+      "radiance_percent_rank": 5,
+      "all_p95_pp_rank": 5,
+      "screened_p95_pp_rank": 5,
+      "p95_reduction_percent": 35.709333333333326
+    },
+    {
+      "model": "network $+$ residual kernel",
+      "radiance_percent": 0.0938,
+      "all_median_pp": 0.065,
+      "all_p95_pp": 25.54,
+      "screened_median_pp": 0.065,
+      "screened_p95_pp": 15.65,
+      "radiance_percent_rank": 4,
+      "all_p95_pp_rank": 3,
+      "screened_p95_pp_rank": 3,
+      "p95_reduction_percent": 38.723570869224744
+    },
+    {
+      "model": "input-scaled Mat\\'ern kernel",
+      "radiance_percent": 0.0853,
+      "all_median_pp": 0.028,
+      "all_p95_pp": 24.38,
+      "screened_median_pp": 0.027,
+      "screened_p95_pp": 16.83,
+      "radiance_percent_rank": 2,
+      "all_p95_pp_rank": 2,
+      "screened_p95_pp_rank": 4,
+      "p95_reduction_percent": 30.96800656275637
+    },
+    {
+      "model": "kernel on learned features",
+      "radiance_percent": 0.0885,
+      "all_median_pp": 0.037,
+      "all_p95_pp": 4.19,
+      "screened_median_pp": 0.037,
+      "screened_p95_pp": 3.117,
+      "radiance_percent_rank": 3,
+      "all_p95_pp_rank": 1,
+      "screened_p95_pp_rank": 1,
+      "p95_reduction_percent": 25.608591885441534
+    },
+    {
+      "model": "convex stack",
+      "radiance_percent": 0.0709,
+      "all_median_pp": 0.046,
+      "all_p95_pp": 25.67,
+      "screened_median_pp": 0.046,
+      "screened_p95_pp": 15.549,
+      "radiance_percent_rank": 1,
+      "all_p95_pp_rank": 4,
+      "screened_p95_pp_rank": 2,
+      "p95_reduction_percent": 39.42734709777952
+    }
+  ],
+  "stack_over_feature_p95_ratio_all": 6.126491646778042,
+  "stack_over_feature_p95_ratio_screened": 4.988450433108758,
+  "unchanged_displayed_medians": 4,
+  "main_network_radiance_mean_percent": 0.38705407073615666,
+  "main_network_radiance_sample_sd_percent": 0.012137425258065717,
+  "retained_refit_network_radiance_percent": 0.1741,
+  "refit_seed": null,
+  "refit_test_indices": null,
+  "refit_hyperparameters": null,
+  "refit_test_mask_coverage": null,
+  "refit_failure_counts": null,
+  "missing_metadata_note": "Not recoverable from these aggregate cells; whole-table coverage is not test-split coverage",
+  "clean_target_training_completed": false
+}

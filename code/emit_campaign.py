@@ -29,6 +29,7 @@ _T = _os.environ.get("NMKC_THREADS", "4")
 for _v in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
     _os.environ.setdefault(_v, _T)
 import numpy as np
+from emit_target_quality import POLICIES, select_training_rows, indices_digest
 from scipy.linalg import cho_factor, cho_solve
 
 p = argparse.ArgumentParser()
@@ -41,6 +42,8 @@ p.add_argument("--members", type=int, default=5)
 p.add_argument("--families", default="all", help="comma list or all")
 p.add_argument("--tag", default="")
 p.add_argument("--smoke", action="store_true")
+p.add_argument("--training-policy", choices=POLICIES, default="raw",
+               help="Training-only sensitivity, applied before preprocessing; never cleans test rows")
 args = p.parse_args()
 
 N_THREADS = int(os.environ.get("NMKC_THREADS", "4"))
@@ -142,6 +145,11 @@ if args.ntrain and args.ntrain < len(idx_tr):
     idx_tr = idx_tr[:args.ntrain]           # a learning-curve rung: the first rows of the same block
 if args.smoke:
     idx_tr = idx_tr[:3000]
+idx_tr, target_quality = select_training_rows(Ys, idx_tr, args.training_policy, args.seed)
+# The original validation block/loss is deliberately unchanged in all arms.
+# This isolates training-stage filtering, not a fully cleaned validation pipeline.
+if not np.isfinite(X).all() or not all(np.isfinite(Y).all() for Y in Ys.values()):
+    raise ValueError("Nonfinite inputs or targets require an explicit missing-data policy")
 n = len(idx_tr)
 print(f"seed {args.seed}: train={n} val={len(idx_val)} test={len(idx_te)} rank={PCA_RANK} widths={WIDTHS}", flush=True)
 
@@ -520,9 +528,16 @@ if need_dnn:
 
 tag = args.tag or ("emit_s%d" % args.seed + (f"_n{args.ntrain}" if args.ntrain else "") +
                    (f"_r{PCA_RANK}" if PCA_RANK != 64 else "") + ("_big" if WIDTHS != (512, 512, 512) else ""))
+if args.training_policy != "raw" and not args.tag:
+    tag += "_" + args.training_policy.replace("-", "_")
 out = dict(tag=tag, kind="emit_campaign", seed=args.seed, ntrain=n, n_val=len(idx_val), n_test=len(idx_te),
            pca_rank=PCA_RANK, pca_evr={c: pca[c].evr for c in COMPONENTS}, widths=list(WIDTHS), epochs=EPOCHS,
            members=MEMBERS, smoke=bool(args.smoke), families=fam_metrics, hyper=hyper,
+           target_quality=target_quality,
+           split_indices_sha256={"train": indices_digest(idx_tr), "validation": indices_digest(idx_val),
+                                 "test": indices_digest(idx_te)},
+           evaluation_note="Historical all-band scores retained; use conditioned_reflectance.py for common-mask scores",
+           driver_sha256=sha256(pathlib.Path(__file__)),
            data_sha=dict(X=sha256(DATA_DIR / "X.npy"), **{c: sha256(DATA_DIR / (c + ".npy")) for c in COMPONENTS}),
            split="numpy RandomState(seed) permutation, 10 percent test; val carve RandomState(seed+10000), "
                  "10 percent of train; --ntrain takes the first rows of the training block",
@@ -534,6 +549,6 @@ os.replace(tmp, OUT_ROOT / (tag + ".json"))
 pdir = OUT_ROOT / "preds"; pdir.mkdir(exist_ok=True)
 # Preserve the precision used in eval_predictions. Rounding to float32 can materially
 # change a near-singular reflectance inverse; old JSON results are not recomputed here.
-np.savez_compressed(pdir / (tag + ".npz"), idx_te=idx_te,
+np.savez_compressed(pdir / (tag + ".npz"), idx_te=idx_te, idx_tr=idx_tr, idx_val=idx_val,
                     **{f"{f}_{c}": fam_te[f][c].astype(np.float64) for f in fam_te for c in COMPONENTS})
 print(f"DONE {tag} in {out['minutes']} min", flush=True)

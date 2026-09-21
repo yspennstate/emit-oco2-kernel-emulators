@@ -17,6 +17,7 @@ python code/make_tables.py
 python code/make_v2_tables.py
 python code/format_publication_tables.py
 python code/revision_manifest.py
+python code/audit_retained_refit.py
 latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
 ```
 
@@ -223,3 +224,24 @@ printed rounded synthetic results agree with the retained table. For legacy tran
 records, the `s<=S` violation mask is weaker than the complete theorem domain; all-band
 bound-related quantities are descriptive. Full-domain re-evaluation requires the raw
 truth and prediction arrays, not only the summaries.
+
+## 5. Later review: target quality and the separate refit
+
+See [REVIEW_FIXES_2026-09-21.md](REVIEW_FIXES_2026-09-21.md) for the implemented
+three-arm training-only sensitivity, matched-size control, common-scale scoring,
+new index hashes and optional synthetic integration test. This experiment has not
+been run on EMIT in the revision. Whole-state training filtering changes the training
+distribution and leaves the original validation criterion unchanged; it must not be
+presented as a fully cleaned validation/deployment experiment.
+
+The Section 6 domain counts, round-trip errors and six-row refit are retained
+aggregates. Missing refit seed, configuration, sample-level predictions, mask coverage
+and failure counts prevent a matched regeneration. `audit_retained_refit.py` checks
+only their published rounded arithmetic. Its null metadata fields are deliberate.
+Do not replace them with the main campaign's seed or whole-table coverage.
+
+The common-mask diagnostic now defaults to `--domain physical` (0 <= Y4 < 1),
+whereas the earlier scorer omitted the albedo interval. `--domain algebraic` explicitly
+recovers the looser domain for diagnostic comparisons. No existing empirical table
+was regenerated on this new default. Read successful-inverse errors alongside coverage
+and failure counts, since failures do not vanish from the reporting contract.

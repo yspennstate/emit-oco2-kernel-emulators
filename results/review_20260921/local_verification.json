@@ -1,0 +1,44 @@
+{
+  "base_commit": "e334bcbf18c93c8beeda1a4cb00cf356dffb457c",
+  "test_command": "EMIT_INTEGRATION_TESTS=1 python -m unittest discover -s code -p 'test_*.py' -v",
+  "tests_run": 34,
+  "tests_passed": 34,
+  "tests_skipped": 0,
+  "synthetic_integration": {
+    "states": 80,
+    "bands": 6,
+    "training_policies": [
+      "raw",
+      "admissible",
+      "matched-unfiltered"
+    ],
+    "families": [
+      "ridge3",
+      "krr",
+      "dnn",
+      "dnn_corr",
+      "dkr",
+      "stack"
+    ],
+    "epochs": 1,
+    "widths": [
+      8,
+      8
+    ]
+  },
+  "EMIT_training_rerun": false,
+  "new_simulator_evaluations": false,
+  "versions": {
+    "python": "3.13.5",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "torch": "2.10.0+cpu"
+  },
+  "tested_source_sha256": {
+    "code/emit_target_quality.py": "ff41865787467da5e979a5eb6c7ca9db7f38043ab5abbf1054ef1f21dfd77053",
+    "code/emit_campaign.py": "c81fb62de3386ec66556e844a8513fa21d216a3ef0fffc69744a85d2b350cc31",
+    "code/conditioned_reflectance.py": "601d0ae6d9e5b29e2ad88b7bd5e3d4e5d57a7b7c5354e73f96063c5a9b8734fb",
+    "code/audit_retained_refit.py": "7348cdf0ed2ccdff1ea67b1367062602883c6f108accaf33ba0114dc4cdedf7a",
+    "code/test_target_quality.py": "de3d3f59ab25eaaf82d5a3186a2a42cb711646b94888686048919cbef20d6686"
+  }
+}
