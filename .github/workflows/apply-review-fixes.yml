@@ -1,0 +1,146 @@
+name: Apply review fixes and build PDF
+on:
+  push:
+    branches: ['revision/review-fixes-2026-09-21']
+    paths:
+      - '.github/workflows/apply-review-fixes.yml'
+      - 'revisions/review-fixes-2026-09-21.part*'
+permissions:
+  contents: write
+concurrency:
+  group: apply-review-fixes-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  apply-verify-build:
+    if: github.ref == 'refs/heads/revision/review-fixes-2026-09-21'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify transport hashes and apply reviewed source changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          git rev-parse HEAD > build/source-commit.txt
+          cat revisions/review-fixes-2026-09-21.part{0,1,2} > build/review.patch.gz
+          echo '58c9d95f943e82fc5b59850648c0a7f91e705a2d3c2236391d7c03f5ebcd5b65  build/review.patch.gz' | sha256sum -c -
+          gzip -dc build/review.patch.gz > build/review.patch
+          echo '8d61ab06594deea18f70b85ba52913872ca4aa5434e4a63845679d212b4c3634  build/review.patch' | sha256sum -c -
+          git apply --check build/review.patch
+          git apply build/review.patch
+      - name: Install reanalysis dependencies
+        run: python -m pip install -r requirements-revision.txt
+      - name: Run synthetic and public-record tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s code -p 'test_*.py' -v 2>&1 | tee build/tests.log
+      - name: Rebuild supported tables and arithmetic audit
+        run: |
+          python code/make_revision_tables.py
+          python code/make_tables.py
+          python code/make_v2_tables.py
+          python code/format_publication_tables.py
+          python code/revision_manifest.py
+          python code/audit_retained_refit.py
+      - name: Install TeX
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
+      - name: Compile a fresh PDF and reject reference or layout errors
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f paper/emit_kernel_dnn.pdf
+          export SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
+          latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          text = Path('paper/emit_kernel_dnn.log').read_text(errors='replace')
+          bad = re.findall(r'There were undefined references|Citation .* undefined|Reference .* undefined|Overfull \\(?:hbox|vbox)|Float too large', text)
+          if bad:
+              raise SystemExit('Unresolved references or overflowing content: ' + repr(bad))
+          if not Path('paper/emit_kernel_dnn.pdf').is_file():
+              raise SystemExit('No fresh PDF was created')
+          PY
+      - name: Record verification and publish the actual source and PDF
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          test "$TARGET_BRANCH" = 'revision/review-fixes-2026-09-21'
+          python - <<'PY'
+          import hashlib, json, os, platform
+          from pathlib import Path
+          pdf = Path('paper/emit_kernel_dnn.pdf')
+          record = {
+              'source_commit': Path('build/source-commit.txt').read_text().strip(),
+              'upstream_base': 'e334bcbf18c93c8beeda1a4cb00cf356dffb457c',
+              'patch_sha256': '8d61ab06594deea18f70b85ba52913872ca4aa5434e4a63845679d212b4c3634',
+              'workflow_run_id': os.environ['GITHUB_RUN_ID'],
+              'python': platform.python_version(),
+              'tests': Path('build/tests.log').read_text(),
+              'local_full_integration_record': 'results/review_20260921/local_verification.json',
+              'emit_training_rerun': False,
+              'simulator_rerun': False,
+              'pdf_path': str(pdf),
+              'pdf_sha256': hashlib.sha256(pdf.read_bytes()).hexdigest(),
+              'latex_reference_and_overflow_checks': 'passed'
+          }
+          Path('results/review_20260921/github_verification.json').write_text(json.dumps(record, indent=2) + '\n')
+          PY
+          git rm -- revisions/review-fixes-2026-09-21.part0 revisions/review-fixes-2026-09-21.part1 revisions/review-fixes-2026-09-21.part2
+          # The connected GitHub client will finalize workflow edits after this build.
+          git restore -- .github/workflows/manuscript-checks.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A -- paper code docs results README.md
+          git diff --cached --stat
+          git commit -m 'Revise retrieval-domain claims, add target-quality sensitivity checks, and rebuild manuscript'
+          git push origin "HEAD:$TARGET_BRANCH"
+          git rev-parse HEAD > build/commit.txt
+          sha256sum paper/emit_kernel_dnn.pdf > build/pdf-sha256.txt
+          cp paper/emit_kernel_dnn.log build/latex.log
+          python --version > build/environment.txt
+          python -m pip freeze >> build/environment.txt
+          pdflatex --version >> build/environment.txt
+      - name: Archive verified PDF, source and diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-fixed-manuscript
+          path: |
+            paper/*.tex
+            paper/*.pdf
+            paper/abstract.txt
+            code/*.py
+            docs/*.md
+            results/
+            figures/
+            build/commit.txt
+            build/source-commit.txt
+            build/pdf-sha256.txt
+            build/environment.txt
+            build/tests.log
+            build/latex.log
+            README.md
+            LICENSE
+            requirements-revision.txt
+          retention-days: 30
+          if-no-files-found: error
+      - name: Archive failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-build-failure-logs
+          path: |
+            build/
+            paper/*.log
+          retention-days: 7
