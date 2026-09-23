@@ -127,6 +127,10 @@ order:
    states with the frozen values, reads the block once and writes `confirmation_report.json`; its output is
    `confirm.log`. It refuses to run unless `freeze.json` has the registered digest.
 
+`make_bands.py` scores the same six families on the test block of the development split and writes
+`development_split_tails.json`; the factors 6.13 and 4.99 that Section 6.5 compares with the fresh partition are
+ratios of its 95th percentiles (stack over feature kernel, over all bands and on the screen).
+
 `domain_audit.py` measures the table against the physical domain and fixed the constants of the screened columns
 before the confirmation run. The protocol is `PREREGISTRATION.md`. The scripts that read the arrays name their folder
 in a constant `D` near the top, and those that save predictions name the output folder in `OUT`; point them at local
