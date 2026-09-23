@@ -10,8 +10,8 @@ $\lambda>0$. Define
 \begin{equation}\label{eq:krr}
  (Sg)(x)=k(x,X_n)(K+\lambda I)^{-1}g(X_n),\qquad R=I-S.
 \end{equation}
-Here $\lambda$ is the diagonal regularizer in the linear system. The campaign code uses
-$\lambda=n\gamma$, where $\gamma$ is its reported nugget; the distinction matters when the
+Here $\lambda$ is the diagonal regularizer in the linear system. The code uses
+$\lambda=n\gamma$, where $\gamma$ is the reported nugget; the distinction matters when the
 training size changes. Although a selected kernel can depend on the targets, $S$ is linear
 in the response only \emph{after that selection is frozen}.
 
@@ -79,7 +79,7 @@ Neither the criterion nor the training-design contraction establishes that corre
 beat both parents at every sample size.
 
 \subsection{What the principal-component implementation computes}
-The campaign trains a network on all standardized bands but projects its predictions into
+The pipeline trains a network on all standardized bands but projects its predictions into
 the retained principal-component basis before correction. Thus its corrected predictor is
 based on the projected network mean. To state the implementation
 precisely, let $f$ and $h$ now denote the target and network output after the common fitted

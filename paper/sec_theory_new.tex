@@ -114,7 +114,9 @@ $\varepsilon_{R,n}=O(n^{-r})$ yields $\|\bar\rho_n-\rho\|_{L^2(P)}=O(n^{-r\beta/
 The middle expression in (ii) keeps the association between the errors and the transmission and is the one the
 tables evaluate; the last needs no power law. Both are computable on a finite test table; (iii) is a population
 statement whose tail hypothesis a finite table cannot establish down to $t=0$. The exponent in (iii) cannot be
-improved from its hypotheses.
+improved from its hypotheses. Item (i) holds entry by entry, so it passes to quantiles: on any set of entries, a
+single band for instance, every quantile of $|\bar\rho-\rho|$ is at most the same quantile of $\min\{R,e_R/t\}$,
+which depends only on the component errors and the true transmission.
 
 \begin{proposition}[the exponent is attained]\label{prop:attained}
 For every $\beta>0$, every $0<c<r_0<R$ and every $\tau\in(0,1)$ there are an evaluation distribution and a predictor
@@ -310,22 +312,32 @@ error at each entry by its transmission. The following example shows how far apa
 optima can be.
 
 \begin{proposition}[forward-optimal and retrieval-optimal weights]\label{prop:stackweights}
-Let $0<\rho<R\le1$ and consider two equally weighted entries with $a=s=0$ and transmissions
-$t_1=1$, $t_2=\delta\in(0,1]$. Two heads predict $t$ and $s$ exactly and the path radiance with
-errors $e^A=(0,c\delta)$ and $e^B=(b,0)$, where $0<b,c\le\min\{\rho,R-\rho\}$. For the convex
-combination with weight $w$ on $A$, let $F(w)$ be the mean squared radiance error at $\rho$ and
-$E(w)$ the mean squared error of the constrained retrieval \eqref{eq:rhobar}. Then
+Let $0<\rho<R\le1$. For a convex combination of heads with weights $w$, let $F(w)$ be the mean
+squared radiance error at $\rho$ and $E(w)$ the mean squared error of the constrained retrieval
+\eqref{eq:rhobar}, and let $w_f$ minimize $F$ and $w_r$ minimize $E$.
+\begin{enumerate}
+\item Take two equally weighted entries with $a=s=0$ and transmissions $t_1=1$,
+$t_2=\delta\in(0,1]$, and two heads that predict $t$ and $s$ exactly and the path radiance with
+errors $e^A=(0,c\delta)$ and $e^B=(b,0)$, where $0<b,c\le\min\{\rho,R-\rho\}$; $w$ is the weight on
+$A$. Then
 \[
 F(w)=\tfrac12\bigl[(1-w)^2b^2+w^2c^2\delta^2\bigr],\qquad
 E(w)=\tfrac12\bigl[(1-w)^2b^2+w^2c^2\bigr],
 \]
-$F$ is minimized at $w_f=b^2/(b^2+c^2\delta^2)$ and $E$ at $w_r=b^2/(b^2+c^2)$, and
+$w_f=b^2/(b^2+c^2\delta^2)$, $w_r=b^2/(b^2+c^2)$, $F(w_f)\le F(w_r)$, and
 \[
-\frac{E(w_f)}{E(w_r)}\longrightarrow1+\frac{c^2}{b^2}\quad(\delta\to0),\qquad
-F(w_f)\le F(w_r).
+\frac{E(w_f)}{E(w_r)}=\frac{(b^2+c^2\delta^4)(b^2+c^2)}{(b^2+c^2\delta^2)^2},
 \]
-For every $\tau\le\delta$ the transmission-weighted objective $J_\tau$ of \eqref{eq:Jtau} equals $E$
-and is minimized at $w_r$.
+which tends to $1+c^2/b^2$ as $\delta\to0$ and equals $(1+\delta^2)^2/(4\delta^2)$ at
+$c=b/\delta$. For every $\tau\le\delta$ the transmission-weighted objective $J_\tau$ of
+\eqref{eq:Jtau} equals $E$.
+\item Suppose instead that $s=0$ at every entry, that every head predicts $t$ and $s$ exactly,
+that $t_{\min}\le t\le t_{\max}$ $P$-almost surely, and that the retrieval of every combination
+lies in $[0,R]$. Then
+\[
+E(w_f)\le\Bigl(\frac{t_{\max}}{t_{\min}}\Bigr)^2E(w_r).
+\]
+\end{enumerate}
 \end{proposition}
 
 \noindent\emph{Proof in Appendix~\ref{app:proofs}.}
@@ -333,7 +345,12 @@ The weights that minimize the forward error put almost all their mass on the hea
 sits at the opaque entry, because there it costs little radiance; the retrieval divides that
 error by $\delta$ and pays for it in full. With $c/b$ large the forward-optimal stack is better
 than either head in radiance and worse than the retrieval-optimal stack by any factor in the
-inverse, which is the pattern of Table~\ref{tab:tails} in miniature.
+inverse, which is the pattern of Table~\ref{tab:tails} in miniature. Item (ii) bounds the loss by
+the squared dynamic range of the transmission, and item (i) at $c=b/\delta$ comes within a
+factor of four of the bound. On the physical domain of the EMIT table the transmission spans
+about twenty-four decades, and thirteen above the floor $10^{-12}T_{\rm train}$ of
+Section~\ref{sec:tq-domain}, so the bound gives no control of the retrieval for weights fitted
+on a forward loss; the bound \eqref{eq:Jtau-bound} for $J_\tau$ does not involve the range.
 
 \paragraph{Numerical weights and threshold convention.}
 The driver solves a nonnegative least-squares problem with a heavily weighted row penalizing

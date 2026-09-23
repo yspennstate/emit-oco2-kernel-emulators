@@ -120,6 +120,17 @@ $6.3\%$ of the entries: the walls come from transmissions that are small but far
 floor, where the retrieval divides a small component error by a small denominator. The feature
 kernel's advantage in the tail is that it adds no wall of its own.
 
+Theorem~\ref{thm:transfer} locates the walls in advance. Its item (i) holds at every entry, so at
+each band the 95th percentile of the constrained retrieval error is at most the 95th percentile of
+$\min\{R,e_R/t\}$, which uses only the component errors and the true transmission. On split 101,
+with $R=0.9$ and $S$ the largest training albedo not above one, the constrained retrieval on the
+physical domain has exactly the walls of Figure~\ref{fig:bands}, family by family, and no entry
+violates the pointwise inequality. For every family each wall lies in the set of bands where the
+bound's 95th percentile exceeds two points; that set is larger by 8 to 21 bands, and on the walls
+the bound exceeds the realized 95th percentile by a median factor of $1.30$ to $1.38$, depending on
+the family, and never by more than $4.5$. The bands marked by the bound for all six families
+number 64 and include the whole common core of 54.
+
 \subsection{A fresh partition, fixed in advance}\label{sec:confirm}
 The comparisons above use partitions that were in view while the families were developed. To test
 the reversal against that selection, a simplified pipeline was frozen together with one hypothesis

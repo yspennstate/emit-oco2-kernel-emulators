@@ -265,7 +265,7 @@ inverse is not identifiable there. Even the exact tabulated components do not in
 floating point: over the whole table the round trip has reflectance RMSE $7.4\times10^{-3}$, all
 of it from the entries with the smallest transmissions (Section~\ref{sec:domain}). We therefore
 report both the center and the tail of the reflectance error. In the all-band statistics a
-non-finite inverse is assigned zero and counted; none occurs in the main campaign.
+non-finite inverse is assigned zero and counted; none occurs in the main comparison.
 
 Differentiating \eqref{eq:inv} separates the components. Write $D = \hat Y_2 + \hat Y_3 +
 \hat Y_4 (L - \hat Y_1)$ for its denominator. Then
@@ -916,7 +916,7 @@ request. The EMIT table is the file
 supplied by the Jet Propulsion Laboratory. Its root holds the state matrix \texttt{X}
 ($6\times23{,}313$), the four components \texttt{Y1}--\texttt{Y4} ($285\times23{,}313$ each), the
 wavelength grid, the index vectors identifying the lookup table's input and component columns, and
-per-component affine vectors. The campaign driver reads NumPy exports of \texttt{X} and
+per-component affine vectors. The drivers read NumPy exports of \texttt{X} and
 \texttt{Y1}--\texttt{Y4}, whose digests are recorded in every run. The table is available from the
 author on request, subject to the permission of the Jet Propulsion Laboratory. The OCO-2 arrays and
 reference predictions are from the release accompanying \cite{lamminpaa}, and the other

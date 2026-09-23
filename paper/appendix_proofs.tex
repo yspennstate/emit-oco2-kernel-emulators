@@ -90,7 +90,7 @@ $c^{-2}\E_P|\bar\rho-\rho|^2=\E_P\min\{1,(\sigma/c)^2t^{2\nu-2}\}$, the same int
 \end{proof}
 
 \begin{proof}[Proof of Proposition~\ref{prop:stackweights}]
-With $a=s=0$ and exact $t$ and $s$, the stack's path-radiance error is
+(i) With $a=s=0$ and exact $t$ and $s$, the stack's path-radiance error is
 $e(w)=((1-w)b,\,wc\delta)$, and the radiance at $\rho$ is predicted with the same error, since
 $q=\widehat q=1$; this gives $F$. The constrained retrieval evaluates
 $(L-\widehat a)/t=\rho-e_i/t_i$ at entry $i$, with denominator $t_i>0$, and
@@ -98,12 +98,26 @@ $|e_i|/t_i\le\max\{b,c\}\le\min\{\rho,R-\rho\}$ keeps it in $[0,R]$, so the proj
 and $\bar\rho-\rho=-((1-w)b,\,wc)$; this gives $E$. Both are convex quadratics in $w$, and setting
 their derivatives to zero gives $w_f$ and $w_r$. Substituting,
 \[
-E(w_f)=\frac{b^2c^2\,(c^2\delta^4+b^2)}{2(b^2+c^2\delta^2)^2}\to\frac{c^2}{2},\qquad
+E(w_f)=\frac{b^2c^2\,(c^2\delta^4+b^2)}{2(b^2+c^2\delta^2)^2},\qquad
 E(w_r)=\frac{b^2c^2}{2(b^2+c^2)},
 \]
-whose ratio tends to $(b^2+c^2)/b^2$, and $F(w_f)\le F(w_r)$ because $w_f$ minimizes $F$. Finally, with
+whose ratio is the one stated. It tends to $(b^2+c^2)/b^2$ as $\delta\to0$; at $c=b/\delta$ the
+two factors of the numerator are $b^2(1+\delta^2)$ and $b^2(1+\delta^2)/\delta^2$ and the
+denominator is $4b^4$. Since $w_f$ minimizes $F$, $F(w_f)\le F(w_r)$. Finally, with
 $\widetilde e_t=\widetilde e_s=0$ and $\tau\le\delta\le1$, the weights $(t_i\vee\tau)^{-2}$ in
 \eqref{eq:Jtau} are $1$ and $\delta^{-2}$, so $J_\tau(w)=\tfrac12[(1-w)^2b^2+w^2c^2\delta^2/\delta^2]=E(w)$.
+
+(ii) With $s=\widehat s=0$ and $\widehat t=t$, the predicted radiance at $\rho$ is
+$\widehat a+\rho t$, so its error is the path-radiance error $r_w$ of the combination, and the
+retrieval evaluates $(L-\widehat a)/t=\rho-r_w/t$, which lies in $[0,R]$ by hypothesis. Hence
+$F(w)=\E_Pr_w^2$ and $E(w)=\E_P[r_w^2/t^2]$. Pointwise
+$r_w^2/t_{\max}^2\le r_w^2/t^2\le r_w^2/t_{\min}^2$, so $F\le t_{\max}^2E$ and
+$E\le t_{\min}^{-2}F$ for every $w$, and
+\[
+E(w_f)\le t_{\min}^{-2}F(w_f)\le t_{\min}^{-2}F(w_r)\le\Bigl(\frac{t_{\max}}{t_{\min}}\Bigr)^2E(w_r).
+\]
+In the example of (i), $t_{\max}/t_{\min}=1/\delta$, and the ratio at $c=b/\delta$ is at least
+$\delta^{-2}/4$.
 \end{proof}
 
 \begin{proof}[Proof of Proposition~\ref{prop:perturb}]

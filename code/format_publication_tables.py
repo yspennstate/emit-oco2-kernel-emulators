@@ -70,7 +70,7 @@ def main():
           + r"\par\bigskip\textbf{B. Failure counts and bound diagnostics}\par\medskip"+"\n"+
           tab("lrrrr",["head",r"\thead{failure [\%]\\upper clip [\%]}",r"\thead{$\E\min\{R^2,$\\$e_R^2/t^2\}$}",r"\thead{violations\\on $s\le S$}",r"\thead{diagnostic\\bound / MSE}"],b))
     rr=rows("table_v2_replication.tex")
-    names=["feature kernel","concatenated features","campaign stack","network + residual"]
+    names=["feature kernel","concatenated features","convex stack","network + residual"]
     data=[]
     for r in rr:
         for j,name in enumerate(names,1):

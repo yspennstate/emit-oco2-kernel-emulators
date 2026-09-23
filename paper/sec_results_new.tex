@@ -150,7 +150,7 @@ three seeds. The validation-selected weight decay matches the control's componen
 ($2.27\%$), and the selected early stopping is less accurate and more variable
 ($2.72\pm0.45\%$). Residual correction brings the component means to $1.88$--$1.95\%$ and
 feature kernels to $0.95$--$0.99\%$, with radiance errors near $0.15\%$, whichever
-regularization the network used. The reference row is the isotropic kernel of this campaign.
+regularization the network used. The reference row is the isotropic kernel fitted in the same runs.
 Under this budget, regularizing the network changes little; the kernel stage does the work.
 
 \begin{table}[t]
@@ -160,8 +160,8 @@ Under this budget, regularizing the network changes little; the kernel stage doe
 relative error [percent] / radiance relative error [percent], with sample standard deviations.
 The width-512, depth-3 network has a 150-epoch cap, and validation selects among three runs per
 arm. The weight-decay grid is $10^{-5},10^{-4},10^{-3}$ and the early-stopping patience grid 3, 5
-and 10 epochs \cite{adamw,prechelt}. The reference row is the isotropic kernel of this
-campaign.}
+and 10 epochs \cite{adamw,prechelt}. The reference row is the isotropic kernel fitted in the same
+runs.}
 \label{tab:v2-regsuite}
 \end{table}
 

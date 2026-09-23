@@ -1,0 +1,79 @@
+{
+ "tag": "tq_s101_raw_w512",
+ "rho": 0.7,
+ "R": 0.9,
+ "S": 0.8937152114631622,
+ "domain_fraction": 0.9985127985127985,
+ "families": {
+  "ridge3": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 133,
+   "walls_bound": 154,
+   "bound_walls_not_actual": 21,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 1.4721239971296987,
+   "p95_ratio_on_actual_walls_median": 1.3766786400757147,
+   "p95_ratio_on_actual_walls_max": 3.166088698874825,
+   "failures_on_domain": 6909
+  },
+  "dnn": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 83,
+   "walls_bound": 91,
+   "bound_walls_not_actual": 8,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 1.4576568763633644,
+   "p95_ratio_on_actual_walls_median": 1.3253287143434445,
+   "p95_ratio_on_actual_walls_max": 4.499999999999998,
+   "failures_on_domain": 5353
+  },
+  "dnn_corr": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 76,
+   "walls_bound": 87,
+   "bound_walls_not_actual": 11,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 1.4350278982084494,
+   "p95_ratio_on_actual_walls_median": 1.3351988069279195,
+   "p95_ratio_on_actual_walls_max": 4.499999999999998,
+   "failures_on_domain": 5001
+  },
+  "ard": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 66,
+   "walls_bound": 74,
+   "bound_walls_not_actual": 8,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 1.4967341067464583,
+   "p95_ratio_on_actual_walls_median": 1.3356062037852672,
+   "p95_ratio_on_actual_walls_max": 3.365059625482716,
+   "failures_on_domain": 6137
+  },
+  "dkr": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 54,
+   "walls_bound": 64,
+   "bound_walls_not_actual": 10,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 1.5699742757273243,
+   "p95_ratio_on_actual_walls_median": 1.2962120382561282,
+   "p95_ratio_on_actual_walls_max": 4.499999999999998,
+   "failures_on_domain": 4411
+  },
+  "stack": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 57,
+   "walls_bound": 67,
+   "bound_walls_not_actual": 10,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 1.5264322331280922,
+   "p95_ratio_on_actual_walls_median": 1.3342741584160096,
+   "p95_ratio_on_actual_walls_max": 4.322866887449187,
+   "failures_on_domain": 3442
+  }
+ },
+ "core_actual": 54,
+ "core_bound": 64,
+ "core_bound_not_actual": 10,
+ "core_actual_not_bound": 0
+}
