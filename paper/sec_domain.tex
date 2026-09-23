@@ -242,15 +242,22 @@ $Y_4=S$, so the retrieval \eqref{eq:inv}, the physical domain and Theorem~\ref{t
 without change. We use the 9{,}722 of its 50{,}000 states that carry all thirteen bands; the others lack
 band B10 at 1372\,nm, which lies in a strong water-vapour absorption band and is nearly opaque. Its
 median transmittance is $9\times10^{-6}$ and a third of its entries lie below $10^{-6}$, while the
-first percentile of every other band is above $0.2$. The seven state variables are the inputs, and the
-transmission enters as $Y_2=T$ with a negligible $Y_3=10^{-6}T$, so that the pipeline runs
-unchanged.
+first percentile of every other band is above $0.2$. The inputs are the seven continuous state
+variables (solar and view zenith, relative azimuth, aerosol optical depth, water vapour, ozone and
+elevation) and the aerosol model and atmosphere profile of the state, one-hot encoded with four and five
+levels; the transmission enters as $Y_2=T$ with a negligible $Y_3=10^{-6}T$, so that the pipeline runs
+unchanged. The two categorical inputs carry much of the variation: within each of the twenty
+aerosol-profile classes a cubic fit of the log transmittance on the continuous inputs leaves 0.7--3.0\%
+of it unexplained at bands B2, B4, B8A and B11, against 2.1--8.7\% for one fit across the classes. The
+same within-class fit describes the 6S transmittance of the same states to within 0.1--0.2\%, so part of
+libRadtran's variation is not a smooth function of these inputs.
 
 The pipeline of Section~\ref{sec:methods} was run on these arrays with no change to any family or
 hyperparameter grid, at output rank 13 (all bands), on ten splits of the same form (7{,}875 training,
 875 validation and 972 test states), and scored as in Section~\ref{sec:tq-domain}. None of these states
 played a part in developing the families. Three hypotheses and their decision rule were fixed in a
-written protocol before the first fit: (H1) the family with the lowest radiance error does not have the
+written protocol, amended once to add the categorical inputs before any of the lanes reported here was
+fitted: (H1) the family with the lowest radiance error does not have the
 lowest all-band 95th-percentile reflectance error; (H2) the convex stack is no worse than the kernel on
 features in radiance and has the larger all-band tail; (H3) restricting the evaluation to
 transmissions above $10^{-3}T_{\rm train}$ brings the families' reflectance tails into closer rank

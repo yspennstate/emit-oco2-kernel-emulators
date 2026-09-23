@@ -6,11 +6,16 @@ evaluated at rho = 0.7 on the physical domain t > 0, 0 <= s < 1 of the test bloc
 error is taken band by band over the test states of all splits together, for each family, and drawn as a heatmap
 (log10 of percentage points). Writes figures/lrt_band_p95.png and results/libradtran/lrt_band_p95.json.
 
+The lanes are those with the given prefix: lrtc (the default, sixteen inputs) or lrt (the seven numeric inputs), whose
+outputs are written with the suffix _numeric.
+
 usage: EMIT_DATA=<libRadtran arrays> python code/make_lrt_band_figure.py <dir with <tag>/results_lrt/preds/<tag>.npz>
+       [lrtc|lrt]
 """
 import glob
 import json
 import os
+import re
 import sys
 
 import matplotlib
@@ -21,6 +26,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 W = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA, KOUT = os.environ["EMIT_DATA"], sys.argv[1]
+PREFIX = sys.argv[2] if len(sys.argv) > 2 else "lrtc"
+SUFFIX = "" if PREFIX == "lrtc" else "_numeric"
 C = ("Y1", "Y2", "Y3", "Y4")
 RHO, R = 0.7, 0.9
 FAMILIES = [("ridge3", "cubic ridge"), ("krr", "isotropic kernel"), ("ard", "input-scaled kernel"), ("dnn", "network"),
@@ -31,7 +38,7 @@ full = {c: np.load(os.path.join(DATA, c + ".npy")).astype(float) for c in C}
 errs = {k: [] for k, _ in FAMILIES}
 doms = []
 seeds = []
-for p in sorted(glob.glob(os.path.join(KOUT, "lrt_s*_w512", "results_lrt", "preds", "lrt_s*_w512.npz"))):
+for p in sorted(glob.glob(os.path.join(KOUT, f"{PREFIX}_s*_w512", "results_lrt", "preds", f"{PREFIX}_s*_w512.npz"))):
     P = np.load(p, allow_pickle=False)
     te, tr = P["idx_te"], P["idx_tr"]
     s_tr = full["Y4"][tr]
@@ -39,7 +46,7 @@ for p in sorted(glob.glob(os.path.join(KOUT, "lrt_s*_w512", "results_lrt", "pred
     a, t, s = full["Y1"][te], full["Y2"][te] + full["Y3"][te], full["Y4"][te]
     L = a + RHO * t / (1.0 - RHO * s)
     doms.append((t > 0) & (s >= 0) & (s < 1))
-    seeds.append(os.path.basename(p)[5:8])
+    seeds.append(re.search(r"_s(\d+)_w512\.npz$", p).group(1))
     for k, _ in FAMILIES:
         Q = {c: P[f"{k}_{c}"].astype(float) for c in C}
         th, sh = np.maximum(Q["Y2"] + Q["Y3"], 0.0), np.clip(Q["Y4"], 0.0, S)
@@ -54,7 +61,8 @@ for k, _ in FAMILIES:
     e = np.where(dom, np.concatenate(errs[k]), np.nan)
     p95[k] = (100 * np.nanquantile(e, 0.95, axis=0)).tolist()
 out = {"seeds": seeds, "bands": bands, "p95_pp": p95, "domain_fraction": float(dom.mean())}
-with open(os.path.join(W, "results", "libradtran", "lrt_band_p95.json"), "w", encoding="utf-8", newline="\n") as f:
+with open(os.path.join(W, "results", "libradtran", f"lrt_band_p95{SUFFIX}.json"), "w", encoding="utf-8",
+          newline="\n") as f:
     json.dump(out, f, indent=1)
 M = np.log10(np.maximum(np.array([p95[k] for k, _ in FAMILIES]), 1e-4))
 plt.rcParams.update({"font.size": 13})
@@ -69,7 +77,7 @@ for i in range(M.shape[0]):
 fig.colorbar(im, ax=ax, label=r"$\log_{10}$ 95th percentile [pp]")
 ax.set_xlabel("Sentinel-2 band")
 fig.tight_layout()
-fig.savefig(os.path.join(W, "figures", "lrt_band_p95.png"), dpi=170)
+fig.savefig(os.path.join(W, "figures", f"lrt_band_p95{SUFFIX}.png"), dpi=170)
 print(json.dumps({"seeds": seeds, "B10_index": bands.index("B10") if "B10" in bands else None,
                   "p95_B10": {k: round(p95[k][bands.index("B10")], 3) for k, _ in FAMILIES},
                   "max_other_band": {k: round(max(v for j, v in enumerate(p95[k]) if bands[j] != "B10"), 3)
