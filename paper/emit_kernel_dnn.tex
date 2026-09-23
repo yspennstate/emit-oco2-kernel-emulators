@@ -245,9 +245,13 @@ inert at first order.}
 \paragraph{Structure of the outputs.}
 Three properties of the table shape the comparison. First, the outputs are low rank. On
 standardized training outputs, $99.99\%$ of the variance of every component lies in the first
-11--25 principal components and $99.9999\%$ in at most 44 (Figure~\ref{fig:structure}, left),
-and the smallest correlation between adjacent bands is $0.994952$. All regressors below act on
-the first 64 principal coefficients, whose unexplained training variance is below $10^{-6}$,
+11--25 principal components and $99.9999\%$ in at most 44 (Figure~\ref{fig:structure}, left).
+Neighbouring bands are nearly collinear: the median correlation between adjacent bands is above
+$0.998$ for every component, and the smallest, $0.85$ to $0.89$, falls at the edges of the
+water-vapour absorption, between 1350 and 1357\,nm for the path radiance and the fluxes and between
+1863 and 1871\,nm for the albedo, inside the regions that carry the retrieval walls of
+Section~\ref{sec:domain}. All regressors below act on the first 64 principal coefficients, whose
+unexplained training variance is below $10^{-7}$,
 except the networks, which are trained on the 285 standardized bands. A small variance tail
 is an aggregate statement; Section~\ref{sec:identity} states the projection error explicitly.
 

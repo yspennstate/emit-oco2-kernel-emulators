@@ -7,7 +7,9 @@ figures/emit_band_anatomy.png   band RMSE over band RMS of the test predictions 
                                 3x512 network and the network with its residual kernel, drawn when --predictions names
                                 a folder with <family>_<component>_te.npy for krr_matern, mlp512 and
                                 mlp512_plus_resid_krr.
-Also writes results/emit_structure.json with the numbers behind the second figure.
+Also writes results/emit_structure.json with the numbers behind the second figure and the structure paragraph of
+Section 3: per component, the number of principal components for 99.99% and 99.9999% of the training variance, the
+variance left after 64, and the median and smallest correlation between adjacent bands with the bands of the smallest.
 
 The split is the one of the JPL notebook: scikit-learn's train_test_split(test_size=0.1, random_state=42) on row
 order, then 10% of the training block, chosen by RandomState(0), for validation. Needs numpy, scikit-learn and
@@ -76,8 +78,17 @@ def main():
         A = Standardizer(Ys[c][idx_tr_full]).fwd(Ys[c][idx_tr_full])
         S = np.linalg.svd(A - A.mean(axis=0), compute_uv=False)
         ev = S ** 2 / (S ** 2).sum()
-        out["output_pca"][c] = {"rank_9999": int(np.searchsorted(np.cumsum(ev), 0.9999) + 1),
-                                "top10_evr": [float(v) for v in ev[:10]]}
+        cum = np.cumsum(ev)
+        # A has mean zero and unit variance per band, so these means are the Pearson correlations
+        adj = (A[:, :-1] * A[:, 1:]).mean(axis=0)
+        k = int(np.argmin(adj))
+        out["output_pca"][c] = {"rank_9999": int(np.searchsorted(cum, 0.9999) + 1),
+                                "rank_999999": int(np.searchsorted(cum, 0.999999) + 1),
+                                "unexplained_after_64": float(1.0 - cum[63]),
+                                "top10_evr": [float(v) for v in ev[:10]],
+                                "adjacent_band_corr_median": float(np.median(adj)),
+                                "adjacent_band_corr_min": float(adj[k]),
+                                "adjacent_band_corr_min_nm": [float(wls[k]), float(wls[k + 1])]}
     # the shuffle test reads validation rows only
     Xs = Standardizer(X[idx_tr]).fwd(X)
     Ycat = np.concatenate([Standardizer(Ys[c][idx_tr]).fwd(Ys[c]) for c in COMPONENTS], axis=1)

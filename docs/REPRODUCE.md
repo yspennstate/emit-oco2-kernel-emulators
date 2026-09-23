@@ -61,7 +61,7 @@ its output is `domain_audit.log` beside it.
 
 | Figure | File in `figures/` | Script | Inputs |
 | --- | --- | --- | --- |
-| `fig:examples`, `fig:structure` | `emit_data_examples.png`, `emit_structure.png` | `make_data_figures.py` | the EMIT arrays; the numbers behind the second figure are in `results/emit_structure.json` |
+| `fig:examples`, `fig:structure` | `emit_data_examples.png`, `emit_structure.png` | `make_data_figures.py` | the EMIT arrays; the numbers behind the second figure and the structure paragraph of Section 3 (principal-component ranks, adjacent-band correlations) are in `results/emit_structure.json` |
 | `fig:band-anatomy` | `emit_band_anatomy.png` | `make_data_figures.py --predictions DIR` | the arrays and the test predictions of three families on one split |
 | `fig:curves` | `emit_curves.png` | `make_scaling_tables.py` | the records |
 | `fig:bands` | `emit_quantiles_top_models.png` | `make_band_figure.py` | the arrays and the float64 test predictions of `tq_s101_raw_w512` |
