@@ -1,0 +1,11 @@
+{
+ "stage": "done",
+ "ok": true,
+ "train_min": 137.0,
+ "score_rc": 0,
+ "tag": "tq_s110_admissible_w2000",
+ "seed": 110,
+ "policy": "admissible",
+ "config": "w2000",
+ "elapsed_min": 138.2
+}
