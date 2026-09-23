@@ -196,12 +196,13 @@ number 64 and include the whole common core of 54.
 \subsection{A fresh partition, fixed in advance}\label{sec:confirm}
 The comparisons above use partitions that were in view while the families were developed. To test
 the reversal against that selection, a simplified pipeline was frozen together with one hypothesis
-and evaluated once on a new partition. Its six families are the cubic ridge, a $3\times512$ network
+in a written protocol, the SHA-256 of its hyperparameters was recorded, and the pipeline was then
+evaluated once on a new partition. Its six families are the cubic ridge, a $3\times512$ network
 (GELU activations, Adam) trained on the 285 standardized bands, the residual kernel of that
 network, the input-scaled Mat\'ern kernel, the Mat\'ern kernel on the network's last hidden layer,
 and a convex stack of the cubic, the corrected network, the input-scaled kernel and the feature
 kernel. Every hyperparameter was copied from development on seed 101 and none was re-tuned. The
-partition holds out 3{,}497 states, $15\%$ of the table, drawn with a seed used in no earlier run;
+partition holds out 3{,}497 states, $15\%$ of the table, drawn with a seed that defines no other split;
 the remaining 19{,}816 states train the families, 1{,}982 of them serving only as the network's
 early-stopping set. The held-out states belong to the same table as every other split, so this
 evaluation guards against the choice of split and of hypothesis rather than testing
@@ -211,7 +212,6 @@ The hypothesis was that the family with the lowest radiance error does not have 
 all-band 95th-percentile reflectance error, and that its all-band 95th percentile is strictly larger
 than that of the residual-corrected network.
 
-\IfFileExists{table_confirmation.tex}{%
 \begin{table}[t]
 \centering
 \resizebox{\textwidth}{!}{\input{table_confirmation}}
@@ -220,7 +220,7 @@ $t\ge10^{-12}$ and $q\ge0.3$, which covers $99.5327\%$ of the $996{,}645$ entrie
 non-finite in any family. The network here is the $3\times512$ GELU network of the frozen pipeline,
 trained with Adam, not the network of Table~\ref{tab:results}.}
 \label{tab:confirm}
-\end{table}}{}
+\end{table}
 
 The reversal reproduces (Table~\ref{tab:confirm}). The convex stack has the lowest radiance error of
 the six, $0.0687\%$, and the fourth-lowest reflectance tail; the kernel on learned features has a

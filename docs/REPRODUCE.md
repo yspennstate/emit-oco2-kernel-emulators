@@ -106,10 +106,13 @@ python code/make_libradtran_arrays.py /path/to/data/pkanrtm/paired_arrays.npz /p
 ```
 
 The first command caches the numeric rows (`paired_arrays.npz`) and the aerosol model and atmosphere profile of every
-row (`paired_cats.npz`). The digests of the sources and of every array are in `results/libradtran/MANIFEST_cats.json`. The sixteen-input lanes run
-`code/lanes/lrtc_kaggle_lane.py` through `make_lrtc_kernels.py`, and the seven-input lanes `lrt_kaggle_lane.py`
-through `make_lrt_kernels.py`. `make_lrt_tables.py` evaluates the three hypotheses of the protocol on every seed and
-writes `results/libradtran/lrt_summary.json` (or `lrt_summary_numeric.json`).
+row (`paired_cats.npz`). The digests of the sources and of every array are in `results/libradtran/MANIFEST_cats.json`.
+
+The sixteen-input lanes run `code/lanes/lrtc_kaggle_lane.py` through `make_lrtc_kernels.py` on Kaggle and
+`code/lanes/lrtc_lane_dgx.py` on the Caltech DGX, with the same commit and package versions;
+`results/libradtran/MACHINES.json` records which seed ran where. The seven-input lanes run `lrt_kaggle_lane.py` through
+`make_lrt_kernels.py`. `make_lrt_tables.py` evaluates the three hypotheses of the protocol on every seed and writes
+`results/libradtran/lrt_summary.json` (or `lrt_summary_numeric.json`).
 
 ### The fresh partition
 

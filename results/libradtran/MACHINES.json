@@ -1,0 +1,8 @@
+{
+ "rule": "PREREGISTRATION_LRT_20260923.md, Machines: all ten lanes on Kaggle sessions (CPU fitting), or whole seeds split between Kaggle and the Caltech DGX with the assignment recorded",
+ "lrtc": {"101": "Kaggle", "102": "Kaggle", "103": "Caltech DGX", "104": "Caltech DGX", "105": "Caltech DGX",
+          "106": "Caltech DGX", "107": "Caltech DGX", "108": "Caltech DGX", "109": "Caltech DGX", "110": "Caltech DGX"},
+ "lrt": {"101": "Kaggle", "102": "Kaggle", "103": "Kaggle", "104": "Kaggle"},
+ "lane_scripts": {"Kaggle": "code/lanes/lrtc_kaggle_lane.py, code/lanes/lrt_kaggle_lane.py", "Caltech DGX": "code/lanes/lrtc_lane_dgx.py"},
+ "note": "Kaggle's weekly GPU-session quota was used up after seeds 101 and 102 of lrtc; the lanes fit on CPU on both machines, with the code of commit 1f5d4df and numpy 2.2.6, scipy 1.15.3, torch 2.13.0 (CPU)"
+}

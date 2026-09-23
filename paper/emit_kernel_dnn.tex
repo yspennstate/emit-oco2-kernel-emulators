@@ -57,7 +57,7 @@ fits the target on that representation \cite{nmkc}. Both differ from deep kernel
 where representation and kernel are trained jointly \cite{wilson}, and from regularizing the
 inner layers of a network with kernel flows \cite{yoo}. The comparison complements work on
 kernel methods for operator learning \cite{batlle}, on neural operators such as DeepONet and
-Fourier neural operators \cite{deeponet,fno}, and classical kernel regression \cite{rw}.
+Fourier neural operators \cite{deeponet,fno}, and on classical kernel regression \cite{rw}.
 
 The data are 23{,}313 tabulated radiative-transfer evaluations on the 285-band EMIT grid
 \cite{green}. The state has six coordinates and each output component is well described by
@@ -216,9 +216,11 @@ The model families and ablations were developed on this table with its test erro
 The ten splits therefore measure how the comparison varies with the partition; their test
 blocks overlap, and their standard deviations are descriptive rather than confidence
 intervals. Section~\ref{sec:paired-tails} reports paired differences on common splits.
-Two evaluations in Section~\ref{sec:domain} were specified before they were run: an experiment
+Three evaluations in Section~\ref{sec:domain} were specified before they were run: an experiment
 on the training targets, whose arms, seeds and scoring were recorded in a protocol before its
-first fit, and a fresh partition with a single hypothesis fixed in advance and evaluated once.
+first fit; a fresh partition with a single hypothesis fixed in advance and evaluated once; and
+the same pipeline on a second radiative-transfer code, with three hypotheses and their decision
+rule fixed before its first fit.
 
 \begin{figure}[t]
 \centering
