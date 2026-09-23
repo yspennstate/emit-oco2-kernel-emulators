@@ -915,9 +915,10 @@ author supplied the data, set the questions, and reviewed the results, the proof
 
 \section*{Data and code availability}
 
-The code, the per-split run records, the scripts that generate every table and figure from those
-records, and this manuscript are at
-\url{https://github.com/yspennstate/emit-oco2-kernel-emulators}. Each record carries the
+The repository
+\url{https://github.com/yspennstate/emit-oco2-kernel-emulators}
+holds the code, the per-split run records, the scripts that generate every table and figure from
+those records, and this manuscript. Each record carries the
 SHA-256 digests of the input arrays, the split sizes, the selected hyperparameters and the test
 metrics; the records of the training-target experiment also carry the digests of their split
 indices, and the float64 test predictions of every family in those runs are available on
@@ -932,8 +933,8 @@ per-component affine vectors. The drivers read NumPy exports of \texttt{X} and
 author on request, subject to the permission of the Jet Propulsion Laboratory. The OCO-2 arrays and
 reference predictions are from the release accompanying \cite{lamminpaa}, and the other
 configurations use the cited public releases. The libRadtran arrays of Section~\ref{sec:lrt} are
-built from the release of \cite{pkan} by \texttt{code/make\_libradtran\_arrays.py} with the option
-\texttt{--cats}, and their digests are recorded in \texttt{results/libradtran/MANIFEST\_cats.json}.
+built from the release of \cite{pkan} by \path{code/make_libradtran_arrays.py} with the option
+\texttt{--cats}, and their digests are recorded in \path{results/libradtran/MANIFEST_cats.json}.
 
 \input{references}
 

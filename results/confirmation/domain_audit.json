@@ -1,0 +1,16 @@
+{
+  "entries": 6644205,
+  "states": 23313,
+  "bands": 285,
+  "albedo_exact_2": 214,
+  "albedo_ge_1": 454,
+  "albedo_lt_0": 9858,
+  "t_le_0": 438,
+  "t_lt_1e_12": 32130,
+  "admissible_frac": 0.998441348513479,
+  "states_fully_admissible": 18859,
+  "rmse_all_band": 0.007379560602036873,
+  "rmse_admissible": 0.004265997945920611,
+  "jld2_sha256": "344a6d0e6d77b9c152de18505befb10c6e7566bcb5ff9bc00e10d260a048c6de",
+  "jld2_bytes": 213761068
+}

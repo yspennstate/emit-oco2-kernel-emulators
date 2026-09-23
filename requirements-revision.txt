@@ -1,3 +1,0 @@
-# Environment for the public-record reanalysis and synthetic tests only.
-# This is not the original campaign training environment.
-numpy==2.3.5

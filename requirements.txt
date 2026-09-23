@@ -1,0 +1,3 @@
+# Regenerating the tables from the run records and running the tests needs only numpy. The figure scripts also
+# use matplotlib, and the training drivers scipy, torch, scikit-learn, h5py and psutil (see docs/REPRODUCE.md).
+numpy==2.3.5

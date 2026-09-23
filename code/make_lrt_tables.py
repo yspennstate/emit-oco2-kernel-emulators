@@ -21,7 +21,27 @@ import re
 import statistics as st
 import sys
 
-from scipy.stats import kendalltau
+
+def kendall_tau_b(x, y):
+    """Kendall's tau-b of two equal-length sequences (the statistic scipy.stats.kendalltau returns)."""
+    c = d = tx = ty = 0
+    for i in range(len(x)):
+        for j in range(i + 1, len(x)):
+            dx = int(x[i] > x[j]) - int(x[i] < x[j])
+            dy = int(y[i] > y[j]) - int(y[i] < y[j])
+            if dx == 0 and dy == 0:
+                continue
+            if dx == 0:
+                tx += 1
+            elif dy == 0:
+                ty += 1
+            elif dx == dy:
+                c += 1
+            else:
+                d += 1
+    den = ((c + d + tx) * (c + d + ty)) ** 0.5
+    return (c - d) / den if den else float("nan")
+
 
 W = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(W, "results", "libradtran")
@@ -81,8 +101,8 @@ for s in seeds:
     hyp["H1"][s] = {"holds": best_rad != best_tail, "lowest_radiance": best_rad, "lowest_allband_p95": best_tail}
     hyp["H2"][s] = {"holds": rad["stack"] <= rad["dkr"] and allp["stack"] > allp["dkr"],
                     "d_radiance": rad["stack"] - rad["dkr"], "tail_ratio": allp["stack"] / allp["dkr"]}
-    t_all = kendalltau([rad[f] for f in fams], [allp[f] for f in fams]).statistic
-    t_phy = kendalltau([rad[f] for f in fams], [phys[f] for f in fams]).statistic
+    t_all = kendall_tau_b([rad[f] for f in fams], [allp[f] for f in fams])
+    t_phy = kendall_tau_b([rad[f] for f in fams], [phys[f] for f in fams])
     hyp["H3"][s] = {"holds": bool(t_phy > t_all), "tau_all_band": float(t_all), "tau_floor_1e-3": float(t_phy)}
 count = {h: sum(1 for v in hyp[h].values() if v["holds"]) for h in hyp}
 resolution = {}

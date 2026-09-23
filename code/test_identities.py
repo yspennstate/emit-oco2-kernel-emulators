@@ -1,14 +1,14 @@
-"""Finite-design verification of the revised mathematics and diagnostic semantics.
+"""Finite-design checks of the identities, bounds and scoring semantics of the paper.
 
-Run: python -m unittest discover -s code -p 'test_publication_revision.py' -v
-These tests are synthetic, not new EMIT fits or a substitute for the written proofs.
+Run: python -m unittest discover -s code -p 'test_identities.py' -v
+The tests use synthetic designs; they check the algebra numerically and do not replace the proofs.
 """
 import unittest
 import numpy as np
 from conditioned_reflectance import evaluate, training_flux_scale
 
 
-class PublicationRevisionTests(unittest.TestCase):
+class IdentityTests(unittest.TestCase):
     def test_frozen_residual_and_design_identity(self):
         rng = np.random.default_rng(20260918)
         for n in (3, 11, 29):

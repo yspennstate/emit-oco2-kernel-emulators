@@ -1,0 +1,52 @@
+table 23313 states x 285 bands = 6,644,205 sample-band entries
+
+--- albedo Y4 ---
+  exactly 2.0            : 214  (0.00322%)
+  >= 1  (q = 1-0.7s <= 0.3 and non-physical) : 454
+  < 0                    : 9,858   min -0.0723864
+  in [0,1)               : 6,633,893
+  q = 1 - 0.7*s <= 0     : 448   min q -0.4
+
+--- transmitted flux t = Y2 + Y3 ---
+  t <= 0        :       438  (0.0066%)
+  t <= 1e-20    :       540  (0.0081%)
+  t <= 1e-13    :    23,762  (0.3576%)
+  t <= 1e-12    :    32,130  (0.4836%)
+  t <= 1e-08    :    90,169  (1.3571%)
+  t <= 0.0001   :   246,834  (3.7150%)
+  min t -4.47651e-20
+
+--- joint admissible domain  A = {t > 0 and 0 <= s < 1} ---
+  admissible entries     : 6,633,849  (99.8441%)
+  inadmissible entries   : 10,356  (0.1559%)
+  states with every band admissible : 18,859 of 23,313
+  bands carrying any violation      : 227 of 285
+  worst bands (wavelength nm : violating states):
+       2492.9 nm : 948
+       1855.9 nm : 798
+       1893.0 nm : 795
+       1848.4 nm : 672
+       1870.7 nm : 630
+       1907.9 nm : 629
+       1900.4 nm : 590
+       2485.5 nm : 588
+       1885.6 nm : 543
+       1841.0 nm : 516
+       1878.2 nm : 452
+       1863.3 nm : 440
+
+--- a stricter operating domain  A_kappa = {t >= tau and q >= kappa} ---
+  tau=1e-12    kappa=0.3: coverage 99.5162%  states fully covered 17,544
+  tau=1e-08    kappa=0.3: coverage 98.6427%  states fully covered 13,727
+  tau=1e-06    kappa=0.3: coverage 97.7849%  states fully covered 11,170
+  tau=0.0001   kappa=0.3: coverage 96.2848%  states fully covered 7,596
+
+--- round trip on EXACT components (the paper's 0.0054 RMSE diagnostic) ---
+  non-finite inverses           : 394
+  all-band RMSE                 : 0.007380
+  RMSE on the admissible domain : 4.266e-03  (coverage 99.8441%)
+  RMSE on t>=1e-12, q>=0.3      : 1.079e-09  (coverage 99.5162%)
+
+data_EMIT_24k.jld2 sha256 = 344a6d0e6d77b9c152de18505befb10c6e7566bcb5ff9bc00e10d260a048c6de
+bytes = 213761068
+wrote domain_audit.json

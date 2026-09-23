@@ -7,7 +7,7 @@ on:
       - 'code/**'
       - 'docs/**'
       - 'results/**'
-      - 'requirements-revision.txt'
+      - 'requirements.txt'
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,17 +26,29 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install analysis dependencies
-        run: python -m pip install -r requirements-revision.txt
+        run: python -m pip install -r requirements.txt
       - name: Check identities, projections, precision and physical-domain semantics
         run: python -m unittest discover -s code -p 'test_*.py' -v
-      - name: Regenerate supported tables and provenance inventory
+      - name: Regenerate the tables from the run records
         run: |
-          python code/make_revision_tables.py
+          python code/make_emit_tables.py
           python code/make_tables.py
           python code/make_v2_tables.py
           python code/format_publication_tables.py
-          python code/revision_manifest.py
-          python code/audit_retained_refit.py
+          python code/make_domain_table.py
+          python code/make_tq_tables.py
+          python code/make_lrt_tables.py
+          python code/make_lrt_tables.py lrt
+          python code/make_confirmation_table.py
+      - name: Check that the committed tables are the regenerated ones
+        shell: bash
+        run: |
+          changed="$(git status --porcelain -- 'paper/table_*.tex' 'paper/layout_*.tex')"
+          if [ -n "$changed" ]; then
+            echo "$changed"
+            git diff -- 'paper/table_*.tex' 'paper/layout_*.tex' | head -200
+            exit 1
+          fi
       - name: Install TeX
         run: |
           sudo apt-get update -qq
@@ -77,7 +89,7 @@ jobs:
             build/
             README.md
             LICENSE
-            requirements-revision.txt
+            requirements.txt
           retention-days: 30
           if-no-files-found: error
       - name: Archive failed-build diagnostics without a PDF

@@ -1,0 +1,32 @@
+[20:17:04] freeze.json verified 656507f1f2c0f732
+[20:17:05] confirmation block 3497, training 17834, early-stop 1982
+[20:17:08] cubic_ridge
+[20:17:09] krr_ard_matern (one Gram per component: the scales differ by component)
+[20:18:33]   Y1 done
+[20:19:54]   Y2 done
+[20:20:59]   Y3 done
+[20:22:01]   Y4 done
+[20:22:01] fc_dnn_512 (CPU)
+C:\Users\owner\AppData\Roaming\Python\Python314\site-packages\torch\cuda\__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+[20:29:45]   Y1: early-stop mse 3.224e-04
+[20:36:07]   Y2: early-stop mse 1.660e-04
+[20:42:50]   Y3: early-stop mse 5.670e-04
+[20:47:33]   Y4: early-stop mse 6.910e-03
+[20:47:33] dnn_plus_residual_krr
+[20:48:50]   Y1 done
+[20:50:06]   Y2 done
+[20:51:23]   Y3 done
+[20:52:34]   Y4 done
+[20:52:34] dkr_feature_kernel
+[20:56:57] convex_stack
+[20:56:57] admissible coverage on the confirmation block 99.5327% (4,657 entries excluded of 996,645)
+[20:56:58]   cubic_ridge              radiance 0.7544%  all-band p95   70.716 pp  admissible p95  70.6725 pp
+[20:56:58]   krr_ard_matern           radiance 0.0900%  all-band p95   26.895 pp  admissible p95  19.3818 pp
+[20:56:58]   fc_dnn_512               radiance 0.1719%  all-band p95   41.832 pp  admissible p95  28.0728 pp
+[20:56:58]   dnn_plus_residual_krr    radiance 0.0978%  all-band p95   26.069 pp  admissible p95  16.8659 pp
+[20:56:59]   dkr_feature_kernel       radiance 0.0828%  all-band p95    3.912 pp  admissible p95   2.9405 pp
+[20:56:59]   convex_stack             radiance 0.0687%  all-band p95   25.820 pp  admissible p95  16.2971 pp
+[20:56:59] H1: lowest radiance = convex_stack; lowest all-band p95 = dkr_feature_kernel; supported = False
+[20:56:59] wrote confirmation_report.json
+CONFIRM_EXIT=0

@@ -1,0 +1,92 @@
+{
+  "cubic_lambda": {
+    "Y1": 1.0,
+    "Y2": 1.0,
+    "Y3": 1e-08,
+    "Y4": 1.0
+  },
+  "residual_kernel": {
+    "Y1": {
+      "length_scales": [
+        5.64,
+        4.0,
+        5.64,
+        4.0,
+        4.0043999999999995,
+        8.0
+      ],
+      "lambda": 1e-06
+    },
+    "Y2": {
+      "length_scales": [
+        5.68,
+        2.0164,
+        2.0164,
+        16.0,
+        4.0,
+        16.0
+      ],
+      "lambda": 0.0001
+    },
+    "Y3": {
+      "length_scales": [
+        4.0043999999999995,
+        2.84,
+        2.84,
+        16.0,
+        4.0,
+        16.0
+      ],
+      "lambda": 0.0001
+    },
+    "Y4": {
+      "length_scales": [
+        4.0,
+        1.0,
+        1.42,
+        11.28,
+        5.68,
+        16.0
+      ],
+      "lambda": 0.0001
+    }
+  },
+  "dkr_multiplier": {
+    "Y1": 4.0,
+    "Y2": 4.0,
+    "Y3": 4.0,
+    "Y4": 1.0
+  },
+  "stack_members": [
+    "krr_ard_matern",
+    "dkr_feature_kernel",
+    "dnn_plus_residual_krr",
+    "cubic_ridge"
+  ],
+  "stack_weights": {
+    "Y1": {
+      "krr_ard_matern": 0.41808159448904997,
+      "dkr_feature_kernel": 0.1325072556345673,
+      "dnn_plus_residual_krr": 0.4494111498763828,
+      "cubic_ridge": 0.0
+    },
+    "Y2": {
+      "krr_ard_matern": 0.02674272035287473,
+      "dkr_feature_kernel": 0.6049564326533906,
+      "dnn_plus_residual_krr": 0.3589169326420571,
+      "cubic_ridge": 0.009383914351677528
+    },
+    "Y3": {
+      "krr_ard_matern": 0.15410149003343496,
+      "dkr_feature_kernel": 0.1950843960168585,
+      "dnn_plus_residual_krr": 0.6478380690038488,
+      "cubic_ridge": 0.002976044945857647
+    },
+    "Y4": {
+      "krr_ard_matern": 0.0,
+      "dkr_feature_kernel": 0.24475632895761035,
+      "dnn_plus_residual_krr": 0.33719643337322286,
+      "cubic_ridge": 0.41804723766916674
+    }
+  }
+}

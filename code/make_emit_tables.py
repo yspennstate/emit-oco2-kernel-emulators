@@ -1,8 +1,8 @@
 """Build the main EMIT tables from the per-split records.
 
 Writes the main and wide-pipeline tables, the paired contrasts and the all-band retrieval tails, and a JSON
-summary with the source digests. Sample SD uses ddof=1.
-Run from any directory: python code/make_revision_tables.py
+summary with the source digests (results/emit_tables.json). Sample SD uses ddof=1.
+Run from any directory: python code/make_emit_tables.py
 """
 from __future__ import annotations
 
@@ -30,7 +30,8 @@ def read(path: Path) -> dict[str, Any]:
 
 
 def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """SHA-256 of the file as stored in the repository (line endings as LF), independent of the checkout."""
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def stats(values) -> dict[str, float | int]:
@@ -154,19 +155,18 @@ def main() -> None:
                           "missing": [p for p in expected if not (ROOT / p).exists()]}
     sources = BASE_FILES + WIDE_FILES + CAT_FILES + [ROOT / f"results/scaling/{name}.json" for name in
                                        ("scaling_numbers", "retune_numbers", "width_numbers")]
-    summary = {"analysis": "reanalysis of stored metrics, not new training or a raw-array rerun",
+    summary = {"analysis": "summary of the per-split run records; no model is refitted",
                "spread": "sample standard deviation (ddof=1); descriptive, not confidence intervals",
                "quantiles": "mean of within-split all-band quantiles, not a pooled quantile",
                "seeds": list(SEEDS), "data_sha": reference_hashes,
-               "source_sha256": {str(p.relative_to(ROOT)): digest(p) for p in sources},
+               "source_sha256": {p.relative_to(ROOT).as_posix(): digest(p) for p in sources},
                "paired_radiance": paired, "all_band_tails": tails,
                "tail_tradeoff": tail_contrasts, "individual_record_inventory": groups,
                "any_nonfinite_inverse_reported_in_core_records": bool(any(
                    rec["families"][fam]["refl_nan_frac"] > 0
                    for rec in list(base.values()) + list(wide.values()) for fam in rec["families"]))}
-    output = ROOT / "results/revision_20260918"
-    output.mkdir(exist_ok=True)
-    (output / "reanalysis.json").write_text(json.dumps(summary, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    with open(ROOT / "results" / "emit_tables.json", "w", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(summary, indent=2, allow_nan=False) + "\n")
     print(json.dumps({"paired_radiance": paired, "tail_tradeoff": tail_contrasts,
                       "individual_record_inventory": groups}, indent=2))
 

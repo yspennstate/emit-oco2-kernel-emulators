@@ -1,4 +1,5 @@
-"""Synthetic checks for target filtering, mask semantics and retained-table arithmetic."""
+"""Checks of target filtering and mask semantics on synthetic data, and of the fresh-partition records."""
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -11,7 +12,6 @@ import numpy as np
 from conditioned_reflectance import evaluate, training_flux_scale
 from emit_target_quality import (admissible_entries, audit_targets, indices_digest,
                                  seeded_split, select_training_rows)
-from audit_retained_refit import audit
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -121,15 +121,20 @@ class TargetQualityTests(unittest.TestCase):
         self.assertEqual(r1["retained_entries"], r2["retained_entries"])
         self.assertAlmostEqual(r1["rmse"], r2["rmse"], places=14)
 
-    def test_retained_refit_rank_and_provenance(self):
-        result = audit()
-        stack = next(r for r in result["rows"] if r["model"] == "convex stack")
-        self.assertEqual(stack["all_p95_pp_rank"], 4)
-        self.assertEqual(stack["screened_p95_pp_rank"], 2)
-        self.assertEqual(result["unchanged_displayed_medians"], 4)
-        self.assertAlmostEqual(result["stack_over_feature_p95_ratio_all"], 6.12649, places=4)
-        self.assertIsNone(result["refit_seed"])
-        self.assertFalse(result["clean_target_training_completed"])
+    def test_fresh_partition_freeze_and_report(self):
+        folder = ROOT / "results" / "confirmation"
+        registered = (folder / "freeze.sha256").read_text(encoding="utf-8").split()[0]
+        self.assertEqual(hashlib.sha256((folder / "freeze.json").read_bytes()).hexdigest(), registered)
+        report = json.loads((folder / "confirmation_report.json").read_text(encoding="utf-8"))
+        self.assertEqual(report["n_confirmation"], round(0.15 * 23313))
+        fam = report["families"]
+        lowest_radiance = min(fam, key=lambda f: fam[f]["radiance_pct"])
+        lowest_tail = min(fam, key=lambda f: fam[f]["all_bands"]["p95_pp"])
+        self.assertEqual(lowest_radiance, report["H1"]["best_radiance_family"])
+        self.assertEqual(lowest_tail, report["H1"]["best_all_band_p95_family"])
+        clause_b = fam[lowest_radiance]["all_bands"]["p95_pp"] > fam["dnn_plus_residual_krr"]["all_bands"]["p95_pp"]
+        self.assertEqual(clause_b, report["H1"]["clause_b_worse_tail"])
+        self.assertEqual(report["H1"]["H1_supported"], lowest_radiance != lowest_tail and clause_b)
 
     @unittest.skipUnless(os.environ.get("EMIT_INTEGRATION_TESTS") == "1",
                          "Set EMIT_INTEGRATION_TESTS=1 with scipy/torch to run the synthetic training smoke test")

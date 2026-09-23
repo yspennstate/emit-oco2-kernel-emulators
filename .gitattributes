@@ -1,0 +1,4 @@
+# Files whose SHA-256 is registered are kept byte for byte: no line-ending conversion.
+results/confirmation/freeze.json -text
+results/target_quality/PREREGISTRATION*.md -text
+results/libradtran/PREREGISTRATION*.md -text
