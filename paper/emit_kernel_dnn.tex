@@ -44,7 +44,7 @@ to the reflectance of the surface through radiative-transfer calculations that d
 state of the atmosphere and on the viewing geometry. Learned emulators replace repeated
 simulator evaluations with a fitted map from that state to the spectral quantities the
 retrieval needs. Neural emulators have been built into reflectance retrieval
-\cite{srtmnet,isofit}, Gaussian-process emulators have been developed for the OCO-2 forward
+\cite{srtmnet}, Gaussian-process emulators have been developed for the OCO-2 forward
 model \cite{lamminpaa}, and physics-guided multi-fidelity networks use a cheaper code as a
 second source of information \cite{pkan}. Two questions follow: which representation gives
 the most accurate forward emulator, and which of its errors matter once the emulator is
@@ -117,8 +117,9 @@ radiative-transfer models \cite{rivera,verrelst}, Gaussian-process emulation for
 retrieval \cite{gomezdans}, and the wider use of Gaussian processes in earth observation
 \cite{campsvalls}; \cite{srtmnet} places an emulator inside a reflectance retrieval and
 \cite{lamminpaa} fits a cross-validated Gaussian process to the OCO-2 forward model. Replacing an
-expensive simulator by a statistical model is a classical problem \cite{sacks}, as is using a
-cheap model to inform an expensive one \cite{kennedyohagan,kennedycalib,perdikaris}, surveyed for
+expensive simulator by a statistical model is a classical problem \cite{sacks}, as are calibrating
+it against observations \cite{kennedycalib} and using a cheap model to inform an expensive one
+\cite{kennedyohagan,perdikaris}, surveyed for
 propagation and inference in \cite{peherstorfer}; the network of \cite{pkan} is a multi-fidelity
 instance on the corpus rescored in Section~\ref{sec:results-benchmarks}. The measurement
 requirements behind the tables used here are those of the EMIT mission \cite{green} and of the
@@ -792,7 +793,8 @@ Burgers' equation at three viscosities from PDEBench \cite{pdebench}; three one-
 The Well \cite{thewell}: a two-dimensional turbulent radiative layer, an active-matter system and
 a Helmholtz staircase; the ClimSim atmospheric physics emulation task \cite{climsim}; and the
 paired correction-coefficient corpus of the physics-guided radiative-transfer work of \cite{pkan},
-a third radiative-transfer emulation problem and the largest here at 487{,}790 rows. That corpus
+a third radiative-transfer emulation problem and the largest here, with about 488{,}000 training
+rows. That corpus
 is run in both of its configurations: from the atmospheric state alone, and with the low-fidelity
 6S coefficients as additional inputs, which is a different and easier problem.
 
