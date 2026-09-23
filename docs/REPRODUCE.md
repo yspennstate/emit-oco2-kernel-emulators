@@ -72,6 +72,8 @@ its output is `domain_audit.log` beside it.
 | `fig:band-anatomy` | `emit_band_anatomy.png` | `make_data_figures.py --predictions DIR` | the arrays and the test predictions of three families on one split |
 | `fig:curves` | `emit_curves.png` | `make_scaling_tables.py` | the records |
 | `fig:bands` | `emit_quantiles_top_models.png` | `make_band_figure.py` | the arrays and the float64 test predictions of `tq_s101_raw_w512` |
+| `fig:tq-profile` | `tq_profile_w512.png` (and `tq_profile_w2000.png`) | `make_profile_figure.py w512` | `results/target_quality/profile_by_arm_s*_w512.json`, written by `profile_by_arm.py` |
+| `fig:lrt-bands` | `lrt_band_p95.png` | `make_lrt_band_figure.py` | the libRadtran arrays and the float64 test predictions of the `lrtc_*` lanes; the values are in `results/libradtran/lrt_band_p95.json` |
 
 ```sh
 EMIT_DATA=/path/to/emit python code/make_data_figures.py --predictions /path/to/predictions
@@ -119,7 +121,10 @@ The sixteen-input lanes run `code/lanes/lrtc_kaggle_lane.py` through `make_lrtc_
 `code/lanes/lrtc_lane_dgx.py` on the Caltech DGX, with the same commit and package versions;
 `results/libradtran/MACHINES.json` records which seed ran where. The seven-input lanes run `lrt_kaggle_lane.py` through
 `make_lrt_kernels.py`. `make_lrt_tables.py` evaluates the three hypotheses of the protocol on every seed and writes
-`results/libradtran/lrt_summary.json` (or `lrt_summary_numeric.json`).
+`results/libradtran/lrt_summary.json` (or `lrt_summary_numeric.json`). The transmission statistics quoted in the
+section (the median of band B10, the share of its entries below 1e-6, the smallest transmission of the other
+bands) are written to `results/libradtran/transmission_by_band.json` by
+`EMIT_DATA=/path/to/arrays python code/lrt_transmission_stats.py`.
 
 ### The fresh partition
 
