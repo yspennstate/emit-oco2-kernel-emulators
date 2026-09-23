@@ -1,0 +1,14 @@
+% seeds w512 [101] w2000 []
+\begin{tabular}{lrrrrrr}
+\toprule
+family & radiance [\%] & all bands: $p_{95}$ [pp] & $\tau_0=10^{-12}$: failed [\%] & $p_{95}$ [pp] & $\tau_0=10^{-3}$: failed [\%] & $p_{95}$ [pp] \\
+\midrule
+cubic ridge (3$\times$512) & 0.754 & 70.67 & 4.39 & 45.78 & 1.461 & 22.08 \\
+isotropic kernel (3$\times$512) & 0.213 & 69.06 & 2.85 & 17.70 & 0.416 & 5.51 \\
+input-scaled kernel (3$\times$512) & 0.088 & 23.53 & 1.78 & 5.19 & 0.074 & 1.50 \\
+network (3$\times$512) & 0.376 & 65.96 & 2.52 & 10.16 & 0.109 & 3.41 \\
+network + residual kernel (3$\times$512) & 0.139 & 46.38 & 2.05 & 6.68 & 0.043 & 2.32 \\
+kernel on features (3$\times$512) & 0.105 & 8.26 & 1.41 & 2.62 & 0.000 & 0.94 \\
+convex stack (3$\times$512) & 0.093 & 22.91 & 1.69 & 4.26 & 0.009 & 1.21 \\
+\bottomrule
+\end{tabular}

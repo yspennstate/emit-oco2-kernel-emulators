@@ -1,0 +1,38 @@
+{
+ "tag": "tq_s101_raw_w512",
+ "coverage_pct": 99.29252560831509,
+ "families": {
+  "ridge3": {
+   "wall_bands": 133,
+   "nonfinite_inversions": 0
+  },
+  "dnn": {
+   "wall_bands": 83,
+   "nonfinite_inversions": 0
+  },
+  "dnn_corr": {
+   "wall_bands": 76,
+   "nonfinite_inversions": 0
+  },
+  "ard": {
+   "wall_bands": 66,
+   "nonfinite_inversions": 0
+  },
+  "dkr": {
+   "wall_bands": 54,
+   "nonfinite_inversions": 0
+  },
+  "stack": {
+   "wall_bands": 57,
+   "nonfinite_inversions": 0
+  }
+ },
+ "common_wall_bands": 54,
+ "union_wall_bands": 133,
+ "common_wall_regions_nm": [
+  "1126-1134",
+  "1342-1469",
+  "1796-1952",
+  "2412-2493"
+ ]
+}

@@ -38,6 +38,15 @@ the single-member feature kernel and $0.060$ for concatenated features, against 
 stack, and the constrained 95th percentiles are $0.076$, $0.061$ and $0.151$. The ratio of the
 middle bound to the mean squared error lies between about $3.4$ and $5.3$ across heads.
 
+The middle term of Theorem~\ref{thm:transfer}(ii), $\E\min\{R^2,e_R^2/t^2\}$, orders the nine
+heads by their retrieval tails. Taking the four-split means, its rank correlation with the raw
+95th percentile is exactly one (Spearman and Kendall), and with the constrained 95th percentile
+$0.98$ (Spearman), while the unweighted $\varepsilon_R$ reaches only $0.78$ and $0.81$. The stack,
+for instance, has a smaller $\varepsilon_R$ than the kernel on concatenated features ($0.060$
+against $0.063$) but a larger middle term ($0.036$ against $0.030$) and a constrained tail more
+than twice as large. What orders the retrievals is the component error weighted by the
+transmission, as the theorem says, not the component error itself.
+
 About five percent of the entries have transmission below $3\times10^{-4}$ of the training flux
 scale, and among positive transmissions the one-percent quantile is of order $10^{-10}$ of that
 scale, while the share of squared retrieval-weighted component error on entries below $0.03$ of
@@ -45,11 +54,19 @@ the scale is under a thousandth for every head. Small absolute errors are amplif
 transmission. The heads still differ in the inverse tail, because the location, sign and
 dependence of their errors matter, as the exact identities show.
 
-A slope fitted over a finite range of transmissions says nothing about the tail law down to
-zero or about an envelope uniform over training sizes, so these profiles do not decide whether
-the worst-case exponent of Theorem~\ref{thm:transfer}(iii) is attained. On a passband
-$t\ge t_0>0$ fixed in advance, item (iv) applies directly, and its coverage and failures are
-reported with it, as in Section~\ref{sec:domain}.
+The table's own transmission distribution is extremely heavy near zero: relative to the median
+positive flux, its $1\%$, $3\%$, $5\%$ and $10\%$ quantiles are $1.1\times10^{-10}$,
+$3.6\times10^{-6}$, $2.2\times10^{-4}$ and $1.7\times10^{-2}$, a log-log slope of
+$\beta\approx0.12$--$0.13$ for $F_t$ over the lowest tenth of the entries. With the measured
+profile slopes $2\nu\approx0.16$--$0.28$, Theorem~\ref{thm:profile} places the all-band retrieval in
+its slow regime, $\beta<2(1-\nu)$, where the mean squared error scales like
+$\sigma^{\beta/(1-\nu)}$ with exponent $0.13$--$0.15$: halving the component error would shrink it
+by less than a tenth. On a passband $t\ge t_0>0$ fixed in advance the bound of item (iv) is
+linear in $\varepsilon_R$ instead. A slope fitted over a finite range of transmissions does not
+establish the tail law down to zero or an envelope uniform over training sizes, so this reading
+describes the table's regime rather than proving a rate. Scaling a fixed error profile down buys
+little over all bands; moving the error away from the opaque entries, as the feature kernels do,
+buys much more.
 
 \section{Representation, correction and combination}\label{sec:results-representation}
 
@@ -93,10 +110,14 @@ as described in Section~\ref{sec:joint}.}
 The mean-relative-norm stack has radiance error $0.0754\%$ and constrained 95th-percentile
 error $0.141$, and the row-relative squared-error stack $0.1130\%$ and $0.180$. The
 finite-threshold $J'_\tau$ fits give radiance errors of about $0.22$--$0.23\%$ for $u\le0.1$,
-$0.1491\%$ at $u=0.3$ and $0.1175\%$ at $u=1$, and the unweighted baseline $0.1262\%$. The
-fitting loss and the reported metric need not favor the same combination; the factor-four
-transfer bound holds for every feasible weight vector on a distribution satisfying its
-hypotheses.
+$0.1491\%$ at $u=0.3$ and $0.1175\%$ at $u=1$, and the unweighted baseline $0.1262\%$.
+Weighting by the transmission moves the stack the way Proposition~\ref{prop:stackweights}
+predicts: at $u=0.003$ the constrained 95th percentile falls from $0.141$ to $0.103$ while the
+radiance error rises from $0.075\%$ to $0.216\%$. It does not reach the kernel on features alone
+($0.077$) or on concatenated features ($0.061$). The fitting loss and the reported metric need
+not favor the same combination, and $J'_\tau$ is a mean-square criterion while the table reports
+a quantile; the factor-four transfer bound holds for every feasible weight vector on a
+distribution satisfying its hypotheses.
 
 \paragraph{Kernel choice on the state and on learned features.}
 Table~\ref{tab:v2-multikernel} covers four components on seeds 101--103. The spectral mixture

@@ -89,6 +89,23 @@ $\nu=1$ the bound is $\sigma^2$ before any tail enters. In the model,
 $c^{-2}\E_P|\bar\rho-\rho|^2=\E_P\min\{1,(\sigma/c)^2t^{2\nu-2}\}$, the same integral with equality.
 \end{proof}
 
+\begin{proof}[Proof of Proposition~\ref{prop:stackweights}]
+With $a=s=0$ and exact $t$ and $s$, the stack's path-radiance error is
+$e(w)=((1-w)b,\,wc\delta)$, and the radiance at $\rho$ is predicted with the same error, since
+$q=\widehat q=1$; this gives $F$. The constrained retrieval evaluates
+$(L-\widehat a)/t=\rho-e_i/t_i$ at entry $i$, with denominator $t_i>0$, and
+$|e_i|/t_i\le\max\{b,c\}\le\min\{\rho,R-\rho\}$ keeps it in $[0,R]$, so the projection is inactive
+and $\bar\rho-\rho=-((1-w)b,\,wc)$; this gives $E$. Both are convex quadratics in $w$, and setting
+their derivatives to zero gives $w_f$ and $w_r$. Substituting,
+\[
+E(w_f)=\frac{b^2c^2\,(c^2\delta^4+b^2)}{2(b^2+c^2\delta^2)^2}\to\frac{c^2}{2},\qquad
+E(w_r)=\frac{b^2c^2}{2(b^2+c^2)},
+\]
+whose ratio tends to $(b^2+c^2)/b^2$, and $F(w_f)\le F(w_r)$ because $w_f$ minimizes $F$. Finally, with
+$\widetilde e_t=\widetilde e_s=0$ and $\tau\le\delta\le1$, the weights $(t_i\vee\tau)^{-2}$ in
+\eqref{eq:Jtau} are $1$ and $\delta^{-2}$, so $J_\tau(w)=\tfrac12[(1-w)^2b^2+w^2c^2\delta^2/\delta^2]=E(w)$.
+\end{proof}
+
 \begin{proof}[Proof of Proposition~\ref{prop:perturb}]
 $\widetilde H=H^{1/2}(I+B)H^{1/2}$ gives $\widetilde H^{-1}=H^{-1/2}QH^{-1/2}$ and $Q=I-QB$. Hence
 $\widetilde k_x^{\top}\widetilde H^{-1}(Y-\widetilde M)-k_x^{\top}H^{-1}(Y-M)

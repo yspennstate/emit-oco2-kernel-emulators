@@ -30,8 +30,8 @@ study how their forward accuracy carries over to reflectance retrieval. Over ten
 of 23{,}313 states, a kernel with one length scale per input reaches $0.095\%$ mean relative
 radiance error and a network $0.387\%$; a kernel on the concatenated hidden features of five
 networks reaches $0.076\%$. Forward and inverse rankings disagree. A convex stack improves on
-a wide feature kernel by $0.0006$ radiance percentage points while tripling its
-95th-percentile reflectance error, at every partition. We prove that on the physical domain
+a wide feature kernel by only $0.0006$ radiance percentage points, yet its 95th-percentile
+reflectance error is larger at every partition, three times larger on average. We prove that on the physical domain
 the constrained retrieval error is at most the retrieval-weighted component error divided by
 the transmission, with constant one, that the rate this implies is sharp, and that errors
 proportional to the transmission lose no rate. [[TQ-ABSTRACT]]
@@ -64,11 +64,12 @@ The data are 23{,}313 tabulated radiative-transfer evaluations on the 285-band E
 a few dozen principal coefficients, so an exact kernel solve on all 18{,}884 training rows is
 affordable. On ten common partitions, the kernel with one length scale per input is four times
 more accurate than the network on radiance, a residual kernel reduces the network's error by
-a factor of almost three, and an exact kernel on the network's hidden features is as accurate
-as the input-scaled kernel. A wider network is a worse emulator but a better feature map:
-from width 512 to width 2{,}000 the network's own radiance error doubles while the error of a
-kernel on its features falls by a fifth. Concatenating the features of five networks and
-solving one kernel on them is better still, at every partition.
+a factor of almost three, and an exact kernel on the network's hidden features is about as
+accurate as the input-scaled kernel. A wider network is a worse emulator but a better feature
+map: from width 512 to width 2{,}000 the network's own radiance error doubles while the error
+of a kernel on its features falls by a fifth. Concatenating the hidden features of five
+networks and solving one kernel on them improves on the features of a single network at every
+partition and gives the lowest radiance error of all the ten-partition comparisons.
 
 The central empirical result concerns the inverse. The stack built on the wide network
 improves mean radiance error over its own feature kernel by $0.0006$ percentage points, while
@@ -84,7 +85,9 @@ reflectance errors through the inverse denominator. A transfer inequality with c
 bounds a physically constrained retrieval by the component error relative to the
 transmission. Tail and conditional-error assumptions then give rates, including a sharp
 worst-case exponent and conditions under which no rate is lost; the central quantity is the
-profile of the conditional error against the transmission, not the error alone. For residual
+profile of the conditional error against the transmission, not the error alone. On test data the
+transmission-weighted term of the bound ranks nine emulators exactly as their 95th-percentile
+retrieval errors, which the unweighted component error does not. For residual
 correction, a Hilbert-space identity gives the exact criterion for improvement, and a
 principal-component decomposition separates truncation error from the error of the kernel
 step.
@@ -258,12 +261,11 @@ cubic ridge regression has a mean relative component error of about two percent
 \paragraph{Conditioning of the inverse.}
 In deep absorption bands the transmitted flux $Y_2+Y_3$ can be as small as $10^{-21}$, and at
 a fully opaque band the radiance does not depend on the surface reflectance at all, so the
-inverse is not identifiable there. Even exact tabulated components do not invert exactly in
-floating point: on 2{,}332 test states the round trip has reflectance RMSE $0.0054$, and the
-error is concentrated in 1{,}652 of 664{,}620 state--band entries whose inverse denominators
-are below $2\times10^{-13}$. We therefore report both the center and the tail of the
-reflectance error. In the all-band statistics a non-finite inverse is assigned zero, and the
-number of such inverses is recorded; none occurs in the main campaign.
+inverse is not identifiable there. Even the exact tabulated components do not invert exactly in
+floating point: over the whole table the round trip has reflectance RMSE $7.4\times10^{-3}$, all
+of it from the entries with the smallest transmissions (Section~\ref{sec:domain}). We therefore
+report both the center and the tail of the reflectance error. In the all-band statistics a
+non-finite inverse is assigned zero and counted; none occurs in the main campaign.
 
 Differentiating \eqref{eq:inv} separates the components. Write $D = \hat Y_2 + \hat Y_3 +
 \hat Y_4 (L - \hat Y_1)$ for its denominator. Then
@@ -288,8 +290,8 @@ All models are trained per component and evaluated in physical units after undoi
 standardization. Unless stated otherwise they regress the 64 leading principal coefficients of
 the standardized component. Every hyperparameter named below is selected on the validation
 rows of the split at hand. The comparisons of Sections~\ref{sec:results}--\ref{sec:retune}
-run on CPUs; the kernel comparison, the regularization suite and the benchmark of
-Sections~\ref{sec:results-representation}--\ref{sec:results-benchmarks} run on one T4 GPU.
+run on CPUs; most diagnostics of Sections~\ref{sec:results-transfer}--\ref{sec:results-benchmarks}
+train their networks on one T4 GPU.
 
 \paragraph{Reference family.} Cubic polynomial ridge regression \cite{hoerl} on all monomials of
 degree at most three in the six standardized inputs, with the ridge weight selected from
@@ -655,8 +657,8 @@ residual fitting cuts the network's error by almost a factor of three; and a ker
 features matches the input-scaled kernel with one network and beats it with several. The width
 experiment separates the two roles of a network: the width-2{,}000 network is the worse emulator
 and the better feature map. Concatenating the features of an ensemble and solving one kernel on
-them gives the most accurate single predictor in the study, and its reflectance tail is the
-smallest.
+them gives the lowest radiance error and the smallest reflectance tail of the ten-partition
+comparisons, with one solve in place of a stack.
 
 Forward and inverse rankings still differ. The input-scaled kernel has the smallest median
 reflectance error of the main comparison, while the feature kernels have the smallest
@@ -677,15 +679,20 @@ transmission on the rest. Proposition~\ref{prop:attained} shows that the resulti
 attained, and Theorem~\ref{thm:profile} that a conditional root-mean-square component error
 proportional to the transmission loses no rate. What decides the retrieval tail is where the
 component errors sit relative to the transmission, and a stack that lowers the average forward
-error can move error into the entries with small transmission. Two stacks can have the same
-radiance error and very different retrievals.
+error can move error into the entries with small transmission. The data agree: the
+transmission-weighted middle term of the bound ranks nine heads exactly as their raw retrieval
+tails (Section~\ref{sec:results-transfer}), while the unweighted component error does not.
 
-The stacking objective and the transfer bound fit together in a simple way. A convex quadratic
-in the component errors, weighted by the transmission, bounds the constrained retrieval error up
-to a factor of three or four (Section~\ref{sec:joint}), for every feasible weight vector. Such an
-objective would target the retrieval directly, where the mean relative norm used by the stacks
-here does not; its weights still come from validation rows, and the bound becomes a guarantee
-only on an independent selection sample (Proposition~\ref{prop:selection}).
+Proposition~\ref{prop:stackweights} isolates the mechanism for stacks. Weights that minimize a
+forward error move mass onto the head whose error sits where the transmission is small, since
+there it costs little radiance, and the retrieval divides that error by the transmission; the
+forward-optimal combination can then be worse than the retrieval-optimal one by any factor while
+winning on radiance. The transmission-weighted quadratic $J_\tau$ of Section~\ref{sec:joint}
+targets the retrieval directly: it bounds the mean squared constrained retrieval error for every
+feasible weight vector, with factor three (four in its separable form), and in the example of the
+proposition it is the retrieval error itself. Its weights still come from validation rows, and
+the bound becomes a guarantee only on an independent selection sample
+(Proposition~\ref{prop:selection}).
 
 For residual correction, the alignment identity and the principal-component decomposition show
 which parts of the error the correction can remove and which remain, and they explain why the
@@ -902,7 +909,8 @@ records, and this manuscript are at
 \url{https://github.com/yspennstate/emit-oco2-kernel-emulators}. Each record carries the
 SHA-256 digests of the input arrays, the split sizes, the selected hyperparameters and the test
 metrics; the records of the training-target experiment also carry the digests of their split
-indices and the float64 predictions of every family. The EMIT table is the file
+indices, and the float64 test predictions of every family in those runs are available on
+request. The EMIT table is the file
 \texttt{data\_EMIT\_24k.jld2} (213{,}761{,}068 bytes, SHA-256
 {\small\ttfamily 344a6d0e6d77b9c152de18505befb10c6\allowbreak e7566bcb5ff9bc00e10d260a048c6de}),
 supplied by the Jet Propulsion Laboratory. Its root holds the state matrix \texttt{X}

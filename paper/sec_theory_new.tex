@@ -281,8 +281,8 @@ J'_\tau(w)=\E_P\!\left[
 \end{equation}
 This is also a convex quadratic. It omits the cross term
 $2R^2\widetilde e_2\widetilde e_3$ present in $J_\tau$.
-Crucially, the flux floor is applied \emph{after fitting}, to the combined total flux
-when retrieval is scored. It is not inside the fitted loss.
+The flux floor is applied after fitting, to the combined total flux when the retrieval is
+scored, and is not part of the fitted loss.
 Since $t\ge0$,
 \[
 |\max\{\widetilde Y_2+\widetilde Y_3,0\}-t|
@@ -303,6 +303,37 @@ not preserve convexity. On $0\le w\le1$, for example,
 $g(w)=(\max\{2w-1,0\}-1)^2$ satisfies
 $g(1/2)=1>(g(0)+g(1))/2=1/2$. This counterexample does not apply to the raw-error
 quadratic actually fitted by the driver.
+
+\paragraph{Forward-optimal weights.}
+A stack fitted on a forward objective weights every band alike, while the retrieval divides the
+error at each entry by its transmission. The following example shows how far apart the two
+optima can be.
+
+\begin{proposition}[forward-optimal and retrieval-optimal weights]\label{prop:stackweights}
+Let $0<\rho<R\le1$ and consider two equally weighted entries with $a=s=0$ and transmissions
+$t_1=1$, $t_2=\delta\in(0,1]$. Two heads predict $t$ and $s$ exactly and the path radiance with
+errors $e^A=(0,c\delta)$ and $e^B=(b,0)$, where $0<b,c\le\min\{\rho,R-\rho\}$. For the convex
+combination with weight $w$ on $A$, let $F(w)$ be the mean squared radiance error at $\rho$ and
+$E(w)$ the mean squared error of the constrained retrieval \eqref{eq:rhobar}. Then
+\[
+F(w)=\tfrac12\bigl[(1-w)^2b^2+w^2c^2\delta^2\bigr],\qquad
+E(w)=\tfrac12\bigl[(1-w)^2b^2+w^2c^2\bigr],
+\]
+$F$ is minimized at $w_f=b^2/(b^2+c^2\delta^2)$ and $E$ at $w_r=b^2/(b^2+c^2)$, and
+\[
+\frac{E(w_f)}{E(w_r)}\longrightarrow1+\frac{c^2}{b^2}\quad(\delta\to0),\qquad
+F(w_f)\le F(w_r).
+\]
+For every $\tau\le\delta$ the transmission-weighted objective $J_\tau$ of \eqref{eq:Jtau} equals $E$
+and is minimized at $w_r$.
+\end{proposition}
+
+\noindent\emph{Proof in Appendix~\ref{app:proofs}.}
+The weights that minimize the forward error put almost all their mass on the head whose error
+sits at the opaque entry, because there it costs little radiance; the retrieval divides that
+error by $\delta$ and pays for it in full. With $c/b$ large the forward-optimal stack is better
+than either head in radiance and worse than the retrieval-optimal stack by any factor in the
+inverse, which is the pattern of Table~\ref{tab:tails} in miniature.
 
 \paragraph{Numerical weights and threshold convention.}
 The driver solves a nonnegative least-squares problem with a heavily weighted row penalizing

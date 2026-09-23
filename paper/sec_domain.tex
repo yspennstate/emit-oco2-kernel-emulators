@@ -91,7 +91,34 @@ its data and of its split indices, and saves the float64 predictions of every fa
 [[TQ-POLICY]]
 
 \subsection{Where the reflectance error sits}
-[[TQ-BANDS]]
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=0.80\textheight,width=\textwidth,keepaspectratio]{emit_quantiles_top_models.png}
+\caption{Residual quantile bands across the test set of split 101, band by band, for six families of
+the main pipeline. The envelopes are nested percentiles of the residual at each wavelength:
+$25$--$75$ in red, $5$--$25$ and $75$--$95$ in blue, $2.5$--$5$ and $95$--$97.5$ in green,
+$0.5$--$2.5$ and $97.5$--$99.5$ in grey, with the median as a thin black line. From the left: the
+direct-flux residual $Y_2-\widehat{Y_2}$ in physical units; the radiance residual at $\rho=0.7$;
+the reflectance residual over all bands; and the reflectance residual on the physical domain with
+the floor $\tau_0=10^{-12}$. The last two columns share a vertical scale of $\pm2$ points.}
+\label{fig:bands}
+\end{figure}
+
+Figure~\ref{fig:bands} shows where along the spectrum the errors of one split sit. The component
+and radiance residuals are smooth in wavelength and widen where the transmitted flux is small, so
+the families differ mainly in the amplitude of a shared shape. The reflectance residual does not
+inherit that shape. Over all bands its outer envelopes open into vertical walls, bands where the
+95th percentile of the absolute error exceeds two points, and the walls have two parts. A common
+core of 54 bands, at 1126--1134, 1342--1469, 1796--1952 and 2412--2493\,nm, is a wall for every
+family, the most accurate included: there the denominator, not the emulator, sets the width.
+Outside the core each family adds bands in proportion to its inaccuracy: none for the kernel on
+features, 3 for the stack, 12 for the input-scaled kernel, 22 for the corrected network, 29 for
+the network and 79 for the cubic ridge, of a 133-band union. Restricting to the physical domain
+changes none of these counts, and neither does the stricter floor $\tau_0=10^{-3}$, which removes
+$6.3\%$ of the entries: the walls come from transmissions that are small but far above either
+floor, where the retrieval divides a small component error by a small denominator. The feature
+kernel's advantage in the tail is that it adds no wall of its own.
 
 \subsection{A fresh partition, fixed in advance}\label{sec:confirm}
 The comparisons above use partitions that were in view while the families were developed. To test

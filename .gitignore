@@ -7,3 +7,6 @@
 nmkc-build/
 __pycache__/
 *.pyc
+
+# per-run float64 predictions of the training-target experiment (about 150 MB each; available on request)
+results/target_quality/preds/
