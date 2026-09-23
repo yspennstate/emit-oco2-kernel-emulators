@@ -1,0 +1,131 @@
+\section{Representation, correction and combination}\label{sec:results-representation}
+
+\paragraph{Concatenated features.}
+Table~\ref{tab:v2-replication} gives the three-member width-2000 experiment of
+Section~\ref{sec:scaling} split by split, with the networks trained on one GPU.
+
+\begin{table}[p]
+\centering
+\input{layout_v2_replication}
+\caption{Kernel on concatenated features, three width-2000 networks, splits 104--107. Radiance
+is a mean relative spectral error in percent; reflectance median and 95th-percentile errors are
+in percentage points. The last column is the paired radiance gain of concatenated features over
+the features of one network. The mean row averages the four within-split quantities.}
+\label{tab:v2-replication}
+\end{table}
+
+The concatenated-feature kernel has mean radiance error $0.0688\%$, against $0.0764\%$ for the
+features of one network; the paired gain is $0.0076\pm0.0053$ percentage points, positive on
+three splits and $-0.0002$ on the fourth. Its mean within-split 95th-percentile reflectance error
+is $5.99$ points, against $7.51$ for single-member features and $14.35$ for the stack. With the
+ten width-512 splits of Section~\ref{sec:scaling} this makes two settings, with different
+networks on overlapping splits, in which concatenation lowers both the radiance error and the
+reflectance tail.
+
+\paragraph{Kernel choice on the state and on learned features.}
+Table~\ref{tab:v2-multikernel} covers four components on seeds 101--103. The spectral mixture
+and the Mat\'ern-5/2 kernel have similar mean errors on $Y_1$ ($0.089\%$), and the spectral
+mixture has the lowest mean errors of the raw-state kernels on $Y_2$ and $Y_3$ ($0.237\%$ and
+$0.099\%$). The first-order additive kernel is much less accurate in this specification.
+Albedo errors for the nonadditive kernels lie between about $2.3\%$ and $3.5\%$.
+
+\begin{table}[p]
+\centering
+\input{layout_v2_multikernel}
+\caption{Ten input-space kernels, feature kernels and combination rules on the EMIT state
+inputs, with rank-64 outputs. Entries are component mean relative spectral errors in percent,
+averaged over seeds 101--103 with sample standard deviations. The network has width 512 and depth
+3 with a 150-epoch budget. Kernels include the Mat\'ern family, Gaussian, spectral mixture
+\cite{wilsonadams}, NNGP \cite{chosaul,leenngp}, NTK \cite{ntk}, additive kernel
+\cite{additivegp}, and learned input scales \cite{owhadiyoo,rw}.}
+\label{tab:v2-multikernel}
+\end{table}
+
+The Mat\'ern-5/2 feature kernel gives $0.105\%$, $0.211\%$, $0.114\%$ and $2.303\%$ on
+$Y_1$--$Y_4$, better than the best raw-state kernel on some components and not on others. The
+convex stack has the lowest component means in this comparison ($0.066\%$, $0.156\%$, $0.077\%$,
+$1.956\%$), which is consistent with its large reflectance tails elsewhere: the component metric
+does not weight errors the way the inverse does.
+
+\paragraph{Network regularization.}
+Table~\ref{tab:v2-regsuite} compares a control, a weight-decay grid and an early-stopping grid on
+three seeds. The validation-selected weight decay matches the control's component mean
+($2.27\%$), and the selected early stopping is less accurate and more variable
+($2.72\pm0.45\%$). Residual correction brings the component means to $1.88$--$1.95\%$ and
+feature kernels to $0.95$--$0.99\%$, with radiance errors near $0.15\%$, whichever
+regularization the network used. The reference row is the isotropic kernel fitted in the same runs.
+Under this budget, regularizing the network changes little; the kernel stage does the work.
+
+\begin{table}[t]
+\centering
+\input{layout_v2_regsuite}
+\caption{Regularization comparison, seeds 101--103. Each cell gives the mean component
+relative error [percent] / radiance relative error [percent], with sample standard deviations.
+The width-512, depth-3 network has a 150-epoch cap, and validation selects among three runs per
+arm. The weight-decay grid is $10^{-5},10^{-4},10^{-3}$ and the early-stopping patience grid 3, 5
+and 10 epochs \cite{adamw,prechelt}. The reference row is the isotropic kernel fitted in the same
+runs.}
+\label{tab:v2-regsuite}
+\end{table}
+
+\paragraph{Perturbation and ridge-path diagnostics.}
+The tables of Section~\ref{app:diagnostics} give the perturbation diagnostics for the state
+inputs and the learned features. The residual-action bound of Proposition~\ref{prop:perturb} is
+often much smaller than the spectrum-only bound, yet it can still exceed the actual movement by a
+factor of tens, thousands or more: positive definiteness makes the bound applicable without
+making it a useful tolerance.
+
+Table~\ref{tab:v2-ridge} reports a 4{,}000-row fit of four components at seed 101. At the
+smallest ridge on input-space $Y_1$ the effective degrees of freedom are 3{,}841 and the noise
+factor $0.924$. The same-half and split-half principal-component errors are $0.079\%$ and
+$2.465\%$, and the physical-unit test errors of the corrected and standalone kernels $0.2168\%$
+and $0.1754\%$; these columns use different metrics and samples and are not to be subtracted. At
+$\gamma=10^{-2}$ the corresponding test errors are $0.5095\%$ and $5.7578\%$: the fitted mean
+keeps its predictive information when the kernel correction is strongly regularized.
+
+\section{A synthetic check of the transfer theorem}\label{sec:results-synthetic}
+
+Table~\ref{tab:v2-synthetic} checks the construction of Proposition~\ref{prop:attained} on
+manufactured data, two million samples for each $\beta\in\{0.5,1,2,3,4\}$. The average-error
+slopes are $0.200$, $0.333$, $0.498$, $0.597$ and $0.664$, against the limits $0.200$, $0.333$,
+$0.500$, $0.600$ and $0.667$. For the uniform family the finite-ladder slope is compared with the
+analytic curve on the same ladder: at $\beta=2$ the measured slope is $1.721$ and the analytic one
+$1.724$, while the limit is two. The largest relative Monte Carlo discrepancy is about $1.01\%$ for
+the uniform family at $\beta=2$ and below $0.053\%$ for the profile family against its quadrature
+reference, and no pointwise violation occurs among the ten million sampled transmissions.
+
+\section{The matched benchmark and the transfer contrast}\label{sec:results-benchmarks}
+
+\paragraph{Correction-coefficient benchmark.}
+Table~\ref{tab:v2-pkanrtm} scores our families under the standard and out-of-distribution
+protocols of \cite{pkan}, with and without the low-fidelity 6S coefficients as inputs, against the
+published values of the reference model, which we did not retrain.
+
+The state-only residual-corrected network reaches standard-split RMSE $0.00581\pm0.00004$, MAE
+$0.00151$, uniform-average $R^2=0.9952$ and SMAPE $3.54\%$, against published values $0.00619$,
+$0.00186$, $0.9947$ and $3.91\%$; with 6S inputs its means are $0.00578$, $0.00148$, $0.9954$ and
+$3.19\%$. On the out-of-distribution split the state-only means are $0.00620$, $0.00252$, $0.9967$
+and $3.37\%$, against published $0.01022$, $0.00544$, $0.9942$ and $5.40\%$, and with 6S inputs
+$0.00596$, $0.00232$, $0.9969$ and $2.92\%$. The spreads describe three seeds on the standard
+protocol and three initializations on the out-of-distribution protocol.
+
+The $R^2$ convention matters here. The reference weights the three coefficients equally, whereas a
+variance-weighted $R^2$ is the default of many libraries. We report the uniform average, computed
+from per-coefficient target scales that are recovered from the per-coefficient RMSE of the heads
+and checked against the variance-weighted value. The ensemble without correction is close to the
+corrected network, while the raw-state kernel is much less accurate in these configurations.
+
+\paragraph{OCO-2 coefficient and radiance objectives.}
+Table~\ref{tab:v2-oco2} covers three bands and seeds 0--2. The feature kernel trained under the
+flat coefficient loss has coefficient errors of about $4.1\%$, $16.3\%$ and $8.1\%$ on O$_2$, weak
+CO$_2$ and strong CO$_2$, and radiance errors of $0.076\%$, $0.114\%$ and $0.108\%$. A
+radiance-weighted feature construction gives about $0.031\%$, $0.048\%$ and $0.064\%$ in radiance,
+at the price of larger coefficient errors. The reconstruction map and the evaluation metric decide
+which fitted representation is preferred.
+
+The radiance stack minimizes a row-relative squared radiance loss, a convex quadratic because the
+reconstruction is affine, and its solver reaches KKT gaps between $4.17\times10^{-6}$ and
+$1.52\times10^{-5}$. Its mean radiance errors are $0.0264\%$, $0.0391\%$ and $0.0511\%$, against
+$0.0291\%$, $0.0404\%$ and $0.0536\%$ for the squared-loss stack on reduced coordinates, while its
+coefficient errors rise to $18.59\%$ and $37.43\%$ on O$_2$ and weak CO$_2$ and to $8.87\%$ on
+strong CO$_2$. All rules use 2{,}000 validation and 2{,}000 test rows.

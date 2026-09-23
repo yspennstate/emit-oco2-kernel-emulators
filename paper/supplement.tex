@@ -1,0 +1,59 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{theorem}[proposition]{Theorem}
+\newtheorem{corollary}[proposition]{Corollary}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\1}{\mathbf{1}}
+\usepackage{booktabs}
+\usepackage{array,longtable,pdflscape}
+\usepackage{microtype}
+\newcommand{\thead}[1]{\shortstack{#1}}
+\usepackage{xr-hyper}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={Supplement to Learned representations and kernel corrections for radiative-transfer emulation},pdfauthor={Yitzchak Shmalo}}
+\graphicspath{{../figures/}}
+\externaldocument[][nocite]{emit_kernel_dnn}[https://github.com/yspennstate/emit-oco2-kernel-emulators/raw/main/paper/emit_kernel_dnn.pdf]
+
+% Sections, results, tables, figures and equations of this document carry the prefix S.
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\numberwithin{equation}{section}
+
+\title{Supplement to ``Learned representations and kernel corrections\\ for radiative-transfer emulation''}
+\author{Yitzchak Shmalo\thanks{Einstein Institute of Mathematics, The Hebrew University of Jerusalem, Jerusalem, Israel. \texttt{yitzchak.shmalo@gmail.com}.}}
+\date{September 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This supplement contains the proofs of the results stated in the article, three further results on the
+sensitivity, selection and perturbation of learned corrections, and the experiments that support the article
+without being needed to follow it: further representation and combination studies on the EMIT table, full-data
+tuning and gradient-based metrics, a synthetic check of the transfer theorem, a matched correction-coefficient
+benchmark, a comparison on OCO-2, ten further emulation configurations and extended tables. Sections, results,
+tables and equations with the prefix S are in this document; numbers without it refer to the article.
+\end{abstract}
+
+\section{Sensitivity, selection and perturbation of learned corrections}\label{supp:sensitivity}
+
+\input{supp_sensitivity}
+
+\input{supp_results}
+
+\input{supp_retune}
+
+\input{supp_further}
+
+\input{supp_tables}
+
+\input{supp_proofs}
+
+\input{references_supplement}
+
+\end{document}

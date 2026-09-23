@@ -1,0 +1,146 @@
+\subsection{Sensitivity of the correction}\label{sec:sensitivity}
+
+For a common frozen operator $R=I-S_\lambda$ and the norm of Section~\ref{sec:identity}, the exact criterion
+$2\langle Rf,Rh\rangle>\|Rh\|^2$ is necessary and sufficient for strict improvement of the corrected predictor over
+the standalone kernel, since $\|Rf-Rh\|^2<\|Rf\|^2$ is that inequality rearranged; the comparison of smoothness
+norms is neither necessary nor sufficient. Write the design values of the targets, of the fitted mean and of the
+corrected predictor as $y$, $h_X$ and $\widehat y$, with $\widehat y=h_X+S_\lambda(y-h_X)$ and
+$S_\lambda=K(K+\lambda I)^{-1}$; in the nugget convention of the experiments, $\lambda=n\gamma$. The mean is trained
+on the same labels, so $h_X=h_X(y)$. In the following Jacobian calculation,
+$K$ and $\lambda$ are held fixed; label-dependent feature or kernel selection would add
+terms involving derivatives of $S_\lambda$.
+
+\begin{proposition}\label{prop:sensitivity}
+\begin{enumerate}
+\item If $h_X$ is differentiable in $y$, the Jacobian of this fixed-kernel pipeline is
+$J_{\widehat y}=S_\lambda+(I-S_\lambda)J_{h}$. In particular the correction stage alone does not bound the
+sensitivity of the pipeline: with $K=I$, $\lambda=1$ and $h_X(y)=2y$ one has $\widehat y=\tfrac32 y$ although
+$\|S_\lambda\|_{\mathrm{op}}=\tfrac12$; and if the mean interpolates the training labels, $h_X(y)=y$, then
+$\widehat y=y$ and the correction changes nothing on the design.
+\item With the mean and the kernel frozen, $y\mapsto\widehat y$ is affine with linear part $S_\lambda$, its
+effective degrees of freedom are $\operatorname{tr}S_\lambda=\sum_j\mu_j/(\mu_j+\lambda)$, and
+$\|S_\lambda\|_{\mathrm{op}}=\max_j\mu_j/(\mu_j+\lambda)<1$.
+\item Suppose the mean, the kernel and the ridge are fixed independently of the correction noise, conditional on
+the design, and the correction is fitted on an independent sample with $y=f_X+\varepsilon$, $\E\varepsilon=0$,
+$\E[\varepsilon\varepsilon^{\top}]=\sigma^2I$. With $r=f_X-h_X$ and $r_j$ its coordinates in the
+eigenbasis of $K$,
+\[
+\frac1n\,\E_\varepsilon\|\widehat y-f_X\|^2
+=\frac1n\sum_j\Bigl(\frac{\lambda}{\mu_j+\lambda}\Bigr)^2r_j^2
++\frac{\sigma^2}{n}\sum_j\Bigl(\frac{\mu_j}{\mu_j+\lambda}\Bigr)^2 .
+\]
+\item At a new input $x$, with $a_\lambda(x)=(K+\lambda I)^{-1}k(X_n,x)$, the noise variance of the correction
+is $\sigma^2\|a_\lambda(x)\|_2^2$.
+\end{enumerate}
+\end{proposition}
+
+\noindent\emph{Proof in Section~\ref{app:proofs}.}
+Item (iii) is what the ridge-path experiments report: the residual's spectral energy $\sum_j r_j^2$ by eigendirection,
+and the two sums as functions of $\lambda$, together with the out-of-sample factor of item (iv). A ridge chosen from
+fits that depend on the correction noise is outside the hypothesis of (iii).
+
+\subsection{A finite-class selection guarantee}\label{sec:damped}
+
+A finite comparison on a genuinely independent selection sample has a simple risk bound
+\cite{stonecv,gcv,arlot}. The independence assumption is stronger than reusing the same
+validation rows for training decisions and combination weights.
+
+\begin{proposition}\label{prop:selection}
+Let $p_1,\dots,p_M$ be predictors frozen before an independent selection sample of $m$ i.i.d.\ units, let the loss
+take values in $[0,B]$, and let $\widehat p$ minimise the empirical risk on that sample. Then with probability at
+least $1-\delta$,
+\[
+R(\widehat p)\le\min_{1\le j\le M}R(p_j)+2B\sqrt{\frac{\log(2M/\delta)}{2m}} .
+\]
+\end{proposition}
+
+\noindent\emph{Proof in Section~\ref{app:proofs}.}
+The squared constrained-retrieval loss is bounded by $R^2$. Thus the proposition can
+compare a finite set of frozen corrections or stacks, with bands and prescribed
+reflectances averaged within each independent state. For example, a finite grid of
+damped corrections $h+\alpha k(x,X_n)(K+\lambda I)^{-1}(y-h_X)$ can include $\alpha=0$;
+the standalone kernel must be added as a separate candidate when it is not already in
+the grid. To apply the result to stacks, one first fits their weights on development
+rows and then compares a frozen finite collection on an independent state-level sample.
+In the experiments of the article the same validation rows serve early stopping, kernel tuning and
+combination, so the proposition describes the protocol under which such a comparison is
+certified rather than a property of the reported stacks.
+
+\subsection{Perturbing a learned-mean kernel predictor}\label{sec:perturb}
+
+Fix the training sample and write a corrected predictor as
+$p(x)=h(x)+k_x^{\top}H^{-1}(Y-M)$ with $H=K+\lambda I$ positive definite, $Y\in\mathbb R^{n\times q}$ the targets
+and $M\in\mathbb R^{n\times q}$ the training-row means used as correction labels. Let a second fitted system be
+$\widetilde p(x)=\widetilde h(x)+\widetilde k_x^{\top}\widetilde H^{-1}(Y-\widetilde M)$ with $\widetilde H$
+symmetric positive definite; both systems may depend on $Y$ through the mean, the features, the selected ridge and
+any kernel approximation. Put $B=H^{-1/2}(\widetilde H-H)H^{-1/2}$, whose least eigenvalue exceeds $-1$,
+$Q=(I+B)^{-1}$, $\gamma_Q=\|Q\|_{\mathrm{op}}=1/(1+\lambda_{\min}(B))$,
+$\eta_Q=\|Q-I\|_{\mathrm{op}}=\max_i|b_i|/(1+b_i)$ over the eigenvalues $b_i$ of $B$, and
+\[
+g=H^{-1/2}k_x,\quad \widetilde g=H^{-1/2}\widetilde k_x,\quad v=\widetilde g-g,\quad
+W=H^{-1/2}(Y-M),\quad U=H^{-1/2}(\widetilde M-M).
+\]
+
+A conditioning argument bounds such a difference by the condition number of $H$ times a norm of the
+change \cite{stewartsun,golubvanloan,higham}. The statement below instead keeps the residual action
+$W$ and the label shift $U$ separate, which is what makes it readable on data.
+
+\begin{proposition}[same-data perturbation]\label{prop:perturb}
+\begin{enumerate}
+\item The exact difference is
+\[
+\widetilde p(x)-p(x)=\widetilde h(x)-h(x)+v^{\top}W
+                  -(Q\widetilde g)^{\top}(BW+U).
+\]
+\item $\|\widetilde p(x)-p(x)\|_2\le\|\widetilde h(x)-h(x)\|_2+\|W^{\top}v\|_2
++\|Q\widetilde g\|_2\,\|BW+U\|_{\mathrm{op}}$.
+\item $\|\widetilde p(x)-p(x)\|_2\le\|\widetilde h(x)-h(x)\|_2
++\|W\|_F\bigl(\gamma_Q\|v\|_2+\eta_Q\|g\|_2\bigr)+\gamma_Q\|U\|_F\|\widetilde g\|_2$.
+\item If $\widetilde H=H+sI$ with $s\ge0$ and the kernel and the means unchanged, then
+$\|\widetilde p(x)-p(x)\|_2\le\|g\|_2\|W\|_F\,s/(\lambda_{\min}(H)+s)$.
+\end{enumerate}
+\end{proposition}
+
+\noindent\emph{Proof in Section~\ref{app:proofs}.}
+Only positive definiteness of $\widetilde H$ is needed. A large positive eigenvalue of $B$,
+as can arise from increasing the ridge, does not invalidate the bound. The bound can
+nonetheless be numerically large, especially when the least eigenvalue approaches $-1$. Item (ii) keeps the
+interaction between the perturbation and the residual: with $v=0$, $U=0$ and $BW=0$ the kernel correction does not move, however large $\|B\|$ is; the full predictor is
+unchanged as well when $\widetilde h(x)=h(x)$. The bounds are stated in the residual $W$, not in $Y$, they use no independence between
+the representation, the mean, the ridge and $Y$, and they transfer between fitted predictors without being
+generalisation statements.
+
+For component $j$ the physical target at band $b$ is $f_{j,b}=\mu_{j,b}+\sum_\ell(A_j)_{b\ell}z_{j,\ell}+\pi_{j,b}$,
+with $A_j$ the standardiser scale times the retained PCA basis and $\pi_j$ the truncation residual, and the
+pipeline predicts the retained coordinates. For a frozen realised system
+$p_\ell(x)=h_\ell(x)+a_x^{\top}(y_\ell-h_{\ell,X})$ with $y_\ell=f_{\ell,X}+\varepsilon_\ell$, the conditional
+RKHS evaluation bound \cite{rw,nmkc} gives
+\begin{equation}\label{eq:chain-coord}
+|p_\ell(x)-f_\ell(x)|\le B_\ell\widetilde P_\lambda(x)+|a_x^{\top}\varepsilon_\ell|,
+\end{equation}
+where, writing $k_x=k(X_n,x)$ and $a_x=(K+\lambda I)^{-1}k_x$,
+\[
+\widetilde P_\lambda(x)^2
+ =k(x,x)-2a_x^\top k_x+a_x^\top K a_x
+ =k(x,x)-k_x^\top(K+\lambda I)^{-1}k_x-\lambda\|a_x\|_2^2.
+\]
+This follows by applying the RKHS Cauchy--Schwarz inequality to the residual and
+$k(x,\cdot)-\sum_i(a_x)_i k(x_i,\cdot)$.
+Here $B_\ell$ is a bound on the residual RKHS norm, a hypothesis and not an observed certificate, and the second term is zero for
+deterministic simulator targets, which is the form used for EMIT. A perturbed system adds the bound
+$\Delta_\ell(x)$ of Proposition~\ref{prop:perturb}. If $|\widehat z_{j,\ell}-z_{j,\ell}|\le u_{j,\ell}$, then
+\begin{equation}\label{eq:chain-recon}
+|\widehat f_{j,b}-f_{j,b}|\le|\pi_{j,b}|+\sum_\ell|(A_j)_{b\ell}|\,u_{j,\ell},
+\end{equation}
+and a change of basis or standardiser between two systems adds its own reconstruction term. Assembling
+$e_R=|e_a|+R|e_t|+R^2t|e_s|$ from \eqref{eq:chain-recon} for the three physical components and applying
+Theorem~\ref{thm:transfer} closes the chain. If the inverse is evaluated at $L_{\mathrm{obs}}=L+\eta$, the proof of
+Theorem~\ref{thm:transfer} goes through with $e_a$ replaced by $e_a-\eta$, so
+$|\bar\rho-\rho|\le\min\{R,(|e_a-\eta|+R|e_t|+R^2t|e_s|)/t\}$. The theorem is an
+exact-arithmetic statement. In floating point the added term $\rho t/q$ can be lost when it is
+small relative to the spacing of representable numbers near $a$, in a way that depends on
+$\rho$, $q$, the magnitudes and the rounding rather than on a single threshold such as
+$t<2^{-52}a$; a rounded radiance may then give zero for $L-a$ even with the tabulated
+components. A count of numerical violations is therefore a check on the implementation, not a
+test of the inequality.
+

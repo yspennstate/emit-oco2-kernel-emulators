@@ -26,11 +26,15 @@ python code/make_tq_tables.py
 python code/make_lrt_tables.py
 python code/make_lrt_tables.py lrt
 python code/make_confirmation_table.py
+(cd paper && pdflatex -interaction=nonstopmode supplement.tex)
 latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
+latexmk -g -pdf -interaction=nonstopmode -halt-on-error -cd paper/supplement.tex
 ```
 
 Each regenerated table is byte-identical to the file in `paper/`. The workflow in `.github/workflows/` runs these
-commands on every push and fails if a table changes or the manuscript has an undefined reference or an overfull box.
+commands on every push and fails if a table changes or either document has an undefined reference or an overfull
+box. The article and the supplement refer to each other through `xr-hyper`, so the supplement is compiled once
+before the article and again after it.
 
 | Table | File in `paper/` | Script | Records |
 | --- | --- | --- | --- |
@@ -176,7 +180,7 @@ split and refuses float32 predictions unless `--allow-float32` is given.
 
 ## Other corpora
 
-The learned-metric comparison of the appendix on OCO-2 is in `results/oco2_metrics/`, one record per band and split
+The learned-metric comparison of the supplement on OCO-2 is in `results/oco2_metrics/`, one record per band and split
 from `code/kf_kernels.py --problem oco2`; `python code/oco2_metric_summary.py results/oco2_metrics
 results/oco2_ensembles` prints the means quoted there beside the baseline runs of the same splits and writes
 `summary.json`.

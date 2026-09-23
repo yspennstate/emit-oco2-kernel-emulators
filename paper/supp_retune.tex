@@ -1,0 +1,63 @@
+\section{Full-data tuning and gradient-based metrics}\label{sec:retune}
+
+We compare hyperparameter selection on a 6{,}000-row subsample with selection on all
+training rows, and coordinate search with a metric read off the gradients of a cubic surrogate
+(Table~\ref{tab:retune}).
+
+\begin{table}[t]
+\centering\small
+\resizebox{\textwidth}{!}{\input{table_emit_retune}}
+\caption{Where the kernel's hyperparameters are chosen, and how its metric is obtained, at the
+full training block and the same ten splits. The first pair tunes smoothness, scale and nugget
+on a $6{,}000$-row subsample and on every training row; the last three rows replace the coordinate
+search by a metric read off the cubic surrogate's gradients, at three exponents. Selecting the
+exponent on validation, per split, chooses $p=1/2$ on all ten, so that row would repeat the
+$p=1/2$ row and is omitted. Mean $\pm$ standard deviation over the ten splits.}
+\label{tab:retune}
+\end{table}
+
+\paragraph{Tuning with every row in the solve.} The kernel families of
+Section~\ref{sec:methods} choose smoothness, scale and nugget by the validation error of a solve
+on a $6{,}000$-row subsample and refit the winner on all $18{,}884$ rows. Tuning with the full
+solve instead lowers the isotropic kernel's radiance error from $0.239\%$ to $0.210\%$ and its
+median reflectance error from $0.141$ to $0.107$ points, better on nine of ten splits, with the
+ratio averaging $0.882$ and never above $1.001$. The selected scales differ: over the forty
+component-split cells the full block picks a shorter length scale than the subsample in $26$,
+the same in $12$ and a longer one in $2$. A smaller tuning fit prefers more smoothing.
+
+Below $6{,}000$ rows the tuning subsample is the whole training block, so those rungs are
+already fully tuned; at $8{,}000$ rows it is three quarters of the block and only at the top rung
+is it a third. Applying the measured ratio to the top rung of Table~\ref{tab:curves} takes the
+kernel's last step on radiance from $-0.183$ to $-0.334$, against a slope of $-0.305$ over the
+five lower rungs, and on the two flux components from $-0.187$ and $-0.171$ to $-0.352$ and
+$-0.358$, against $-0.437$ and $-0.468$. Most of the bend of Section~\ref{sec:scaling} is the
+tuning protocol, and with full tuning the kernel's margin over the network at the full block is
+$1.8$ rather than $1.6$.
+
+Full-data tuning barely changes the input-scaled kernel: $0.096\%$ against $0.095\%$, better on
+four of ten splits, ratio $1.005$. Its coordinate search already arrives at the scale the full
+block selects.
+
+\paragraph{Gradient-based metric.} The coordinate search costs a sweep over the six inputs at
+five multipliers, twice, per component and split. The alternative fixes the metric before any
+kernel is fitted: the multiplier of coordinate $j$ is the root-mean-square gradient of the fitted
+cubic surrogate along $j$ over the training rows, raised to a power $p$, normalized to geometric
+mean one and clipped to $[1/16, 4]$, the range of the multipliers the search selected, so that
+weakly varying coordinates receive longer length scales. It costs one cubic fit and six finite differences.
+
+At $p=1$ the radiance error is $0.159\%$, below the isotropic kernel on every split, by a factor
+$0.669$ on average, and above the searched metric on every split, by a factor $1.680$. The
+dependence on $p$ is not monotone: $p=1/2$ gives $0.125\%$ and $p=1/4$ gives $0.157\%$. Choosing
+$p$ like every other hyperparameter here, by the lowest mean validation error over the four
+components, selects $p=1/2$ on all ten splits. At that exponent the gradient metric closes $79\%$
+of the gap between the isotropic and searched kernels on radiance and $82\%$ on the median
+reflectance error, for one cubic fit and a choice among three numbers.
+
+The components prefer different exponents: $Y_2$ and $Y_3$ are best at $1/2$, the albedo at $1$
+($2.17\%$ against $2.27\%$), and the path radiance at $1/4$. On path radiance the isotropic kernel
+already reads $0.084\%$ and the searched metric $0.085\%$, while the proportional metric reads
+$0.34\%$, four times the isotropic error. The gradient of the surrogate along a coordinate
+measures how fast the map moves with it, not how much that coordinate helps predict, and on this
+component the two disagree. Softening the exponent to $1/4$ brings $Y_1$ back to $0.085\%$, at the
+cost of $Y_2$ and $Y_3$. Coordinate search can adjust each component separately, whereas the
+gradient construction uses one exponent for all four.

@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Remove checked-in PDF before verification
-        run: rm -f paper/emit_kernel_dnn.pdf
+        run: rm -f paper/emit_kernel_dnn.pdf paper/supplement.pdf
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -56,16 +56,22 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
-      - name: Compile manuscript and check references and layout
+      - name: Compile the article and its supplement and check references and layout
         shell: bash
         run: |
           set -euo pipefail
           export SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
+          # the two documents cite each other through xr-hyper: the supplement is compiled once so that its labels
+          # exist, then the article, then the supplement again against the article's final numbering
+          (cd paper && pdflatex -interaction=nonstopmode -halt-on-error supplement.tex > /dev/null)
           latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
-          if grep -Eq 'There were undefined references|Citation .* undefined|Reference .* undefined|Overfull \\(hbox|vbox)|Float too large' paper/emit_kernel_dnn.log; then
-            echo 'Manuscript has unresolved references or overflowing content.'
-            exit 1
-          fi
+          latexmk -g -pdf -interaction=nonstopmode -halt-on-error -cd paper/supplement.tex
+          for doc in emit_kernel_dnn supplement; do
+            if grep -Eq 'There were undefined references|There were multiply-defined labels|Citation .* undefined|Reference .* undefined|Overfull \\(hbox|vbox)|Float too large' paper/$doc.log; then
+              echo "$doc has unresolved references or overflowing content."
+              exit 1
+            fi
+          done
       - name: Record build provenance
         if: always()
         run: |
@@ -74,8 +80,10 @@ jobs:
           python --version > build/environment.txt
           python -m pip freeze >> build/environment.txt
           if command -v pdflatex >/dev/null; then pdflatex --version >> build/environment.txt; fi
-          if test -f paper/emit_kernel_dnn.pdf; then sha256sum paper/emit_kernel_dnn.pdf > build/pdf-sha256.txt; fi
-          if test -f paper/emit_kernel_dnn.log; then cp paper/emit_kernel_dnn.log build/latex.log; fi
+          for doc in emit_kernel_dnn supplement; do
+            if test -f paper/$doc.pdf; then sha256sum paper/$doc.pdf >> build/pdf-sha256.txt; fi
+            if test -f paper/$doc.log; then cp paper/$doc.log build/latex-$doc.log; fi
+          done
       - name: Archive manuscript, sources and diagnostics
         if: success()
         uses: actions/upload-artifact@v4

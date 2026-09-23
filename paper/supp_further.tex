@@ -1,0 +1,142 @@
+\section{Comparison with OCO-2}\label{sec:oco2}
+
+The companion paper \cite{nmkc} applies the same construction to the OCO-2 radiative-transfer
+emulation problem of Lamminp\"a\"a et al.~\cite{lamminpaa}: per spectral band (O$_2$, weak
+CO$_2$, strong CO$_2$), a reduced atmospheric state of twenty or twenty-four coordinates maps to
+forty reduced radiance coefficients, with errors on the standardized coefficients and on the
+reconstructed radiance, under the ten-split protocol of Section~\ref{sec:data}. It gives a
+comparison at a higher input dimension.
+
+There a kernel on the state trails the network by a factor of nine, four and five on the reduced
+coefficients: the isotropic Mat\'ern reaches $40.6\%$, $58.6\%$ and $43.4\%$ on the three bands
+against $4.4\%$, $16.4\%$ and $8.2\%$ for the network. Four ways of learning the kernel's metric
+on the state were run on the same ten splits on all three bands: a kernel-flow metric
+\cite{owhadiyoo}, a Mahalanobis metric under the same flow, the gradient outer product of the
+recursive feature machine \cite{rfm}, and per-input scales fitted by empirical Bayes. The last is
+the best of the four on every band, taking the isotropic kernel's $40.6\%$, $58.6\%$ and $44.3\%$
+on the coefficients to $18.7\%$, $25.3\%$ and $16.9\%$, and on O$_2$ its radiance from $0.233\%$ to
+$0.150\%$; the two flow metrics agree within half a point of each other at $26.9\%$, $29.8\%$ and
+$23.9\%$, the recursive feature machine reads $28.2\%$, $47.9\%$ and $31.3\%$, and an additive
+kernel $38.2\%$, $46.9\%$ and $47.7\%$. (The isotropic kernel on strong CO$_2$ reads $44.3\%$ here
+and $43.4\%$ in the baseline experiment. The metric experiment also chooses the Mat\'ern smoothness
+on validation and takes $\nu=3/2$ on this band at every split; the baseline fixes $\nu=5/2$, and its
+choice of scale and nugget changes from split to split, six splits landing near $41\%$, three near
+$48\%$ and one at $44\%$, hence its spread of $\pm3.4$.)
+The feature kernel remains more accurate, by a margin that depends on the band: the exact Mat\'ern
+regression on the network's frozen features reads $4.1\%$, $16.3\%$ and $8.1\%$ on the same splits,
+so the best state metric is $4.6$ times that on O$_2$ but only $1.6$ and $2.1$ times it on the two
+CO$_2$ bands. The empirical-Bayes metric is bimodal across splits on O$_2$, eight of ten landing near
+$17.2\%$ and two at $24.7\%$, so its spread of $\pm3.2$ is thirty times the isotropic kernel's
+$\pm0.1$. The exact Mat\'ern regression on the network's frozen features beats a ridge readout
+refitted on the same features on every split, every band and every training loss, and a
+per-coefficient choice among heads trained under different losses has lower mean error than the
+release's own emulator under both reported metrics: it wins the reduced-coefficient comparison on
+all ten splits on each band, and the radiance comparison on ten, nine and ten splits on O$_2$, weak
+CO$_2$ and strong CO$_2$.
+
+\section{Ten further emulation configurations}\label{sec:corpora}
+
+Table~\ref{tab:corpora} extends the comparison to ten further configurations, each with
+validation-based selection; the comparison concerns the families under a common protocol, not the
+best method available for each problem.
+
+The corpora are the advection equation with discontinuous initial data from the operator suite
+of \cite{dehoop}, which is also the source of the structural-mechanics problem of \cite{nmkc};
+Burgers' equation at three viscosities from PDEBench \cite{pdebench}; three one-step maps from
+The Well \cite{thewell}: a two-dimensional turbulent radiative layer, an active-matter system and
+a Helmholtz staircase; the ClimSim atmospheric physics emulation task \cite{climsim}; and the
+paired correction-coefficient corpus of the physics-guided radiative-transfer work of \cite{pkan},
+a third radiative-transfer emulation problem and the largest here, with about 488{,}000 training
+rows. That corpus
+is run in both of its configurations: from the atmospheric state alone, and with the low-fidelity
+6S coefficients as additional inputs, which is a different and easier problem.
+
+Advection is the 200-point input/output pair of the operator suite at full resolution. Burgers is
+PDEBench's \texttt{1D\_Burgers\_Sols\_Nu}$\nu$ release, the map from the initial condition to the
+solution at $t = 1$ on a grid subsampled by four to 256 cells, with the input used raw and the output
+reduced to 128 principal coefficients. The three Well datasets are one-step maps of the full
+multi-channel state with 256 principal coefficients in and out: the turbulent radiative layer on
+its $128 \times 384$ grid (density, pressure, velocity), active matter on $256 \times 256$
+(concentration, velocity and the two tensor fields), and the Helmholtz staircase on its two pressure
+channels. ClimSim is the low-resolution release, 124 inputs to 128 tendencies, with 100{,}000
+training rows drawn from the 10.1 million available and validation and test taken from the release's
+own validation and scoring files. The correction-coefficient corpus is the paired 6S/libRadtran
+Sentinel-2 set \cite{vermote,mayer}: wavelength, solar zenith, view zenith, relative azimuth,
+aerosol optical depth, water vapor, ozone and elevation map to three libRadtran coefficients, split
+by atmospheric state so that all bands of a state stay together; the multi-fidelity configuration
+adds the three 6S coefficients, for input dimensions eight and eleven. For these two configurations
+the error is
+\begin{equation}\label{eq:coefficient-floor}
+ E_{0.05}=\frac{1}{N}\sum_{i=1}^{N}
+ \frac{\|Y_i-\widehat Y_i\|_2}{\max\{\|Y_i\|_2,0.05\}},
+\end{equation}
+and the same floor enters validation selection and the kernel-flow objective, which limits the
+weight of coefficient vectors of small norm.
+
+The families are those of Section~\ref{sec:methods} with two changes forced by scale. The
+reference is a ridge regression linear in the inputs, since a cubic expansion of a 256-dimensional
+input is not tractable. Kernel solves are exact when the training block has at most 20{,}000 rows
+and use a Nystr\"om approximation \cite{nystrom} on 6{,}000 uniformly drawn landmarks above that,
+which applies to ClimSim, the Helmholtz staircase at 20{,}384 rows and the two
+correction-coefficient configurations. The convex stack and the per-coordinate selection are formed
+from the kernels, the networks, the residual correction and the feature kernel; the ridge is a
+reference row, not one of their members. Advection, Burgers, ClimSim and the two
+correction-coefficient configurations have three to five random splits. The Well's releases carry
+their own training, validation and test files, which are used unchanged, so the three
+turbulent-radiative-layer runs share one split and differ only in network initialization (their
+spread, of order $0.01$ points, measures initialization), and the active-matter and
+Helmholtz-staircase rows are single runs.
+
+\begin{table}[t]
+\centering
+\input{layout_corpora}
+\caption{Ten further configurations: dimensions and run counts (A), reference models (B),
+and combinations (C). Errors are mean relative spectral norms in percent, with the
+0.05 denominator floor of \eqref{eq:coefficient-floor} for the two RT-coefficient rows.
+Spreads are sample standard deviations; the radiative-layer repetitions share one split
+and vary initialization, and two rows are single runs. The network budget is 200 epochs
+at width 512, except ClimSim (60 at 512) and RT coefficients (120 at 384). The linear
+ridge is excluded from the stack; its Helmholtz error is $0.004\%$, rounded in the table.
+Kernel solves above 20{,}000 training rows use 6{,}000 Nystr\"om landmarks.}
+\label{tab:corpora}
+\end{table}
+
+The relative errors vary widely with the problem. Where the map is smooth and the sample small,
+Burgers at $\nu = 0.1$, the exact kernel is at $2.81\%$ against the network's $20.34\%$, a factor of
+seven, of the same kind as the five- to six-fold gap between the per-input kernel and the network on
+the EMIT table's smooth components; as the viscosity falls and the solutions roughen the gap closes
+to $23.40\%$ against $36.65\%$ and then to $31.66\%$ against $39.98\%$. Where the sample is large and
+the map rough, on ClimSim and on the correction-coefficient corpus at nearly half a million rows, the
+network leads instead, $25.10\%$ against $27.20\%$ and $3.75\%$ against $62.93\%$, which is the OCO-2
+regime. On advection, where the operator is linear, the linear ridge is the lowest row and every
+other family lands within $0.4$ points of it.
+
+Learned metrics help most on the correction-coefficient corpus. From the state alone the isotropic
+kernel is at $62.93 \pm 0.51$ and a kernel-flow metric \cite{owhadiyoo} takes it to $3.97 \pm 0.42$,
+a factor of sixteen, which brings a kernel on the state within six percent of the network on a
+corpus where the plain kernel was seventeen times worse. With the low-fidelity coefficients as
+inputs the same pair reads $15.76$ and $4.60$, a factor of $3.4$: the easier the problem is made for
+the plain kernel, the less the learned metric adds.
+
+The convex stack is the lowest row on eight of the ten configurations and the second lowest on the
+other two; the residual-corrected network is among the lowest two on five. Both exceptions are the
+linear problems, and on both the row that beats the stack is the ridge, which the stack does not
+contain. On advection the ridge is lower by $0.07$ points while the stack, at $11.36\%$, matches its
+best member, the isotropic kernel, to two decimals; that kernel and the learned-metric kernel, which
+differ by less than $0.01$ points there, carry between $0.85$ and $0.91$ of its weight at every
+split. On the Helmholtz
+staircase the ridge reaches $0.004\%$, sixteen times below the next row and about a hundred times
+below the weakest member of the pool, and the stack reaches $0.066\%$, slightly below its best member,
+the learned-metric kernel at $0.067\%$, on which it puts weight $0.94$. In both cases the stack does
+what it is asked within its pool and cannot recover a family the pool excludes. A combination is a
+good default when no member of its pool dominates it, and it can be read against the whole
+comparison only when the pool contains the families being compared.
+
+These rows use one training budget per corpus and one architecture family, and several of the
+corpora have published results from methods tuned for them. With three to five runs, and one on two
+rows, the spreads support the large orderings above and not fine distinctions between adjacent
+families. Every kernel column also inherits the tuning protocol of Section~\ref{sec:retune}, with
+the length scale chosen on a $6{,}000$-row subsample and the winner refit on every row. On the EMIT
+table, choosing it with every row in the solve lowers the isotropic kernel's radiance error by a
+factor $0.882$ on average, so the kernel columns of Table~\ref{tab:corpora} describe the stated
+training and selection procedures rather than the best each kernel can reach.

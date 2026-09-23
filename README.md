@@ -4,7 +4,8 @@ Manuscript, code and run records for a comparison of neural networks, exact Mat�
 combinations as emulators of a six-dimensional radiative-transfer table on the 285-band EMIT wavelength grid, and for
 an analysis of how their forward accuracy carries over to reflectance retrieval.
 
-[Paper (PDF)](paper/emit_kernel_dnn.pdf) · [LaTeX source](paper/emit_kernel_dnn.tex) ·
+[Paper (PDF)](paper/emit_kernel_dnn.pdf) · [Supplement (PDF)](paper/supplement.pdf) ·
+[LaTeX source](paper/emit_kernel_dnn.tex) ·
 [How each table is produced](docs/REPRODUCE.md)
 
 ## Findings
@@ -30,7 +31,8 @@ bands where the retrieval error is large.
 
 ## Layout
 
-- `paper/`: the manuscript, its tables (generated from the records) and the compiled PDF.
+- `paper/`: the article (`emit_kernel_dnn.tex`), its supplement (`supplement.tex`: the proofs, the further
+  experiments and the extended tables), the tables of both (generated from the records) and the two compiled PDFs.
 - `code/`: drivers, scoring, table and figure scripts, and tests. `code/lanes/` holds the scripts that ran each fit of
   the training-target experiment, the libRadtran comparison and the correction-coefficient benchmark.
 - `results/`: one JSON record per run, with the digests of its data and split indices. `results/target_quality/` and
@@ -58,7 +60,9 @@ python code/make_tq_tables.py
 python code/make_lrt_tables.py
 python code/make_lrt_tables.py lrt
 python code/make_confirmation_table.py
+(cd paper && pdflatex -interaction=nonstopmode supplement.tex)
 latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
+latexmk -g -pdf -interaction=nonstopmode -halt-on-error -cd paper/supplement.tex
 ```
 
 These commands run the tests and regenerate every table of the paper from the records in `results/`, byte for byte;
