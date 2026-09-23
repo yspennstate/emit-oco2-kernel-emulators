@@ -8,7 +8,7 @@ the low-fidelity prediction that can serve as a mean.
 
   climsim(seed, ntrain)          LEAP ClimSim subsampled low-res: 124 inputs -> 128 tendencies; train rows
                                  subsampled from the 10.1M, validation from val_*, test from scoring_*
-  pkanrtm(seed, ntrain, lowfi)   paired 6S / libRadtran Sentinel-2 coefficients: 7 state inputs + band
+  pkanrtm(seed, ntrain, lowfi)   paired 6S / libRadtran Sentinel-2 coefficients: 9 state inputs + band
                                  wavelength -> (rho_path, T_total, spher_alb) of libRadtran; lowfi=1 adds the
                                  6S coefficients of the same state as inputs (physics-mean / multi-fidelity)
   trl2d(seed, ntrain)            The Well turbulent radiative layer 2D: one-step map state_t -> state_{t+1}
@@ -99,6 +99,85 @@ def climsim(seed=0, ntrain=100000, nval=20000, ntest=20000):
     return D
 
 
+def climsim_official(seed=0, ntrain=100000, nval_steps=52, ntest_steps=52):
+    """ClimSim on the strict-v1 leaderboard protocol (climsim_official.py, written against climsim_utils/data_utils.py).
+
+    Training rows are a seeded random subsample of the train split, as climsim(). Validation and test are WHOLE
+    TIMESTEPS - nval_steps of the val split and ntest_steps of the scoring split, a seeded sample of each
+    (52 x 384 = 19,968 rows, the size the random-row lanes used) - because the leaderboard's area weighting and
+    time reduction are defined on the (time, column) grid and a random row subsample cannot be scored on it. Val's
+    first timestep, the one block it shares with the scoring split, is never drawn. The lane's `err` stays the
+    relative L2 of the standardized 128-vector (every head is selected on it, on validation, as in every other
+    lane); the extra metrics `off_<variable>_mae` / `off_<variable>_r2` are the leaderboard's per-variable MAE and
+    R2 in W/m2 from climsim_official.score on those rows (r2 = the mean over the levels where it exists; ptend_q0001
+    has twelve levels with zero variance under strict v1), and `off_mae_mean` the mean MAE over the ten variables.
+    The time-mean climatology and the zero prediction are scored on the same test rows and recorded beside the
+    heads (`official_baselines`), so the file reads against the published CNN (ptend_t MAE 2.585, R2 0.627) and
+    against its own climatology (about 4.43) without another run."""
+    import hashlib
+    import climsim_official as co
+    root = DN / "climsim"
+    rng = np.random.default_rng(seed)
+    Xall = np.load(root / "train_input.npy", mmap_mode="r"); Yall = np.load(root / "train_target.npy", mmap_mode="r")
+    itr = np.sort(rng.choice(Xall.shape[0], ntrain, replace=False))
+    Xtr, Ytr = np.asarray(Xall[itr], np.float64), np.asarray(Yall[itr], np.float64)
+
+    def whole_steps(split, n_steps, skip_first):
+        n_rows = np.load(root / co.SPLIT_FILES[split][1], mmap_mode="r").shape[0]
+        if n_rows % co.NCOL:
+            raise ValueError(f"{split}: {n_rows} rows is not a multiple of {co.NCOL}")
+        pool = np.arange(1 if skip_first else 0, n_rows // co.NCOL)
+        st = np.sort(rng.permutation(pool)[:min(int(n_steps), len(pool))])
+        return st, (st[:, None] * co.NCOL + np.arange(co.NCOL)[None, :]).ravel()
+    st_va, iva = whole_steps("val", nval_steps, skip_first=True)
+    st_te, ite = whole_steps("scoring", ntest_steps, skip_first=False)
+    Xv = np.load(root / "val_input.npy", mmap_mode="r"); Yv = np.load(root / "val_target.npy", mmap_mode="r")
+    Xva, Yva = np.asarray(Xv[iva], np.float64), np.asarray(Yv[iva], np.float64)
+    Xs_ = np.load(root / "scoring_input.npy", mmap_mode="r"); Ys_ = np.load(root / "scoring_target.npy", mmap_mode="r")
+    Xte, Yte = np.asarray(Xs_[ite], np.float64), np.asarray(Ys_[ite], np.float64)
+    ys = Std(Ytr)
+    Zs = {"tr": ys.fwd(Ytr), "va": ys.fwd(Yva), "te": ys.fwd(Yte)}
+    Yph = {"tr": Ytr, "va": Yva, "te": Yte}
+    D = _pack("climsim_official", f"climsim_off_s{seed}_n{ntrain}", {"tr": Xtr, "va": Xva, "te": Xte}, Zs, ys.inv, Yph, [f"in{j}" for j in range(124)])
+
+    Wt = co.Weights()
+    rows = {"va": iva, "te": ite}; spl = {"va": "val", "te": "scoring"}
+    _cache = {}
+
+    def official(Zp, split):
+        k = (split, Zp.shape, hashlib.md5(np.ascontiguousarray(Zp).tobytes()).hexdigest())
+        if k not in _cache:
+            _cache.clear()
+            _cache[k] = co.score(ys.inv(np.asarray(Zp, np.float64)), split=spl[split], rows=rows[split], W=Wt)
+        return _cache[k]
+
+    def _r2(Zp, split):
+        Yt = Yph[split]; Yp = ys.inv(Zp)
+        ss = ((Yt - Yp) ** 2).sum(0); st = ((Yt - Yt.mean(0)) ** 2).sum(0)
+        ok = st > 0
+        return 1 - ss[ok] / st[ok]
+    em = {"r2_mean_clip0": lambda Zp, split: float(np.mean(np.maximum(_r2(Zp, split), 0.0))),
+          "mae_std": lambda Zp, split: float(np.abs(Zp - Zs[split]).mean()),
+          "off_mae_mean": lambda Zp, split: float(np.mean([official(Zp, split)[v]["mae"] for v in co.V1_OUTPUTS]))}
+    for v in co.V1_OUTPUTS:
+        em[f"off_{v}_mae"] = (lambda vv: (lambda Zp, split: float(official(Zp, split)[vv]["mae"])))(v)
+        em[f"off_{v}_r2"] = (lambda vv: (lambda Zp, split: float(official(Zp, split)[vv]["r2_finite"])))(v)
+    D["extra_metrics"] = em
+    base = {}
+    for kind in ("time_mean", "zero"):
+        P = co.baseline_predictions(kind, "scoring", ite, W=Wt)
+        r = co.score(P, split="scoring", rows=ite, W=Wt)
+        base[kind] = {v: {"mae": r[v]["mae"], "r2": r[v]["r2_finite"]} for v in co.V1_OUTPUTS}
+        base[kind]["mae_mean"] = float(np.mean([r[v]["mae"] for v in co.V1_OUTPUTS]))
+    base["note"] = "time_mean is each (column, output)'s own time mean over the scored test rows - a floor computed on the test targets, not a forecast"
+    D.update(official_baselines=base, official_steps={"val": [int(s) for s in st_va], "scoring": [int(s) for s in st_te]},
+             official_units="W/m2 (ClimSim strict v1: output_scale undone, dp/g, area weight, cp or Lv)",
+             protocol="ClimSim strict-v1 leaderboard protocol: train = seeded random rows of the train split; validation and "
+                      "test = whole timesteps (val / scoring splits, seeded, val's shared first step excluded); heads selected "
+                      "on the standardized relative L2 on validation; off_* metrics are climsim_official.score on those rows")
+    return D
+
+
 def _read_jsonl(path, keys):
     rows = []
     with open(path, "r", encoding="utf-8") as f:
@@ -108,7 +187,34 @@ def _read_jsonl(path, keys):
     return rows
 
 
-def pkanrtm(seed=0, ntrain=0, lowfi=0, cache=True):
+AERO_LEVELS = ("continental", "desert", "maritime", "urban")
+PROF_LEVELS = ("midlatitude_summer", "midlatitude_winter", "subarctic_summer", "subarctic_winter", "tropical")
+
+
+def _pkanrtm_cats(root, sid, band, cache=True):
+    """The two categorical inputs the release carries and the paper uses (aerosol model, atmosphere profile) plus the
+    release's own split label, aligned to the cached rows by (state_id, band). Cached beside the arrays."""
+    npz = root / "paired_cats.npz"
+    if npz.exists() and cache:
+        z = np.load(npz, allow_pickle=True)
+        if len(z["aero"]) == len(sid):
+            return z["aero"], z["prof"], z["split"]
+    m = {}
+    with open(root / "dataset_rows_libradtran.jsonl", "r", encoding="utf-8") as f:
+        for line in f:
+            d = json.loads(line)
+            m[(d["state_id"], d["band"])] = (AERO_LEVELS.index(d["aerosol_type"]), PROF_LEVELS.index(d["atm_profile"]), d["split"])
+    aero = np.array([m[(s, b)][0] for s, b in zip(sid, band)], np.int64)
+    prof = np.array([m[(s, b)][1] for s, b in zip(sid, band)], np.int64)
+    split = np.array([m[(s, b)][2] for s, b in zip(sid, band)])
+    np.savez_compressed(npz, aero=aero, prof=prof, split=split)
+    return aero, prof, split
+
+
+def pkanrtm(seed=0, ntrain=0, lowfi=0, cache=True, cats=0, split="seeded"):
+    """cats=1 appends one-hot aerosol model (4) and atmosphere profile (5) to the inputs - the two inputs of the paper
+    that the numeric row keys leave out; split="official" uses the release's own train/val/test state assignment
+    (35,000 / 7,500 / 7,500 states, the paper's protocol) instead of the seeded 80/10/10 draw."""
     root = DN / "pkanrtm"; npz = root / "paired_arrays.npz"
     keys_in = ["wvl_nm", "sza_deg", "vza_deg", "raa_deg", "aod550", "cwv_cm", "o3_cm", "elev_km"]
     keys_out = ["rho_path", "T_total", "spher_alb"]
@@ -128,20 +234,38 @@ def pkanrtm(seed=0, ntrain=0, lowfi=0, cache=True):
         X, Yh, Yl = np.array(X, np.float64), np.array(Yh, np.float64), np.array(Yl, np.float64)
         sid, band = np.array(sid), np.array(band)
         np.savez_compressed(npz, X=X, Yh=Yh, Yl=Yl, sid=sid, band=band)
-    # split by STATE (all bands of a state travel together), 80/10/10 by seed
-    states = np.unique(sid); rng = np.random.default_rng(seed); perm = rng.permutation(len(states))
-    n_te = len(states) // 10; te_states = set(states[perm[:n_te]]); va_states = set(states[perm[n_te:2 * n_te]])
-    is_te = np.array([s in te_states for s in sid]); is_va = np.array([s in va_states for s in sid]); is_tr = ~(is_te | is_va)
+    rng = np.random.default_rng(seed)
+    if cats or split == "official":
+        aero, prof, rel_split = _pkanrtm_cats(root, sid, band, cache=cache)
+    if split == "official":
+        # the release's own state-level assignment (all bands of a state carry the same label)
+        is_tr, is_va, is_te = rel_split == "train", rel_split == "val", rel_split == "test"
+    else:
+        # split by STATE (all bands of a state travel together), 80/10/10 by seed
+        states = np.unique(sid); perm = rng.permutation(len(states))
+        n_te = len(states) // 10; te_states = set(states[perm[:n_te]]); va_states = set(states[perm[n_te:2 * n_te]])
+        is_te = np.array([s in te_states for s in sid]); is_va = np.array([s in va_states for s in sid]); is_tr = ~(is_te | is_va)
     if ntrain and ntrain < is_tr.sum():
         tr_idx = np.where(is_tr)[0]; keep = np.sort(rng.choice(tr_idx, ntrain, replace=False)); is_tr = np.zeros_like(is_tr); is_tr[keep] = True
-    Xin = np.concatenate([X, Yl], 1) if lowfi else X
-    names = keys_in + (["6s_" + k for k in keys_out] if lowfi else [])
+    Xin = X
+    names = list(keys_in)
+    if cats:
+        onehot = np.zeros((len(X), len(AERO_LEVELS) + len(PROF_LEVELS)))
+        onehot[np.arange(len(X)), aero] = 1.0
+        onehot[np.arange(len(X)), len(AERO_LEVELS) + prof] = 1.0
+        Xin = np.concatenate([Xin, onehot], 1)
+        names += ["aero_" + a for a in AERO_LEVELS] + ["prof_" + p for p in PROF_LEVELS]
+    if lowfi:
+        Xin = np.concatenate([Xin, Yl], 1)
+        names += ["6s_" + k for k in keys_out]
     Xs = {"tr": Xin[is_tr], "va": Xin[is_va], "te": Xin[is_te]}
     Yph = {"tr": Yh[is_tr], "va": Yh[is_va], "te": Yh[is_te]}
     ys = Std(Yph["tr"])
     Zs = {k: ys.fwd(v) for k, v in Yph.items()}
-    D = _pack("pkanrtm", f"pkanrtm_s{seed}" + ("_lowfi" if lowfi else ""), Xs, Zs, ys.inv, Yph, names,
+    tag = f"pkanrtm_s{seed}" + ("_lowfi" if lowfi else "") + ("_cats" if cats else "") + ("_off" if split == "official" else "")
+    D = _pack("pkanrtm", tag, Xs, Zs, ys.inv, Yph, names,
               extra=dict(lowfi_pred={"tr": Yl[is_tr], "va": Yl[is_va], "te": Yl[is_te]}))
+    D["pkanrtm_protocol"] = dict(cats=int(bool(cats)), split=split, n_states={k: int(len(np.unique(sid[v]))) for k, v in (("tr", is_tr), ("va", is_va), ("te", is_te))})
     # The water-vapour bands (B9, B10) have coefficients of order 1e-3 or below: a per-sample relative error
     # explodes there (the 6S pair itself reads 83% mean / 11% median). The reported error is therefore relative
     # with an absolute floor of 0.05 on the coefficient norm; the same floor enters the kernel-flow objective.
@@ -233,7 +357,21 @@ def _trl2d_build_cache(root, cdir, key, rank_in, rank_out, stride, target, nfit=
              n_tr=len(Xtr), n_va=len(Xva), n_te=len(Xte), target=target)
 
 
-def trl2d(seed=0, ntrain=0, rank_in=256, rank_out=256, stride=1, target="increment"):
+def _trl2d_row_index(root, split, stride):
+    """(trajectory id, step) of every cached row of a split, in the builder's row order, read from the HDF5 shapes
+    only (no field data). The builder appends, file by file and trajectory by trajectory, the steps ts = 0, stride, ..."""
+    import h5py
+    tid, step, k = [], [], 0
+    for f in sorted(root.glob(f"{split}_tcool_*.hdf5")):
+        with h5py.File(f, "r") as h:
+            traj, T = h["t0_fields/density"].shape[:2]
+        ts = np.arange(0, T - 1, stride)
+        for _ in range(traj):
+            tid.append(np.full(len(ts), k)); step.append(np.arange(len(ts))); k += 1
+    return np.concatenate(tid), np.concatenate(step)
+
+
+def trl2d(seed=0, ntrain=0, rank_in=256, rank_out=256, stride=1, target="increment", history=1):
     """One-step map on The Well's turbulent radiative layer: x = state at t (density, pressure, two velocity
     components on 128 x 384), y = state at t+1. Training pairs from the nine tcool training files, validation and
     test from the valid/test files. The representation (per-field standardization, PCA fitted on 4000 training
@@ -257,6 +395,24 @@ def trl2d(seed=0, ntrain=0, rank_in=256, rank_out=256, stride=1, target="increme
     Xfull = {"va": np.load(cdir / f"{key}_Xva_s.npy", mmap_mode="r"), "te": np.load(cdir / f"{key}_Xte_s.npy", mmap_mode="r")}
     Yph = {"va": np.load(cdir / f"{key}_Yva_s.npy", mmap_mode="r"), "te": np.load(cdir / f"{key}_Yte_s.npy", mmap_mode="r")}
     tnorm2 = m["tnorm2_tr"]
+    tids = {k: _trl2d_row_index(root, split, stride)[0] for k, split in (("va", "valid"), ("te", "test"))}   # trajectory of each row
+    history = max(int(history or 1), 1)
+    if history > 1:
+        # The Well's baselines see the last four snapshots; the input becomes the concatenated PCA scores of the
+        # `history` most recent cached rows of the same trajectory (consecutive rows are `stride` steps apart), and
+        # the rows without a full history are dropped from every split. Targets, full states and norms follow.
+        Xfull = {k: np.asarray(v) for k, v in Xfull.items()}; Yph = {k: np.asarray(v) for k, v in Yph.items()}
+        for k, split in (("tr", "train"), ("va", "valid"), ("te", "test")):
+            tid, step = _trl2d_row_index(root, split, stride)
+            assert len(tid) == len(Xs[k]), (split, len(tid), len(Xs[k]))
+            keep = np.where(step >= history - 1)[0]
+            assert all(tid[keep - j][0] == tid[keep][0] for j in range(history)) if len(keep) else True
+            Xs[k] = np.concatenate([Xs[k][keep - j] for j in range(history - 1, -1, -1)], axis=1)
+            Zs[k] = Zs[k][keep]
+            if k == "tr":
+                tnorm2 = tnorm2[keep]
+            else:
+                Xfull[k] = Xfull[k][keep]; Yph[k] = Yph[k][keep]; tids[k] = tids[k][keep]
     if ntrain and ntrain < len(Xs["tr"]):
         keep = np.sort(np.random.default_rng(seed).choice(len(Xs["tr"]), ntrain, replace=False))
         Xs["tr"], Zs["tr"], tnorm2 = Xs["tr"][keep], Zs["tr"][keep], tnorm2[keep]
@@ -266,30 +422,60 @@ def trl2d(seed=0, ntrain=0, rank_in=256, rank_out=256, stride=1, target="increme
     def state_of(Zp, split):
         return inv(Zp) + (np.asarray(Xfull[split], np.float64) if incr else 0.0)
     xs = Std(Xs["tr"])
-    D = dict(problem="trl2d", tag=f"trl2d_s{seed}" + (f"_n{ntrain}" if ntrain else ""), Xtr=xs.fwd(Xs["tr"]), Xva=xs.fwd(Xs["va"]), Xte=xs.fwd(Xs["te"]),
-             Ztr=Zs["tr"], Zva=Zs["va"], Zte=Zs["te"], names=[f"pc{j}" for j in range(rank_in)], to_phys=inv)
+    D = dict(problem="trl2d", tag=f"trl2d_s{seed}" + (f"_n{ntrain}" if ntrain else "") + (f"_h{history}" if history > 1 else ""),
+             Xtr=xs.fwd(Xs["tr"]), Xva=xs.fwd(Xs["va"]), Xte=xs.fwd(Xs["te"]),
+             Ztr=Zs["tr"], Zva=Zs["va"], Zte=Zs["te"], names=[f"pc{j}_h{h}" for h in range(history) for j in range(rank_in)], to_phys=inv)
     D["err"] = lambda Zp, split: rel_l2(np.asarray(Yph[split], np.float64), state_of(Zp, split))
     D["phys_pred"] = lambda Zp, split, rows=None: inv(Zp) + (np.asarray(Xfull[split] if rows is None else Xfull[split][rows], np.float64) if incr else 0.0)
     D["den"] = lambda split, rows=None: np.maximum(np.linalg.norm(np.asarray(Yph[split] if rows is None else Yph[split][rows], np.float64), axis=1), 1e-30)
     D["Yobj"] = Zs["tr"] - Zs["tr"].mean(0); D["ynorm2"] = np.maximum(tnorm2, 1e-30)     # objective in score space, norms of the full target
     D["Yph"] = Yph
 
-    def vrmse_fields(Zp, split):                  # The Well's VRMSE per field: RMSE over the field / std of the field (test set)
-        P = state_of(Zp, split).reshape(-1, 128 * 384, 4); T = np.asarray(Yph[split], np.float64).reshape(-1, 128 * 384, 4)
-        num = np.sqrt(((P - T) ** 2).mean((0, 1))); den = T.std((0, 1))
-        return num / den
-    D["extra_metrics"] = {"vrmse_mean": lambda Zp, split: float(vrmse_fields(Zp, split).mean()),
-                          "vrmse_density": lambda Zp, split: float(vrmse_fields(Zp, split)[0]),
-                          "vrmse_pressure": lambda Zp, split: float(vrmse_fields(Zp, split)[1]),
-                          "vrmse_vx": lambda Zp, split: float(vrmse_fields(Zp, split)[2]),
-                          "vrmse_vy": lambda Zp, split: float(vrmse_fields(Zp, split)[3])}
-    # the persistence baseline in The Well's own metric, per field, on the test block
-    Pp = np.asarray(Xfull["te"], np.float64).reshape(-1, 128 * 384, 4); Tt = np.asarray(Yph["te"], np.float64).reshape(-1, 128 * 384, 4)
-    pers_vrmse = np.sqrt(((Pp - Tt) ** 2).mean((0, 1))) / Tt.std((0, 1)); del Pp, Tt
+    # Two VRMSE conventions per field (density, pressure, vx, vy). `vrmse_paper_*` is The Well's own metric - per-row
+    # spatial variance, mean over rows (Ohana et al. 2024 App. E.3; the_well NMSE norm_mode="std") - and the only one
+    # comparable with the paper's Table 2 (TRL2D: CNextU-net 0.1956, U-net 0.2418, FNO 0.5001, from a 4-step history).
+    # `vrmse_*` is the pooled convention the first lanes reported: std over (rows, cells), a ratio of aggregates; it
+    # can read lower OR higher than the paper's (persistence on the test block: pressure 0.62 vs 1.13, vx 0.42 vs 0.30)
+    # and is not comparable with the Well's tables. Chunked; the helpers live in well_data.
+    # `vrmse_paper_medtraj_*` is Walrus's convention (Tables 1/13): the median over the test trajectories of the
+    # trajectory-averaged one-step VRMSE (TRL2D: Walrus 0.0831, Poseidon-L 0.1323, MPP-A 0.1707, DPOT-H 0.1601).
+    import hashlib
+    from well_data import vrmse_paper, vrmse_pooled, traj_median
+    _fields = ["density", "pressure", "vx", "vy"]; _cache = {}
+    for k_ in ("va", "te"):
+        assert len(tids[k_]) == Yph[k_].shape[0], (k_, len(tids[k_]), Yph[k_].shape[0])
+
+    def _rows(Zp, split):
+        return lambda i, j: inv(Zp[i:j]) + (np.asarray(Xfull[split][i:j], np.float64) if incr else 0.0)
+
+    def both(Zp, split):
+        k = (split, Zp.shape, hashlib.md5(np.ascontiguousarray(Zp).tobytes()).hexdigest())
+        if k not in _cache:
+            _cache.clear()
+            rows = vrmse_paper(_rows(Zp, split), Yph[split], 4, per_row=True)
+            _cache[k] = (rows.mean(0), vrmse_pooled(_rows(Zp, split), Yph[split], 4), traj_median(rows, tids[split]))
+        return _cache[k]
+    D["extra_metrics"] = {"vrmse_paper_mean": lambda Zp, split: float(both(Zp, split)[0].mean()),
+                          "vrmse_mean": lambda Zp, split: float(both(Zp, split)[1].mean()),
+                          "vrmse_paper_medtraj_mean": lambda Zp, split: float(both(Zp, split)[2].mean())}
+    for j, nm in enumerate(_fields):
+        D["extra_metrics"][f"vrmse_paper_{nm}"] = (lambda jj: (lambda Zp, split: float(both(Zp, split)[0][jj])))(j)
+        D["extra_metrics"][f"vrmse_{nm}"] = (lambda jj: (lambda Zp, split: float(both(Zp, split)[1][jj])))(j)
+        D["extra_metrics"][f"vrmse_paper_medtraj_{nm}"] = (lambda jj: (lambda Zp, split: float(both(Zp, split)[2][jj])))(j)
+    # the persistence baseline in the three conventions, per field, on the test block
+    pers_rows = lambda i, j: Xfull["te"][i:j]
+    prow = vrmse_paper(pers_rows, Yph["te"], 4, per_row=True)
+    pers_paper = prow.mean(0); pers_med = traj_median(prow, tids["te"]); pers_vrmse = vrmse_pooled(pers_rows, Yph["te"], 4)
     D.update(pca_evr_in=float(m["evr_in"]), pca_evr_out=float(m["evr_out"]), pca_fit_rows=int(m["nfit"]), target=str(m["target"]),
              persistence_err={"va": float(m["pers_va"]), "te": float(m["pers_te"])}, pca_recon_err={"va": float(m["recon_va"]), "te": float(m["recon_te"])},
-             persistence_vrmse={"mean": float(pers_vrmse.mean()), "density": float(pers_vrmse[0]), "pressure": float(pers_vrmse[1]), "vx": float(pers_vrmse[2]), "vy": float(pers_vrmse[3])},
-             rank_in=rank_in, rank_out=rank_out)
+             persistence_vrmse={"mean": float(pers_vrmse.mean()), **{nm: float(pers_vrmse[j]) for j, nm in enumerate(_fields)}},
+             persistence_vrmse_paper={"mean": float(pers_paper.mean()), **{nm: float(pers_paper[j]) for j, nm in enumerate(_fields)}},
+             persistence_vrmse_paper_medtraj={"mean": float(pers_med.mean()), **{nm: float(pers_med[j]) for j, nm in enumerate(_fields)}},
+             n_traj={"va": int(len(np.unique(tids["va"]))), "te": int(len(np.unique(tids["te"])))},
+             rank_in=rank_in, rank_out=rank_out, history=history,
+             protocol=f"The Well official train/valid/test files (9 cooling rates each); one-step state_t -> state_(t+1) from "
+                      f"{history} input step(s) (the Well baselines see 4); vrmse_paper_* is the paper's metric (mean over rows), "
+                      f"vrmse_paper_medtraj_* Walrus's median over trajectories, vrmse_* the pooled one")
     return D
 
 

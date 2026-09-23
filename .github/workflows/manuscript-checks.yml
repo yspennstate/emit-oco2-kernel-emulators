@@ -31,6 +31,9 @@ jobs:
         run: python -m unittest discover -s code -p 'test_*.py' -v
       - name: Regenerate the tables from the run records
         run: |
+          python code/make_width_numbers.py
+          python code/make_scaling_tables.py
+          python code/make_retune_table.py
           python code/make_emit_tables.py
           python code/make_tables.py
           python code/make_v2_tables.py

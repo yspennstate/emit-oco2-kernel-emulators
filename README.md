@@ -1,111 +1,82 @@
-# Neural means and kernel corrections for radiative-transfer emulators
+# Learned representations and kernel corrections for radiative-transfer emulation
 
-Manuscript, code and recorded results for a comparison of neural networks, exact
-kernel regression and their combinations on a six-dimensional radiative-transfer
-table over the 285-band EMIT wavelength grid.
+Manuscript, code and run records for a comparison of neural networks, exact Matérn kernel regression and their
+combinations as emulators of a six-dimensional radiative-transfer table on the 285-band EMIT wavelength grid, and for
+an analysis of how their forward accuracy carries over to reflectance retrieval.
 
 [Paper (PDF)](paper/emit_kernel_dnn.pdf) · [LaTeX source](paper/emit_kernel_dnn.tex) ·
-[Abstract](paper/abstract.txt) · [Reproduction instructions](docs/REPRODUCE.md)
+[How each table is produced](docs/REPRODUCE.md)
 
 ## Findings
 
-Across ten EMIT splits, each with 18,884 training rows and validation-based
-selection, the input-scaled Matérn kernel has 0.095% mean relative radiance error,
-compared with 0.760% for cubic regression and 0.387% for the neural network.
-Residual correction reduces the network error to 0.141%. A kernel on the
-width-2000 network's features reaches 0.079%; its convex stack reaches 0.078%.
+On ten partitions of 23,313 tabulated states, each with 18,884 training rows and validation-based selection, a
+Matérn kernel with one length scale per input reaches 0.095% mean relative radiance error, against 0.760% for cubic
+regression and 0.387% for a 3 × 512 network. A residual kernel brings the network to 0.141%. An exact kernel on the
+hidden features of a width-2,000 network reaches 0.079%, and one kernel on the concatenated features of five width-512
+networks reaches 0.076%.
 
-The forward and inverse rankings differ. The wide feature kernel has a mean
-within-split 95th-percentile absolute reflectance error of 7.57 percentage points,
-compared with 22.71 for its convex stack. The stack has a larger tail at every
-split, despite a mean radiance gain of 0.000584 percentage points. The inverse
-metrics include all bands and their ill-conditioned absorption entries.
+Forward and inverse rankings disagree. The convex stack built on the width-2,000 network improves on its own feature
+kernel by 0.0006 radiance percentage points, while its mean within-split 95th-percentile reflectance error is 22.71
+points against 7.57, larger at every partition. [[README-DOMAIN]]
 
-The mathematical analysis gives exact residual-error identities, a Hilbert-space
-alignment criterion, the principal-component error decomposition, and conditional
-finite-error bounds for reflectance inversion. The empirical comparisons include
-learning curves, rank and width experiments, OCO-2, and ten additional emulation
-configurations. The correction-coefficient corpus uses eight state/wavelength
-inputs (eleven with low-fidelity coefficients) and a 0.05 denominator floor in
-its relative-error metric.
+The analysis proves that on the physical domain the constrained retrieval error is at most the retrieval-weighted
+component error divided by the transmission, with constant one; that the rate this implies is sharp; and that
+component errors proportional to the transmission lose no rate. Applied band by band, the bound marks in advance the
+bands where the retrieval error is large.
 
-## Publication revision of 21 September 2026
+[[README-TQ]]
 
-The revised paper separates the raw quadratic used to fit stacks from projection during
-retrieval scoring, derives the corresponding factor-four bound, and documents the
-historical approximate weighting solver. It preserves the principal ten-split model
-results, narrows the finite-profile interpretation, and makes the reproducibility limits
-explicit. The transmission comparison now uses the common four-record float64 cohort;
-the separate float32 experiment is not pooled. Long tables have readable multipage layouts.
+[[README-LRT]]
 
-[Detailed revision notes](docs/PUBLICATION_REVISION_2026-09-21.md) ·
-[Record-level inventory](results/revision_20260921/reanalysis.json).
-The earlier additions are described in [the original 21 September notes](docs/REVISION_2026-09-21.md).
+## Layout
 
-## Review fixes: physical domain and training-target sensitivity
-
-The later review revision corrects the domain/conditioning interpretation and the
-single-split refit ranking, documents the missing refit metadata, and distinguishes
-training-target sensitivity from post-hoc evaluation masking. The main empirical
-scores are retained; no clean-target EMIT training result is claimed. The diagnostic
-now enforces its stated albedo domain and preserves explicit failure accounting.
-The campaign includes raw, admissible-training and matched-size unfiltered policies,
-with preprocessing refitted independently and hashed split indices saved for scoring.
-
-[Changes, remaining experiment and run commands](docs/REVIEW_FIXES_2026-09-21.md) ·
-[Retained-refit arithmetic](results/review_20260921/retained_refit_audit.json).
+- `paper/`: the manuscript, its tables (generated from the records) and the compiled PDF.
+- `code/`: drivers, scoring, table and figure scripts, and tests. `code/lanes/` holds the exact lane scripts of the
+  training-target experiment, the libRadtran comparison and the correction-coefficient benchmark.
+- `results/`: one JSON record per run, with the digests of its data and split indices. `results/target_quality/` and
+  `results/libradtran/` also hold the protocols of those two experiments with the SHA-256 of each, recorded before the
+  first fit; `results/confirmation/` holds the protocol, the frozen hyperparameters with their SHA-256, the scripts
+  and the report of the fresh-partition evaluation.
+- `figures/`: the figures of the paper.
 
 ## Reproduction
 
-Python 3.11, the analysis requirements and a TeX installation are needed for the
-checks, table generation and PDF build:
+With Python 3.11 or later and a TeX installation:
 
 ```sh
-python -m pip install -r requirements-revision.txt
+python -m pip install -r requirements.txt
 python -m unittest discover -s code -p 'test_*.py' -v
-python code/make_revision_tables.py
+python code/make_width_numbers.py
+python code/make_scaling_tables.py
+python code/make_retune_table.py
+python code/make_emit_tables.py
 python code/make_tables.py
 python code/make_v2_tables.py
 python code/format_publication_tables.py
-python code/revision_manifest.py
-python code/audit_retained_refit.py
+python code/make_domain_table.py
+python code/make_tq_tables.py
+python code/make_lrt_tables.py
+python code/make_lrt_tables.py lrt
+python code/make_confirmation_table.py
 latexmk -pdf -interaction=nonstopmode -halt-on-error -cd paper/emit_kernel_dnn.tex
 ```
 
-These commands run the synthetic regression tests (the optional training smoke test
-is skipped unless explicitly enabled) and regenerate the tables supported
-by public records. The concatenation and joint-stacking aggregates, and the state-input
-perturbation rows, are explicitly retained because their generating JSONs are absent.
-The Section 6 truth audit and separate refit are also retained because their
-generating manifests and sample-level arrays are absent. They do not retrain the models. The GitHub workflow runs the same
-checks and archives the compiled paper, sources and build provenance.
+These commands run the tests and regenerate every table of the paper from the records in `results/`, byte for byte;
+they do not retrain any model. [docs/REPRODUCE.md](docs/REPRODUCE.md) maps every table and figure to its records
+and scripts and gives the commands that redraw the figures and rerun the training.
 
-## Data and scope
+## Data
 
-The main and wide EMIT comparisons each have ten per-split records. Some secondary
-experiments have complete aggregate summaries but incomplete individual archives;
-[the reproduction manifest](docs/REPRODUCE.md) lists them. Raw EMIT arrays, trained
-weights and per-sample predictions are not distributed in this repository.
-Simulator-generation details and data access are required for full reproduction.
+The EMIT table was provided by the Jet Propulsion Laboratory for EMIT atmospheric correction and is identified in the
+paper by size and SHA-256; the arrays are available from the author on request, subject to JPL's permission. The
+libRadtran arrays are built from the public release of the paired 6S/libRadtran Sentinel-2 corpus with
+`code/make_libradtran_arrays.py`. The OCO-2 arrays and reference predictions come from the release accompanying
+Lamminpää et al. (2025); the other corpora are the cited public releases.
 
-Model development and evaluation used the same finite table. The overlapping
-partitions describe split sensitivity, not independent external validation. The
-conditioned-reflectance diagnostic reports common-mask coverage and failures when
-sample-level arrays are provided. The primary EMIT results are all-band errors. Supplementary transmission summaries
-include entries outside the theorem's physical domain and are not certified all-band
-retrieval bounds. No operational retrieval or matched-throughput benchmark is supplied.
+## Contributions and license
 
-## Contributions and sources
-
-Claude Code (Anthropic) and Codex (OpenAI) implemented and ran the experiments,
-diagnostics and figures and drafted the manuscript. ChatGPT (OpenAI) developed the
-residual-error and inversion-stability analyses, checked the finite identities,
-analysed the recorded results, implemented conditioning diagnostics and tests,
-and edited the manuscript. Funding and competing interests are stated in the paper.
-
-The method and companion experiments are in
-[neural-means-kernel-corrections](https://github.com/yspennstate/neural-means-kernel-corrections).
-The EMIT arrays are attributed to the Jet Propulsion Laboratory. The OCO-2 data
-and reference predictions come from Lamminpää et al. (2025); the other data sources
-are cited in the manuscript. The [MIT license](LICENSE) covers the repository
-code, not rights to data absent from the repository.
+Claude Code (Anthropic) and Codex (OpenAI) implemented and ran the experiments and drafted the manuscript; ChatGPT
+(OpenAI) developed parts of the analysis. Funding and competing interests are stated in the paper. The companion
+method and experiments are in
+[neural-means-kernel-corrections](https://github.com/yspennstate/neural-means-kernel-corrections). The
+[MIT license](LICENSE) covers the code in this repository, not rights to data that are not distributed here.

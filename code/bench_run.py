@@ -29,7 +29,7 @@ torch.set_num_threads(int(_T))
 import bench_data
 
 p = argparse.ArgumentParser()
-p.add_argument("--corpus", required=True, choices=["climsim", "pkanrtm", "trl2d", "advection", "darcy", "burgers", "well", "rrtmgp", "qm9"])
+p.add_argument("--corpus", required=True, choices=["climsim", "climsim_official", "pkanrtm", "trl2d", "advection", "darcy", "burgers", "well", "rrtmgp", "qm9", "tabular", "airfrans"])
 p.add_argument("--well_name", default="active_matter", help="The Well dataset for --corpus well (well_data.FIELDS)")
 p.add_argument("--nu", type=float, default=0.1, help="Burgers viscosity (PDEBench file)")
 p.add_argument("--seed", type=int, default=0)
@@ -42,22 +42,49 @@ p.add_argument("--epochs", type=int, default=0)
 p.add_argument("--width", type=int, default=0)
 p.add_argument("--exact_max", type=int, default=20000)
 p.add_argument("--centers", type=int, default=6000)
+p.add_argument("--qm9_rep", default="cmeig", choices=["cmeig", "bob", "soap"],
+               help="qm9 input representation. cmeig (the default, unchanged) is 29 sorted Coulomb-matrix "
+                    "eigenvalues plus five element counts, the 2012 baseline; the loader's own docstring already "
+                    "warns it costs an order of magnitude against a modern representation, and the 09-13 reading "
+                    "puts a number on it: published kernel ridge reaches 0.22 kcal/mol (FCHL19, 1k molecules) and "
+                    "0.69 (cMBDF, 32k) on atomization energy where our best head reaches 6.71 on 100k. bob is Bag "
+                    "of Bonds (Hansen 2015): the same Coulomb entries, grouped by element pair and sorted inside "
+                    "each group instead of collapsed to a spectrum.")
+p.add_argument("--wide_grid", action="store_true",
+               help="widen krr_fit_predict's hyperparameter search: scale gains 0.25 and 8.0, nugget gains 1e-1 and 1.0. "
+                    "Measured 2026-09-13 over 71 fixed-grid records on this box: the residual-correction heads "
+                    "(mlp_resid, mlp_wc_resid) chose the CEILING nugget 1e-2 in 8 of 20 lanes while every other head "
+                    "chose it in 0 of 51, so the ceiling binds on exactly one family. Off by default: a queued lane's "
+                    "search is unchanged unless it names this flag.")
 p.add_argument("--kf_steps", type=int, default=300)
 p.add_argument("--rank", type=int, default=0, help="TRL2D: PCA rank of the input and target representations (default 256)")
+p.add_argument("--history", type=int, default=1, help="TRL2D: number of past snapshots concatenated as the input (The Well baselines use 4)")
 p.add_argument("--tag", default="")
 p.add_argument("--hpo", type=int, default=0, help="mlp_hpo: random-search trials on validation (0 = 6)")
 p.add_argument("--rrtmgp_test_files", default="", help="rrtmgp: comma list of file stems whose columns form the test set (distribution shift)")
+p.add_argument("--table", default="reg_num/Ailerons", help="tabular: <reg_num|reg_cat>/<table> of the Grinsztajn benchmark")
+p.add_argument("--nsims", type=int, default=0, help="airfrans: cap on simulations per split (smoke tests)")
 p.add_argument("--ncal", type=int, default=1000, help="test cases carved for the split-conformal summary of the stack")
+p.add_argument("--tune_refine", type=int, default=0, help="kernel heads: after the subsample tune, refine the scale on validation against the solve that actually runs, over this many octaves either side (0 = off, the behaviour of every lane before 2026-09-14)")
+p.add_argument("--refine_nug", type=int, default=0, help="with --tune_refine: also try the neighbouring nugget-grid points at the chosen scale (2 more full solves)")
+p.add_argument("--pkan_cats", type=int, default=0, help="pkanrtm: 1 = append one-hot aerosol model and atmosphere profile (the paper's inputs)")
+p.add_argument("--pkan_split", default="seeded", choices=["seeded", "official"], help="pkanrtm: the release's own train/val/test state split, or the seeded 80/10/10")
+p.add_argument("--nval_steps", type=int, default=0, help="climsim_official: whole timesteps of the val split (0 = 52)")
+p.add_argument("--ntest_steps", type=int, default=0, help="climsim_official: whole timesteps of the scoring split (0 = 52; 4380 = the whole split)")
 p.add_argument("--smoke", action="store_true")
 args = p.parse_args()
 OUT = pathlib.Path(os.environ.get("P2_OUT", "results"))
 t0 = time.time()
 if args.corpus == "climsim":
     D = bench_data.climsim(args.seed, args.ntrain or 100000, nval=20000, ntest=20000); EP, W, DEPTH, BS = 60, 512, 4, 1024
+elif args.corpus == "climsim_official":
+    # the leaderboard protocol: whole timesteps for validation and test, per-variable MAE / R2 in W/m2 as extra metrics
+    D = bench_data.climsim_official(args.seed, args.ntrain or 100000, nval_steps=args.nval_steps or 52, ntest_steps=args.ntest_steps or 52)
+    EP, W, DEPTH, BS = 60, 512, 4, 1024
 elif args.corpus == "pkanrtm":
-    D = bench_data.pkanrtm(args.seed, args.ntrain, args.lowfi); EP, W, DEPTH, BS = 120, 384, 4, 1024
+    D = bench_data.pkanrtm(args.seed, args.ntrain, args.lowfi, cats=args.pkan_cats, split=args.pkan_split); EP, W, DEPTH, BS = 120, 384, 4, 1024
 elif args.corpus == "trl2d":
-    D = bench_data.trl2d(args.seed, args.ntrain, rank_in=args.rank or 256, rank_out=args.rank or 256); EP, W, DEPTH, BS = 200, 512, 4, 256
+    D = bench_data.trl2d(args.seed, args.ntrain, rank_in=args.rank or 256, rank_out=args.rank or 256, history=args.history); EP, W, DEPTH, BS = 200, 512, 4, 256
 elif args.corpus == "well":
     import well_data
     D = well_data.well2d(args.well_name, args.seed, args.ntrain, rank_in=args.rank or 256, rank_out=args.rank or 256); EP, W, DEPTH, BS = 200, 512, 4, 256
@@ -67,7 +94,13 @@ elif args.corpus == "rrtmgp":
     EP, W, DEPTH, BS = 60, 512, 4, 1024
 elif args.corpus == "qm9":
     import qm9_data
-    D = qm9_data.qm9(args.seed, args.ntrain or 100000); EP, W, DEPTH, BS = 200, 512, 4, 512
+    D = qm9_data.qm9(args.seed, args.ntrain or 100000, rep=args.qm9_rep); EP, W, DEPTH, BS = 200, 512, 4, 512
+elif args.corpus == "tabular":
+    import tabular_data
+    D = tabular_data.tabular(args.seed, args.table, args.ntrain or 10000); EP, W, DEPTH, BS = 300, 256, 3, 256
+elif args.corpus == "airfrans":
+    import airfrans_data
+    D = airfrans_data.airfrans(args.seed, args.ntrain or 140000, nsims=args.nsims); EP, W, DEPTH, BS = 100, 512, 4, 1024
 elif args.corpus == "burgers":
     D = bench_data.burgers(args.nu, args.seed, args.ntrain or 8000); EP, W, DEPTH, BS = 200, 512, 4, 256
 elif args.corpus == "advection":
@@ -110,24 +143,18 @@ def solve(K, Y, nug):
     return cho_solve(cho_factor(Kr, lower=True, check_finite=False, overwrite_a=True), Y, check_finite=False)
 
 
-def krr_fit_predict(Ftr, Fva, Fte, Ytr_, val_fn, w=None, label="krr"):
-    """Scale and nugget on validation over a subsample; then exact (n <= exact_max) or Nystrom solve on all rows.
-    val_fn(pred_va) -> validation error in the corpus metric. Returns (pred_va, pred_te, hyper)."""
-    if w is not None:
-        Ftr, Fva, Fte = Ftr * w, Fva * w, Fte * w
-    Fs = Ftr[sub_tune]; D2s, D2vs = sqd(Fs, Fs), sqd(Fva, Fs)
-    med = float(np.sqrt(np.median(D2s[np.triu_indices(len(Fs), 1)]))) + 1e-12
-    best = (np.inf, None)
-    for sc in (0.5, 1.0, 2.0, 4.0):
-        Ks, Kvs = m52(D2s, sc * med), m52(D2vs, sc * med)
-        for nug in (1e-8, 1e-6, 1e-4, 1e-2):
-            try:
-                e = val_fn(Kvs @ solve(Ks, Ytr_[sub_tune], nug))
-            except np.linalg.LinAlgError:
-                continue
-            if e < best[0]:
-                best = (e, (sc * med, nug))
-    ls, nug = best[1]
+
+# krr_fit_predict's hyperparameter search. The narrow pair is what every lane before 2026-09-13 ran and stays the
+# default, so a queued line's search is unchanged. --wide_grid adds one rung below and one above on each axis; the
+# widening of the nugget is the one with evidence behind it (see the --wide_grid help), the scale rung is carried
+# along because it costs the same subsample solve and 12 of 71 records sat on the 0.5 floor.
+SCALE_GRID = (0.25, 0.5, 1.0, 2.0, 4.0, 8.0) if args.wide_grid else (0.5, 1.0, 2.0, 4.0)
+NUG_GRID = (1e-8, 1e-6, 1e-4, 1e-2, 1e-1, 1.0) if args.wide_grid else (1e-8, 1e-6, 1e-4, 1e-2)
+
+
+def _full_solve_predict(Ftr, Fva, Fte, Ytr_, ls, nug):
+    """The exact (n <= exact_max) or Nystrom solve on ALL rows at one (ls, nugget), returning [pred_va, pred_te].
+    Factored out of krr_fit_predict so the scale can be refined against the solve that actually runs (2026-09-14)."""
     if exact:
         K = m52(sqd(Ftr, Ftr), ls); alpha = solve(K, Ytr_, nug); del K
         outs = []
@@ -136,17 +163,122 @@ def krr_fit_predict(Ftr, Fva, Fte, Ytr_, val_fn, w=None, label="krr"):
             for k in range(0, len(F_), 4000):
                 pr[k:k + 4000] = m52(sqd(F_[k:k + 4000], Ftr), ls) @ alpha
             outs.append(pr)
-    else:
-        # Nystrom ridge: alpha_m = (Knm' Knm + nug n Kmm)^-1 Knm' y
-        Fm = Ftr[centers]; Kmm = m52(sqd(Fm, Fm), ls)
-        KtK = np.zeros((len(Fm), len(Fm))); Kty = np.zeros((len(Fm), Ytr_.shape[1]))
-        for k in range(0, n, 8000):
-            Knm = m52(sqd(Ftr[k:k + 8000], Fm), ls); KtK += Knm.T @ Knm; Kty += Knm.T @ Ytr_[k:k + 8000]
-        A = KtK + nug * n * Kmm + 1e-8 * np.trace(KtK) / len(Fm) * np.eye(len(Fm))
-        alpha = cho_solve(cho_factor(A, lower=True, check_finite=False), Kty, check_finite=False)
-        outs = [m52(sqd(F_, Fm), ls) @ alpha for F_ in (Fva, Fte)]
+        return outs
+    Fm = Ftr[centers]; Kmm = m52(sqd(Fm, Fm), ls)
+    KtK = np.zeros((len(Fm), len(Fm))); Kty = np.zeros((len(Fm), Ytr_.shape[1]))
+    for k in range(0, n, 8000):
+        Knm = m52(sqd(Ftr[k:k + 8000], Fm), ls); KtK += Knm.T @ Knm; Kty += Knm.T @ Ytr_[k:k + 8000]
+    jit = 1e-8 * np.trace(KtK) / len(Fm)
+    A = KtK + nug * n * Kmm
+    A.flat[::len(Fm) + 1] += jit
+    del KtK, Kmm, Knm
+    alpha = cho_solve(cho_factor(A, lower=True, check_finite=False), Kty, check_finite=False)
+    del A, Kty
+    outs = []
+    for F_ in (Fva, Fte):
+        pr = np.empty((len(F_), alpha.shape[1]))
+        for k in range(0, len(F_), 4000):
+            pr[k:k + 4000] = m52(sqd(F_[k:k + 4000], Fm), ls) @ alpha
+        outs.append(pr)
+    return outs
+
+
+def krr_fit_predict(Ftr, Fva, Fte, Ytr_, val_fn, w=None, label="krr"):
+    """Scale and nugget on validation over a subsample; then exact (n <= exact_max) or Nystrom solve on all rows.
+    val_fn(pred_va) -> validation error in the corpus metric. Returns (pred_va, pred_te, hyper).
+
+    With --tune_refine k the scale is then refined on VALIDATION against the solve that actually runs, over k octaves
+    either side of the subsample winner. The tuning subsample is a third to a twentieth of the solve, and a tuning set
+    smaller than its solve supports a LONGER length scale than the solve does, so the subsample protocol over-smooths:
+    measured on the EMIT table (paper 2, Section 5.1), the subsample picks twice the median pairwise distance where the
+    full block picks once it in 17 of 36 cells and never the other way, and correcting it lowered the isotropic
+    kernel's error by a factor 0.885 and removed the flattening at the top of its learning curve."""
+    if w is not None:
+        Ftr, Fva, Fte = Ftr * w, Fva * w, Fte * w
+    Fs = Ftr[sub_tune]; D2s, D2vs = sqd(Fs, Fs), sqd(Fva, Fs)
+    med = float(np.sqrt(np.median(D2s[np.triu_indices(len(Fs), 1)]))) + 1e-12
+    best = (np.inf, None)
+    for sc in SCALE_GRID:
+        Ks, Kvs = m52(D2s, sc * med), m52(D2vs, sc * med)
+        for nug in NUG_GRID:
+            try:
+                e = val_fn(Kvs @ solve(Ks, Ytr_[sub_tune], nug))
+            except np.linalg.LinAlgError:
+                continue
+            if e < best[0]:
+                best = (e, (sc * med, nug))
+    ls, nug = best[1]
+    refine = None
+    if args.tune_refine and len(sub_tune) < n:
+        # Start at the requested half-width and EXPAND on whichever side the optimum sits, only while the best
+        # candidate is still at an edge, up to REFINE_CAP solves. Measured 2026-09-14: ClimSim's optimum is one
+        # octave below the subsample pick (interior at the first window, 3 solves) while QM9's is two octaves below
+        # (the fixed one-octave window would have stopped at its edge and left the gain), so a fixed width either
+        # wastes solves or misses the optimum. Expanding on demand costs the extra solve only where it pays.
+        REFINE_CAP = 7
+        seen, cand, best_full = {}, [], (np.inf, None, None)
+
+        def _try(m_):
+            nonlocal best_full
+            if m_ in seen or len(seen) >= REFINE_CAP:
+                return
+            try:
+                o = _full_solve_predict(Ftr, Fva, Fte, Ytr_, ls * m_, nug)
+            except (np.linalg.LinAlgError, MemoryError):
+                seen[m_] = np.inf
+                return
+            e = float(val_fn(o[0]))
+            seen[m_] = e
+            cand.append((round(m_, 4), round(100 * e, 5)))
+            if e < best_full[0]:
+                best_full = (e, ls * m_, o)
+
+        k0 = int(args.tune_refine)
+        lo, hi = -k0, k0
+        for k in range(lo, hi + 1):
+            _try(2.0 ** k)
+        while len(seen) < REFINE_CAP:
+            bexp = round(np.log2(best_full[1] / ls)) if best_full[1] is not None else 0
+            if bexp <= lo:
+                lo -= 1; _try(2.0 ** lo)
+            elif bexp >= hi:
+                hi += 1; _try(2.0 ** hi)
+            else:
+                break
+        nug_cand = []
+        if best_full[1] is not None and args.refine_nug:
+            # coordinate descent: at the chosen scale, try the neighbouring points of the nugget grid. The nugget's
+            # optimum also falls with n, so the subsample can leave it too large for the solve that runs.
+            j = NUG_GRID.index(nug) if nug in NUG_GRID else None
+            for nug2 in ([NUG_GRID[k] for k in (j - 1, j + 1) if 0 <= k < len(NUG_GRID)] if j is not None else []):
+                try:
+                    o = _full_solve_predict(Ftr, Fva, Fte, Ytr_, best_full[1], nug2)
+                except (np.linalg.LinAlgError, MemoryError):
+                    continue
+                e = float(val_fn(o[0]))
+                nug_cand.append((nug2, round(100 * e, 5)))
+                if e < best_full[0]:
+                    best_full = (e, best_full[1], o); nug = nug2
+        if best_full[1] is not None:
+            refine = dict(mults=cand, chosen=round(best_full[1] / ls, 4), val_sub=float(best[0]), val_full=float(best_full[0]),
+                          nug_tried=nug_cand, nug_chosen=nug)
+            ls = best_full[1]
+            print(f"  {label}: refined scale x{refine['chosen']} on the full solve, val {100*best_full[0]:.4f}% "
+                  f"(subsample pick {100*best[0]:.4f}%) {cand}", flush=True)
+            outs = best_full[2]
+            print(f"  {label}: scale {ls/med:.1f} x med, nugget {nug:g}, val {100*best_full[0]:.4f}% "
+                  f"({'exact' if exact else 'nystrom %d' % len(centers)})", flush=True)
+            return outs[0], outs[1], dict(scale=float(ls), nugget=nug, med=med, val_sub=float(best[0]),
+                                          val_full=float(best_full[0]), refine=refine, exact=exact,
+                                          wide_grid=bool(args.wide_grid), centers=(None if exact else len(centers)),
+                                          scale_edge="", nug_edge=("lo" if nug <= NUG_GRID[0] else "hi" if nug >= NUG_GRID[-1] else ""))
+    outs = _full_solve_predict(Ftr, Fva, Fte, Ytr_, ls, nug)
     print(f"  {label}: scale {ls/med:.1f} x med, nugget {nug:g}, val {100*best[0]:.4f}% ({'exact' if exact else 'nystrom %d' % len(centers)})", flush=True)
-    return outs[0], outs[1], dict(scale=float(ls), nugget=nug, med=med, val_sub=float(best[0]), exact=exact)
+    return outs[0], outs[1], dict(scale=float(ls), nugget=nug, med=med, val_sub=float(best[0]), exact=exact,
+                                  wide_grid=bool(args.wide_grid), centers=(None if exact else len(centers)),
+                                  scale_edge=("lo" if ls / med <= SCALE_GRID[0] * 1.000001 else
+                                              "hi" if ls / med >= SCALE_GRID[-1] * 0.999999 else ""),
+                                  nug_edge=("lo" if nug <= NUG_GRID[0] else "hi" if nug >= NUG_GRID[-1] else ""))
 
 
 def kf_shape(Ftr, Yobj, yn2, steps, batch=600, lr=0.05, seed=0):
@@ -304,7 +436,16 @@ def cmixup_batch(xb, yb, alpha=2.0):
     """C-Mixup: partners drawn with probability decaying in target distance; convex mix of inputs and targets."""
     with torch.no_grad():
         d2 = torch.cdist(yb, yb).pow(2); sig2 = d2.median().clamp_min(1e-6)
-        P = torch.exp(-d2 / (2 * sig2)); P.fill_diagonal_(0); P = P / P.sum(1, keepdim=True).clamp_min(1e-12)
+        P = torch.exp(-d2 / (2 * sig2)); P.fill_diagonal_(0)
+        rs = P.sum(1, keepdim=True)
+        degenerate = (rs <= 0).squeeze(1)
+        if bool(degenerate.any()):
+            # every off-diagonal weight underflowed for these rows (targets far apart relative
+            # to their median distance). Draw the partner uniformly instead of crashing.
+            U = torch.ones_like(P); U.fill_diagonal_(0)
+            P[degenerate] = U[degenerate]
+            rs = P.sum(1, keepdim=True)
+        P = P / rs.clamp_min(1e-12)
         j = torch.multinomial(P, 1).squeeze(1)
         lam = torch.distributions.Beta(alpha, alpha).sample((len(xb), 1))
     return lam * xb + (1 - lam) * xb[j], lam * yb + (1 - lam) * yb[j]
@@ -490,8 +631,11 @@ if final_head is not None and ncal >= 100:
 
 tag = args.tag or (D["tag"] + "_bench")
 out = dict(tag=tag, kind="bench", corpus=args.corpus, seed=args.seed, n=n, d=d, q=q, exact=exact, epochs=EP, width=W, smoke=bool(args.smoke), conformal=conformal,
+           wide_grid=bool(args.wide_grid), centers=(None if exact else int(len(centers))),
+           scale_grid=list(SCALE_GRID), nug_grid=list(NUG_GRID),
            results={k: {m: (100 * v if m in ("val", "test") else v) for m, v in r.items()} for k, r in results.items()}, hyper=hyper,
-           extra={k: v for k, v in D.items() if k in ("pca_evr_in", "pca_evr_out", "pca_fit_rows", "persistence_err", "pca_recon_err", "extra_metrics_lowfi", "err_floor", "frac_below_floor_te", "target", "persistence_vrmse", "rank_in", "rank_out")},
+           extra={k: v for k, v in D.items() if k in ("pca_evr_in", "pca_evr_out", "pca_fit_rows", "persistence_err", "pca_recon_err", "extra_metrics_lowfi", "err_floor", "frac_below_floor_te", "target", "persistence_vrmse", "rank_in", "rank_out",
+                                                     "persistence_vrmse_paper", "persistence_vrmse_paper_medtraj", "n_traj", "protocol", "history", "grid", "official_baselines", "official_steps", "official_units")},
            minutes=round((time.time() - t0) / 60, 1))
 OUT.mkdir(parents=True, exist_ok=True)
 tmp = OUT / (tag + ".tmp"); json.dump(out, open(tmp, "w"), indent=1); os.replace(tmp, OUT / (tag + ".json"))
