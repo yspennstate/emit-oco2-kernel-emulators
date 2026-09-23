@@ -711,8 +711,10 @@ the bound becomes a guarantee only on an independent selection sample
 (Proposition~\ref{prop:selection}).
 
 For residual correction, the alignment identity and the principal-component decomposition show
-which parts of the error the correction can remove and which remain, and they explain why the
-optimal output rank for the correction is lower than for the direct kernel. A learning rate for
+which parts of the error the correction can remove and which remain. They also show the trade-off
+behind Table~\ref{tab:rank}, where the corrected network is best at rank 32 and worsens above it
+while the direct kernel is flat from rank 32 up: a higher rank shrinks the truncation term and
+hands the kernel more residual coefficients to regress. A learning rate for
 the corrected predictor would need a uniform regression bound and control of the residual in a
 source norm; the learning curves measure slopes over a finite range. Proposition~\ref{prop:perturb}
 bounds the movement between two fitted systems; its residual-action form is often much smaller
