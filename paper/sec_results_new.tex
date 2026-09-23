@@ -88,8 +88,9 @@ The concatenated-feature kernel has mean radiance error $0.0688\%$, against $0.0
 features of one network; the paired gain is $0.0076\pm0.0053$ percentage points, positive on
 three splits and $-0.0002$ on the fourth. Its mean within-split 95th-percentile reflectance error
 is $5.99$ points, against $7.51$ for single-member features and $14.35$ for the stack. With the
-ten width-512 splits of Section~\ref{sec:scaling} this makes three independent settings in which
-concatenation lowers both the radiance error and the reflectance tail.
+ten width-512 splits of Section~\ref{sec:scaling} this makes three settings, with different
+networks on overlapping splits, in which concatenation lowers both the radiance error and the
+reflectance tail.
 
 \paragraph{Fitting objective against retrieval metric.}
 Table~\ref{tab:v2-stacks} compares stacks fitted under different objectives on five splits:
