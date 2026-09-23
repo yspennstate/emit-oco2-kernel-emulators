@@ -2,7 +2,17 @@
 \section{Extended diagnostic tables}\label{app:diagnostics}
 
 This appendix collects the perturbation, ridge-path, synthetic and external-benchmark tables
-referred to in Sections~\ref{sec:results-representation}--\ref{sec:results-benchmarks}.
+referred to in Sections~\ref{sec:results-representation}--\ref{sec:results-benchmarks}, and the
+record of the runs behind Section~\ref{sec:tq-policy}.
+
+\begin{table}[h]
+\centering
+\input{table_tq_runs}
+\caption{The runs of the training-target experiment: for each split and width, the machine it ran on
+and the number of training states in each arm. Validation and test blocks are the same in the three
+arms. The admissible and matched arms have the same size by construction.}
+\label{tab:tq-runs}
+\end{table}
 
 \input{layout_v2_perturbation}
 \input{layout_v2_ridge}

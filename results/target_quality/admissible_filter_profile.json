@@ -1,0 +1,420 @@
+{
+ "admissible_states_whole_table": 18859,
+ "states": 23313,
+ "seeds": {
+  "101": {
+   "train": 18884,
+   "kept": 15287,
+   "removed": 3597,
+   "T_train": 4.672233089636514,
+   "record_digest_matches": true,
+   "test_admissible_fraction": 0.8009438009438009,
+   "median_inputs": {
+    "aerosol_optical_depth": {
+     "kept": 0.6387,
+     "removed": 0.5644
+    },
+    "elevation_km": {
+     "kept": 3.3638,
+     "removed": 1.0554
+    },
+    "water_vapour_cm": {
+     "kept": 2.971,
+     "removed": 5.1026
+    },
+    "relative_azimuth_deg": {
+     "kept": 89.5387,
+     "removed": 89.0382
+    },
+    "solar_zenith_deg": {
+     "kept": 30.4511,
+     "removed": 41.677
+    },
+    "view_zenith_deg": {
+     "kept": 165.0349,
+     "removed": 165.1574
+    }
+   },
+   "median_smallest_transmission": {
+    "kept": 1.229807375197609e-05,
+    "removed": 2.0479484550933916e-15
+   },
+   "share_of_entries_below_0.001_T_in_removed_states": 0.3313391375453955,
+   "share_of_entries_below_0.01_T_in_removed_states": 0.2989888144281124
+  },
+  "102": {
+   "train": 18884,
+   "kept": 15239,
+   "removed": 3645,
+   "T_train": 4.655064781246163,
+   "record_digest_matches": null,
+   "test_admissible_fraction": 0.8211068211068211,
+   "median_inputs": {
+    "aerosol_optical_depth": {
+     "kept": 0.6397,
+     "removed": 0.5588
+    },
+    "elevation_km": {
+     "kept": 3.3316,
+     "removed": 1.0577
+    },
+    "water_vapour_cm": {
+     "kept": 2.9649,
+     "removed": 5.13
+    },
+    "relative_azimuth_deg": {
+     "kept": 89.5969,
+     "removed": 90.0395
+    },
+    "solar_zenith_deg": {
+     "kept": 30.5698,
+     "removed": 41.7418
+    },
+    "view_zenith_deg": {
+     "kept": 164.9135,
+     "removed": 165.1121
+    }
+   },
+   "median_smallest_transmission": {
+    "kept": 1.0791754915009094e-05,
+    "removed": 1.7971441418951428e-15
+   },
+   "share_of_entries_below_0.001_T_in_removed_states": 0.33354122154716576,
+   "share_of_entries_below_0.01_T_in_removed_states": 0.30143254747871645
+  },
+  "103": {
+   "train": 18884,
+   "kept": 15284,
+   "removed": 3600,
+   "T_train": 4.663606946808554,
+   "record_digest_matches": null,
+   "test_admissible_fraction": 0.8151008151008151,
+   "median_inputs": {
+    "aerosol_optical_depth": {
+     "kept": 0.6369,
+     "removed": 0.5538
+    },
+    "elevation_km": {
+     "kept": 3.34605,
+     "removed": 1.05555
+    },
+    "water_vapour_cm": {
+     "kept": 2.9650499999999997,
+     "removed": 5.1343
+    },
+    "relative_azimuth_deg": {
+     "kept": 89.62555,
+     "removed": 89.28815
+    },
+    "solar_zenith_deg": {
+     "kept": 30.6437,
+     "removed": 41.68325
+    },
+    "view_zenith_deg": {
+     "kept": 164.9094,
+     "removed": 164.9964
+    }
+   },
+   "median_smallest_transmission": {
+    "kept": 1.1866969399700023e-05,
+    "removed": 1.651299269835274e-15
+   },
+   "share_of_entries_below_0.001_T_in_removed_states": 0.3308857906661712,
+   "share_of_entries_below_0.01_T_in_removed_states": 0.29868012884603146
+  },
+  "104": {
+   "train": 18884,
+   "kept": 15286,
+   "removed": 3598,
+   "T_train": 4.663815139081266,
+   "record_digest_matches": null,
+   "test_admissible_fraction": 0.8048048048048048,
+   "median_inputs": {
+    "aerosol_optical_depth": {
+     "kept": 0.6361,
+     "removed": 0.563
+    },
+    "elevation_km": {
+     "kept": 3.3439,
+     "removed": 1.0871
+    },
+    "water_vapour_cm": {
+     "kept": 2.9662,
+     "removed": 5.10905
+    },
+    "relative_azimuth_deg": {
+     "kept": 89.4317,
+     "removed": 90.41645
+    },
+    "solar_zenith_deg": {
+     "kept": 30.511499999999998,
+     "removed": 41.870000000000005
+    },
+    "view_zenith_deg": {
+     "kept": 164.93630000000002,
+     "removed": 165.1344
+    }
+   },
+   "median_smallest_transmission": {
+    "kept": 1.15967490274302e-05,
+    "removed": 1.7136320312711484e-15
+   },
+   "share_of_entries_below_0.001_T_in_removed_states": 0.33105665889777763,
+   "share_of_entries_below_0.01_T_in_removed_states": 0.298941135864965
+  },
+  "105": {
+   "train": 18884,
+   "kept": 15271,
+   "removed": 3613,
+   "T_train": 4.658649743419513,
+   "record_digest_matches": null,
+   "test_admissible_fraction": 0.806949806949807,
+   "median_inputs": {
+    "aerosol_optical_depth": {
+     "kept": 0.637,
+     "removed": 0.5642
+    },
+    "elevation_km": {
+     "kept": 3.3571,
+     "removed": 1.0718
+    },
+    "water_vapour_cm": {
+     "kept": 2.9566,
+     "removed": 5.1481
+    },
+    "relative_azimuth_deg": {
+     "kept": 89.4499,
+     "removed": 89.8703
+    },
+    "solar_zenith_deg": {
+     "kept": 30.7448,
+     "removed": 41.5225
+    },
+    "view_zenith_deg": {
+     "kept": 164.8536,
+     "removed": 165.0178
+    }
+   },
+   "median_smallest_transmission": {
+    "kept": 1.1881536888059306e-05,
+    "removed": 1.4836179129615509e-15
+   },
+   "share_of_entries_below_0.001_T_in_removed_states": 0.3324352319197217,
+   "share_of_entries_below_0.01_T_in_removed_states": 0.30009345449626795
+  },
+  "106": {
+   "train": 18884,
+   "kept": 15290,
+   "removed": 3594,
+   "T_train": 4.658850893171423,
+   "record_digest_matches": null,
+   "test_admissible_fraction": 0.8056628056628057,
+   "median_inputs": {
+    "aerosol_optical_depth": {
+     "kept": 0.64115,
+     "removed": 0.5645
+    },
+    "elevation_km": {
+     "kept": 3.3483,
+     "removed": 1.0551
+    },
+    "water_vapour_cm": {
+     "kept": 2.9644000000000004,
+     "removed": 5.12725
+    },
+    "relative_azimuth_deg": {
+     "kept": 89.4614,
+     "removed": 89.4925
+    },
+    "solar_zenith_deg": {
+     "kept": 30.71165,
+     "removed": 41.70035
+    },
+    "view_zenith_deg": {
+     "kept": 164.94889999999998,
+     "removed": 165.00745
+    }
+   },
+   "median_smallest_transmission": {
+    "kept": 1.1690896626436917e-05,
+    "removed": 1.5166324553942647e-15
+   },
+   "share_of_entries_below_0.001_T_in_removed_states": 0.33100661168413703,
+   "share_of_entries_below_0.01_T_in_removed_states": 0.2987846424115059
+  },
+  "107": {
+   "train": 18884,
+   "kept": 15325,
+   "removed": 3559,
+   "T_train": 4.675335654860862,
+   "record_digest_matches": null,
+   "test_admissible_fraction": 0.8103818103818103,
+   "median_inputs": {
+    "aerosol_optical_depth": {
+     "kept": 0.6403,
+     "removed": 0.565
+    },
+    "elevation_km": {
+     "kept": 3.3578,
+     "removed": 1.065
+    },
+    "water_vapour_cm": {
+     "kept": 2.9754,
+     "removed": 5.1026
+    },
+    "relative_azimuth_deg": {
+     "kept": 89.0785,
+     "removed": 89.9602
+    },
+    "solar_zenith_deg": {
+     "kept": 30.521,
+     "removed": 41.4387
+    },
+    "view_zenith_deg": {
+     "kept": 164.9813,
+     "removed": 165.2885
+    }
+   },
+   "median_smallest_transmission": {
+    "kept": 1.1831473309733618e-05,
+    "removed": 1.94948939810355e-15
+   },
+   "share_of_entries_below_0.001_T_in_removed_states": 0.32748634535742155,
+   "share_of_entries_below_0.01_T_in_removed_states": 0.29570115660630175
+  },
+  "108": {
+   "train": 18884,
+   "kept": 15250,
+   "removed": 3634,
+   "T_train": 4.6516725268626695,
+   "record_digest_matches": null,
+   "test_admissible_fraction": 0.8185328185328186,
+   "median_inputs": {
+    "aerosol_optical_depth": {
+     "kept": 0.63815,
+     "removed": 0.5633
+    },
+    "elevation_km": {
+     "kept": 3.35285,
+     "removed": 1.0811
+    },
+    "water_vapour_cm": {
+     "kept": 2.9903500000000003,
+     "removed": 5.140750000000001
+    },
+    "relative_azimuth_deg": {
+     "kept": 89.03540000000001,
+     "removed": 91.4644
+    },
+    "solar_zenith_deg": {
+     "kept": 30.78185,
+     "removed": 41.436499999999995
+    },
+    "view_zenith_deg": {
+     "kept": 164.97655,
+     "removed": 165.02105
+    }
+   },
+   "median_smallest_transmission": {
+    "kept": 1.0939528025663417e-05,
+    "removed": 1.5258162320099244e-15
+   },
+   "share_of_entries_below_0.001_T_in_removed_states": 0.3329848655461934,
+   "share_of_entries_below_0.01_T_in_removed_states": 0.30099546807068417
+  },
+  "109": {
+   "train": 18884,
+   "kept": 15253,
+   "removed": 3631,
+   "T_train": 4.659358838521813,
+   "record_digest_matches": null,
+   "test_admissible_fraction": 0.818961818961819,
+   "median_inputs": {
+    "aerosol_optical_depth": {
+     "kept": 0.6372,
+     "removed": 0.5683
+    },
+    "elevation_km": {
+     "kept": 3.3707,
+     "removed": 1.0496
+    },
+    "water_vapour_cm": {
+     "kept": 2.9752,
+     "removed": 5.1433
+    },
+    "relative_azimuth_deg": {
+     "kept": 89.6959,
+     "removed": 90.4941
+    },
+    "solar_zenith_deg": {
+     "kept": 30.6466,
+     "removed": 41.3657
+    },
+    "view_zenith_deg": {
+     "kept": 164.9601,
+     "removed": 165.206
+    }
+   },
+   "median_smallest_transmission": {
+    "kept": 1.1692940961689162e-05,
+    "removed": 1.3742582199021194e-15
+   },
+   "share_of_entries_below_0.001_T_in_removed_states": 0.33412085279674214,
+   "share_of_entries_below_0.01_T_in_removed_states": 0.30176553150624214
+  },
+  "110": {
+   "train": 18884,
+   "kept": 15264,
+   "removed": 3620,
+   "T_train": 4.660238788138345,
+   "record_digest_matches": null,
+   "test_admissible_fraction": 0.8065208065208065,
+   "median_inputs": {
+    "aerosol_optical_depth": {
+     "kept": 0.6374,
+     "removed": 0.56365
+    },
+    "elevation_km": {
+     "kept": 3.35055,
+     "removed": 1.0804
+    },
+    "water_vapour_cm": {
+     "kept": 2.96935,
+     "removed": 5.14545
+    },
+    "relative_azimuth_deg": {
+     "kept": 89.4887,
+     "removed": 90.4705
+    },
+    "solar_zenith_deg": {
+     "kept": 30.69695,
+     "removed": 41.870000000000005
+    },
+    "view_zenith_deg": {
+     "kept": 164.9647,
+     "removed": 165.0464
+    }
+   },
+   "median_smallest_transmission": {
+    "kept": 1.207800933280386e-05,
+    "removed": 1.4363269329988476e-15
+   },
+   "share_of_entries_below_0.001_T_in_removed_states": 0.3330261780104712,
+   "share_of_entries_below_0.01_T_in_removed_states": 0.30070715329304754
+  }
+ },
+ "pooled": {
+  "removed_fraction": [
+   0.18846642660453294,
+   0.19302054649438677
+  ],
+  "share_below_1e-3_T": [
+   0.32748634535742155,
+   0.33412085279674214
+  ],
+  "test_admissible_fraction": [
+   0.8009438009438009,
+   0.8211068211068211
+  ]
+ }
+}

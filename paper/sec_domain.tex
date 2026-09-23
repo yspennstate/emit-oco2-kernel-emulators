@@ -66,6 +66,30 @@ $0.33\%$ of the entries takes the round-trip error from $4\times10^{-3}$ to $10^
 of the all-band reflectance tail on $\mathcal C$ belongs to the emulators.
 
 \subsection{The main pipeline on the physical domain}\label{sec:tq-domain}
+The families of the main comparison were refitted on the ten splits at both network widths with
+their float64 test predictions kept; these are the raw arm of the experiment in
+Section~\ref{sec:tq-policy}. Each family is scored on the test entries that satisfy
+\[
+ t\ge\tau_0T_{\rm train},\qquad 0\le s<1,\qquad q\ge0.3,
+\]
+where $T_{\rm train}$ is the median positive transmission of the split's training block ($4.67$ at
+split 101) and $\tau_0\in\{10^{-12},10^{-3},10^{-2}\}$; the three floors were fixed before the
+first fit, and at $\rho=0.7$ the albedo condition already gives $q>0.3$. An inversion fails when
+its predicted denominator is not positive or its value is not finite. Failures are counted, and
+the percentiles are taken over the successful inversions. Coverage depends on the truth alone and
+is the same for every family.
+
+\begin{table}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{table_tq_domain}}
+\caption{The main pipeline on the physical domain: the raw arm, mean $\pm$ sample standard deviation
+over [[TQ-SEEDS]] splits. Radiance is the mean relative error in percent, and the all-band column is
+the unrestricted inverse of Table~\ref{tab:tails}. At each floor $\tau_0$, the failed column is the
+percentage of covered entries at which the inversion fails, and $p_{95}$ is the 95th percentile of the
+absolute reflectance error over the successful inversions, in percentage points.}
+\label{tab:tq-domain}
+\end{table}
+
 [[TQ-DOMAIN]]
 
 \subsection{Training on physically admissible targets}\label{sec:tq-policy}
@@ -86,7 +110,33 @@ with a flux scale taken from the original training block.
 The arms, the two network configurations of Table~\ref{tab:results} and Table~\ref{tab:wide}, the
 seeds 101--110, the scoring and the summaries reported below were fixed in a written protocol
 before the first run, and every run was completed and is reported. Each run records the digests of
-its data and of its split indices, and saves the float64 predictions of every family.
+its data and of its split indices, and saves the float64 predictions of every family. Splits
+101--104 ran on one machine and splits 105--110 on another, and the three arms of a split always ran
+on the same machine, so every paired difference below is taken within one computing environment
+(Table~\ref{tab:tq-runs}).
+
+\begin{table}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{table_tq_policy}}
+\caption{Training on admissible targets: paired differences from the raw arm, arm minus raw, mean
+$\pm$ sample standard deviation over [[TQ-SEEDS]] splits. Radiance differences are in percentage
+points of relative error, albedo differences in percentage points of the relative albedo error, and
+the reflectance percentiles in percentage points; the physical $p_{95}$ uses the floor
+$\tau_0=10^{-12}$. The columns headed lower count the splits on which the arm is below the raw
+arm.}
+\label{tab:tq-policy}
+\end{table}
+
+\begin{table}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{table_tq_reversal}}
+\caption{The convex stack against the kernel on features in each arm: the radiance difference, stack
+minus feature kernel, in percentage points, and the ratio of their 95th-percentile reflectance errors
+over all bands and on the physical domain at the three floors; mean $\pm$ sample standard deviation
+over [[TQ-SEEDS]] splits. The columns headed $>1$ count the splits on which the stack has the
+larger tail, over all bands and at $\tau_0=10^{-12}$.}
+\label{tab:tq-reversal}
+\end{table}
 
 [[TQ-POLICY]]
 
