@@ -304,7 +304,7 @@ train their networks on one T4 GPU.
 degree at most three in the six standardized inputs, with the ridge weight selected from
 $\{10^{-10},\allowbreak 10^{-8},\allowbreak 10^{-6},\allowbreak 10^{-4},\allowbreak 10^{-2}\}$.
 
-\paragraph{Exact kernel ridge regression.} Three constructions, all Mat\'ern kernels \cite{stein}
+\paragraph{Exact kernel ridge regression (KRR).} Three constructions, all Mat\'ern kernels \cite{stein}
 on the standardized inputs, with the length scale expressed as a multiple of the median pairwise
 distance of the fit set. The nugget $\gamma$ enters the system as $(K+n\gamma I)\alpha=Z$. The
 subset baseline is a Mat\'ern-$5/2$ kernel fitted on a uniformly drawn subset of 4{,}000
@@ -319,7 +319,7 @@ per-input multipliers in $\{1/4,1/2,1,2,4\}$ runs for two sweeps scored on valid
 which smoothness, scale and nugget are re-tuned at the metric found and the solve is refit on
 every row.
 
-\paragraph{Fully connected networks.} Three ELU hidden layers of 512 units per component,
+\paragraph{Fully connected networks (FC-DNN).} Three ELU hidden layers of 512 units per component,
 trained on the 285 standardized bands with AdamW \cite{adam,adamw} at learning rate $10^{-3}$,
 cosine decay, batch size 1024 and weight decay $10^{-6}$, for up to 150 epochs with early
 stopping on validation loss \cite{prechelt} (patience 25). Five networks are trained per
