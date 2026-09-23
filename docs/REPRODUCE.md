@@ -171,6 +171,11 @@ split and refuses float32 predictions unless `--allow-float32` is given.
 
 ## Other corpora
 
+The learned-metric comparison of the appendix on OCO-2 is in `results/oco2_metrics/`, one record per band and split
+from `code/kf_kernels.py --problem oco2`; `python code/oco2_metric_summary.py results/oco2_metrics
+results/oco2_ensembles` prints the means quoted there beside the baseline runs of the same splits and writes
+`summary.json`.
+
 `make_tables.py` reads the records of the other configurations. Their drivers are `code/jpl_seeded.py` (OCO-2 losses
 and readouts), `code/oco2_curve.py` (OCO-2 ensembles) and `code/bench_run.py` with the corpus loaders in
 `code/bench_data.py` and `code/well_data.py`; `bench_run.py` also accepts corpora outside this paper, whose loaders are

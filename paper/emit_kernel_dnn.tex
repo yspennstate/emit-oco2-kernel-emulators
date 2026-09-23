@@ -759,18 +759,19 @@ comparison at a higher input dimension.
 
 There a kernel on the state trails the network by a factor of nine, four and five on the reduced
 coefficients: the isotropic Mat\'ern reaches $40.6\%$, $58.6\%$ and $43.4\%$ on the three bands
-against $4.4\%$, $16.4\%$ and $8.2\%$ for the network, and residual correction adds little. The
-coordinate search that gives a kernel on the EMIT state its own length scales is not the strongest
-construction there either. Four learned metrics were run on the same ten splits on all three
-bands: a kernel-flow metric \cite{owhadiyoo}, a Mahalanobis metric under the same flow, the
-gradient outer product of the recursive feature machine \cite{rfm}, and per-input scales fitted by
-empirical Bayes. The last is the best of the four on every band, taking the isotropic kernel's
-$40.6\%$, $58.6\%$ and $44.3\%$ on the coefficients to $18.7\%$, $25.3\%$ and $16.9\%$, and on O$_2$
-its radiance from $0.233\%$ to $0.150\%$; the two flow metrics agree within half a point of each
-other at $26.9\%$, $29.8\%$ and $23.9\%$, the recursive feature machine reads $28.2\%$, $47.9\%$ and
-$31.3\%$, and an additive kernel $38.2\%$, $46.9\%$ and $47.7\%$. (The isotropic baseline on strong
-CO$_2$ reads $44.3\%$ in the metric experiment and $43.4\%$ in the baseline experiment; this band
-has a spread of $\pm3.4$ because two of its ten splits land three points below the other eight.)
+against $4.4\%$, $16.4\%$ and $8.2\%$ for the network. Four ways of learning the kernel's metric
+on the state were run on the same ten splits on all three bands: a kernel-flow metric
+\cite{owhadiyoo}, a Mahalanobis metric under the same flow, the gradient outer product of the
+recursive feature machine \cite{rfm}, and per-input scales fitted by empirical Bayes. The last is
+the best of the four on every band, taking the isotropic kernel's $40.6\%$, $58.6\%$ and $44.3\%$
+on the coefficients to $18.7\%$, $25.3\%$ and $16.9\%$, and on O$_2$ its radiance from $0.233\%$ to
+$0.150\%$; the two flow metrics agree within half a point of each other at $26.9\%$, $29.8\%$ and
+$23.9\%$, the recursive feature machine reads $28.2\%$, $47.9\%$ and $31.3\%$, and an additive
+kernel $38.2\%$, $46.9\%$ and $47.7\%$. (The isotropic kernel on strong CO$_2$ reads $44.3\%$ here
+and $43.4\%$ in the baseline experiment. The metric experiment also chooses the Mat\'ern smoothness
+on validation and takes $\nu=3/2$ on this band at every split; the baseline fixes $\nu=5/2$, and its
+choice of scale and nugget changes from split to split, six splits landing near $41\%$, three near
+$48\%$ and one at $44\%$, hence its spread of $\pm3.4$.)
 The feature kernel remains more accurate, by a margin that depends on the band: the exact Mat\'ern
 regression on the network's frozen features reads $4.1\%$, $16.3\%$ and $8.1\%$ on the same splits,
 so the best state metric is $4.6$ times that on O$_2$ but only $1.6$ and $2.1$ times it on the two
@@ -782,14 +783,6 @@ per-coefficient choice among heads trained under different losses has lower mean
 release's own emulator under both reported metrics: it wins the reduced-coefficient comparison on
 all ten splits on each band, and the radiance comparison on ten, nine and ten splits on O$_2$, weak
 CO$_2$ and strong CO$_2$.
-
-The release accompanying \cite{lamminpaa} also contains 976 retrieval records, each with an
-atmospheric state, the full-physics monochromatic radiance at that state, its rank-40
-reconstruction and the prediction of the release's Gaussian-process emulator. Every one of the 976
-reduced states matches a test input of the release within $6.67\times10^{-16}$, mapping to 974
-distinct test rows with the same nearest index in all three bands, so these records belong to the
-test set; they supply a different target, the full-physics radiance, at those states rather than an
-independent evaluation pool.
 
 \section{Ten further emulation configurations}\label{sec:corpora}
 
@@ -872,14 +865,16 @@ Learned metrics help most on the correction-coefficient corpus. From the state a
 kernel is at $62.93 \pm 0.51$ and a kernel-flow metric \cite{owhadiyoo} takes it to $3.97 \pm 0.42$,
 a factor of sixteen, which brings a kernel on the state within six percent of the network on a
 corpus where the plain kernel was seventeen times worse. With the low-fidelity coefficients as
-inputs the same pair reads $15.76$ and $4.60$, a factor of three: the easier the problem is made for
+inputs the same pair reads $15.76$ and $4.60$, a factor of $3.4$: the easier the problem is made for
 the plain kernel, the less the learned metric adds.
 
 The convex stack is the lowest row on eight of the ten configurations and the second lowest on the
 other two; the residual-corrected network is among the lowest two on five. Both exceptions are the
 linear problems, and on both the row that beats the stack is the ridge, which the stack does not
 contain. On advection the ridge is lower by $0.07$ points while the stack, at $11.36\%$, matches its
-best member, the isotropic kernel, on which it puts weight $0.87$, to two decimals. On the Helmholtz
+best member, the isotropic kernel, to two decimals; that kernel and the learned-metric kernel, which
+differ by less than $0.01$ points there, carry between $0.85$ and $0.91$ of its weight at every
+split. On the Helmholtz
 staircase the ridge reaches $0.004\%$, sixteen times below the next row and about a hundred times
 below the weakest member of the pool, and the stack reaches $0.066\%$, slightly below its best member,
 the learned-metric kernel at $0.067\%$, on which it puts weight $0.94$. In both cases the stack does
@@ -892,11 +887,9 @@ corpora have published results from methods tuned for them. With three to five r
 rows, the spreads support the large orderings above and not fine distinctions between adjacent
 families. Every kernel column also inherits the tuning protocol of Section~\ref{sec:retune}, with
 the length scale chosen on a $6{,}000$-row subsample and the winner refit on every row. On the EMIT
-table that costs the isotropic kernel a factor $0.882$; on ClimSim, where the subsample is a
-sixteenth of the solve, re-choosing the scale against the full solve halves it and lowers the
-kernel's error by $3.6\%$; on a $20{,}000$-row corpus it changes nothing. Retuning can move a
-comparison in either direction, and the columns of Table~\ref{tab:corpora} describe the stated
-training and selection procedures.
+table, choosing it with every row in the solve lowers the isotropic kernel's radiance error by a
+factor $0.882$ on average, so the kernel columns of Table~\ref{tab:corpora} describe the stated
+training and selection procedures rather than the best each kernel can reach.
 
 \clearpage
 \section*{Acknowledgements}

@@ -4,7 +4,7 @@ Four ways of choosing the kernel of an exact Matern/Gaussian kernel ridge regres
 the same split and scored once on test, so that the selection criterion is the only thing that
 changes:
 
-  val_iso   isotropic Matern-5/2, scale x nugget grid on validation                 (the baseline)
+  val_iso   isotropic Matern (nu 3/2 or 5/2), scale x nugget grid on validation     (the baseline)
   kf_ard    per-input length scales learned by the kernel-flow loss rho of Owhadi and Yoo
             (rho = 1 - y_c' K_cc^-1 y_c / y_b' K_bb^-1 y_b on random batches, half sub-batches;
             trace form for vector outputs), then the global scale and nugget re-selected on
