@@ -43,6 +43,12 @@ When $\widehat q\ne0$, the same calculation gives the exact forward--inverse lin
 Consequently, on a common set where $|\widehat q|\le Q$ and
 $|\widehat D|\ge\delta>0$, the corresponding unweighted $L^2$ errors obey
 $\|\widehat\rho-\rho\|_2\le(Q/\delta)\|\widehat L-L\|_2$.
+Squaring the link gives $(\widehat L-L)^2=(\widehat D/\widehat q)^2(\widehat\rho-\rho)^2$ at every entry, so a mean
+squared radiance error is a mean squared reflectance error in which each entry carries the weight
+$(\widehat D/\widehat q)^2$, and this weight tends to $t^2/q^4$ as the component errors vanish. Relative to the
+retrieval, the forward metric discounts an entry by the square of its transmission, and two emulators whose
+reflectance errors sit at different transmissions can be ordered one way by radiance and the other way by
+reflectance.
 Without the denominator condition there is no uniform implication from small spectral
 relative radiance error to small reflectance error. For example, take two bands with
 $a=s=0$, $t=(1,\varepsilon)$ and $0<\rho<1$. A predictor with
