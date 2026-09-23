@@ -85,14 +85,14 @@ evaluation domain, not a filter that a retrieval could apply without knowing the
 \centering
 \resizebox{\textwidth}{!}{\input{table_tq_domain}}
 \caption{The main pipeline on the physical domain: the raw arm, mean $\pm$ sample standard deviation
-over [[TQ-SEEDS]] splits. Radiance is the mean relative error in percent, and the all-band column is
+over ten splits. Radiance is the mean relative error in percent, and the all-band column is
 the unrestricted inverse of Table~\ref{tab:tails}. At each floor $\tau_0$, the failed column is the
 percentage of covered entries at which the inversion fails, and $p_{95}$ is the 95th percentile of the
 absolute reflectance error over the successful inversions, in percentage points.}
 \label{tab:tq-domain}
 \end{table}
 
-[[TQ-DOMAIN]]
+On the physical domain every tail shrinks, and the order of the families does not change (Table~\ref{tab:tq-domain}). At the floor $10^{-12}$, which keeps $99.3\%$ of the test entries, the 95th percentile at width 512 runs from $2.66$ points for the kernel on features to $44.9$ for the cubic ridge, against $7.75$ and $70.7$ over all bands, and the stack's falls from $29.4$ to $4.55$. At $10^{-3}$ and $10^{-2}$, with coverage $93.7$--$94.0\%$ and $90.8$--$91.1\%$, the kernel on features and the stack stay below $1.4$ points at both widths. The kernel on features has the smallest 95th percentile at every floor, on every split and at both widths. Failed inversions are few and sit at the smallest transmissions: at $10^{-12}$ they are $1.4$ to $4.4\%$ of the covered entries, and of those, between $69\%$ for the cubic ridge and nearly all for the kernel on features and the stack lie below $10^{-3}T_{\rm train}$; at $10^{-3}$ they are at most $1.4\%$, and at $10^{-2}$ at most $0.4\%$, almost all of them the cubic ridge's and the isotropic kernel's.
 
 \subsection{Training on physically admissible targets}\label{sec:tq-policy}
 The training pipeline standardizes, compresses and fits the targets as they come, including the
@@ -121,7 +121,7 @@ on the same machine, so every paired difference below is taken within one comput
 \centering
 \resizebox{\textwidth}{!}{\input{table_tq_policy}}
 \caption{Training on admissible targets: paired differences from the raw arm, arm minus raw, mean
-$\pm$ sample standard deviation over [[TQ-SEEDS]] splits. Radiance differences are in percentage
+$\pm$ sample standard deviation over ten splits. Radiance differences are in percentage
 points of relative error, albedo differences in percentage points of the relative albedo error, and
 the reflectance percentiles in percentage points; the physical $p_{95}$ uses the floor
 $\tau_0=10^{-12}$. The columns headed lower count the splits on which the arm is below the raw
@@ -135,7 +135,7 @@ arm.}
 \caption{The convex stack against the kernel on features in each arm: the radiance difference, stack
 minus feature kernel, in percentage points, and the ratio of their 95th-percentile reflectance errors
 over all bands and on the physical domain at the three floors; mean $\pm$ sample standard deviation
-over [[TQ-SEEDS]] splits. The column headed lower counts the splits on which the stack has the lower
+over ten splits. The column headed lower counts the splits on which the stack has the lower
 radiance error, and the columns headed $>1$ the splits on which it has the larger tail, over all bands
 and at $\tau_0=10^{-12}$.}
 \label{tab:tq-reversal}
@@ -150,9 +150,26 @@ with transmission below $10^{-3}T_{\rm train}$ ($32.7$ to $33.4\%$). In the test
 of the states are of the kind the filter removes, and their entries inside the physical domain are
 scored like any others.
 
-[[TQ-POLICY]]
+Training on admissible targets improves the components and not the retrieval (Table~\ref{tab:tq-policy}). The albedo error falls for every family, by $0.45$ to $1.22$ points at width 512 and $0.51$ to $1.24$ at width $2{,}000$. On radiance the kernel on the network's features and the stack gain on every split, by $0.013$ and $0.009$ points at width 512 and $0.016$ and $0.017$ at width $2{,}000$. The network itself loses $0.026$ points on average at width 512, on every split, so there, as with the wider network of Section~\ref{sec:scaling}, the result is a worse emulator and a better feature map; at width $2{,}000$ the network is worse on five of the ten splits and $0.011$ points worse on average. The gain comes from the filter and not from the smaller training set: the matched arm raises the feature kernel's radiance error at both widths. At width $2{,}000$ the stack reaches $0.061\%$, against $0.078\%$ when trained on every row. The physical tail moves the other way. At width 512 the 95th percentile at the floor $10^{-12}$ rises for every family on average, by $0.28$ to $3.41$ points, and for each family on at least eight of the ten splits; at width $2{,}000$ it rises on every split for the three families without a network and is mixed for the four built on one. The matched arm separates the causes. For the cubic ridge, the isotropic kernel and the network, the random subset of the same size raises the tail by at most $29\%$ of the filter's rise, so the filter is what raises it; for the kernel on features it raises it by $92\%$ of the filter's rise, so there the cause is the loss of rows; the input-scaled kernel, the corrected network and the stack lie between, at $50$ to $87\%$.
 
-\subsection{Where the reflectance error sits}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{tq_profile_w512.png}
+\caption{Where the admissible targets move the error at width 512: the ratio of the conditional mean
+square $\E[e_R^2\mid t]$ in each arm to that of the raw arm, in six quantile bins of the true
+transmission on the physical domain ($0$--$1$, $1$--$5$, $5$--$10$, $10$--$25$, $25$--$50$ and
+$50$--$100$ percent), one line per family; points are medians over the ten splits and bars the
+interquartile range. The admissible arm raises the error at small transmissions and lowers it in the
+top half; the matched arm, which loses the same number of rows at random, has no such tilt. This
+analysis is exploratory and was not in the written protocol.}
+\label{fig:tq-profile}
+\end{figure}
+
+Figure~\ref{fig:tq-profile} shows where the filter moves the error at width 512. Relative to the raw arm, the admissible arm's conditional mean square $\E[e_R^2\mid t]$ is larger in each of the three bins of the lowest tenth of the transmissions for every family, by factors up to $2.8$ and, for the input-scaled kernel, $4.7$ in the lowest percent, and smaller in the top half for every family, by factors of $0.17$ to $0.79$; in between, the ratio crosses one. The matched arm has no such tilt: its ratios lie between $0.70$ and $1.38$ in every bin for every family but the input-scaled kernel, which is worse by $1.2$ to $2.6$ throughout. Removing the wet, low and oblique states moves error from the transmissions that dominate the forward metric to those that dominate the retrieval, which is the trade that Theorem~\ref{thm:profile} prices: the profile of the error in $t$, not its mean, sets the tail. At width $2{,}000$ the network does not show the tilt in the lowest bins, in line with the mixed tails there.
+
+The reversal survives all three policies (Table~\ref{tab:tq-reversal}). In every arm the stack has the larger 95th percentile on every split, over all bands and at every floor: at width 512 in the raw arm by factors of $2.63$ to $4.94$ over all bands, $1.56$ to $1.87$ at $10^{-12}$ and $1.10$ to $1.30$ at $10^{-2}$, while its radiance error is lower on every split. At width $2{,}000$ the two are level on radiance in the raw arm, the stack lower on eight of ten splits by $0.0006$ points on average, and the tail ratio stays above one everywhere. The ratio shrinks as the floor rises, which is what Theorem~\ref{thm:transfer} leads one to expect: the stack's excess error sits at the smallest transmissions.
+
+\subsection{Where the reflectance error sits}\label{sec:walls}
 
 \begin{figure}[p]
 \centering
@@ -191,7 +208,7 @@ violates the pointwise inequality. For every family each wall lies in the set of
 bound's 95th percentile exceeds two points; that set is larger by 8 to 21 bands, and on the walls
 the bound exceeds the realized 95th percentile by a median factor of $1.30$ to $1.38$, depending on
 the family, and never by more than $4.5$. The bands marked by the bound for all six families
-number 64 and include the whole common core of 54.
+number 64 and include the whole common core of 54. The same holds on every split at both widths: no entry violates the inequality, every wall of every family lies in the marked set, which is larger by 4 to 85 bands, and on the walls the bound exceeds the realized 95th percentile by median factors of $1.29$ to $1.43$.
 
 \subsection{A fresh partition, fixed in advance}\label{sec:confirm}
 The comparisons above use partitions that were in view while the families were developed. To test
@@ -268,9 +285,21 @@ on at least nine of the ten splits.
 \begin{table}[t]
 \centering
 \resizebox{\textwidth}{!}{\input{table_lrt}}
-\caption{The pipeline on libRadtran, mean $\pm$ sample standard deviation over [[LRT-SEEDS]] splits,
+\caption{The pipeline on libRadtran, mean $\pm$ sample standard deviation over ten splits,
 with the columns of Table~\ref{tab:tq-domain}.}
 \label{tab:lrt}
 \end{table}
 
-[[LRT-RESULTS]]
+Table~\ref{tab:lrt} gives the result. H1 holds on six of the ten splits and is not confirmed: the lowest radiance error belongs to the input-scaled kernel on eight splits and to the convex stack on two splits, and the lowest all-band tail to the convex stack on four splits, to the input-scaled kernel on three splits and to the kernel on features on three splits. H2 holds on five of the ten splits and is not confirmed: the stack is no worse than the kernel on features on radiance on every split and has the larger all-band tail on five of the ten splits, the ratio of the two 95th percentiles ranging from $0.92$ to $1.13$. H3 holds on nine of the ten splits and is confirmed: Kendall's $\tau$ between the radiance and tail rankings, $0.52$ to $0.90$ over all bands, rises to $0.81$ to $1.00$ above $10^{-3}T_{\rm train}$.
+
+One band sets the all-band tail (Figure~\ref{fig:lrt-bands}). At B10 every family loses the retrieval: its 95th percentile is $70$ points, the error of a constrained retrieval that returns zero at $\rho=0.7$. On the other twelve bands the largest per-band 95th percentile is $0.56$ to $3.44$ points, and band by band the stack and the kernel on features differ by at most $0.03$ points. Away from B10 every transmission exceeds $0.14$, so the factor $1/t$ in Theorem~\ref{thm:transfer} stays below $8$, whereas on the EMIT table $5.5\%$ of the test entries have transmissions between $10^{-12}$ and $10^{-3}$ times $T_{\rm train}$. Without such transmissions Theorem~\ref{thm:transfer} bounds the retrieval error at every entry by about seven times the retrieval-weighted component error. The stack's all-band tail is $0.92$ to $1.13$ times that of the kernel on features, against $2.63$ to $4.94$ on the EMIT table at width 512, and since the two differ by at most $0.03$ points on the other bands, the difference comes from B10.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{lrt_band_p95.png}
+\caption{The 95th percentile of the constrained retrieval error on libRadtran at $\rho=0.7$, band by
+band and family by family, in percentage points, over the test states of all ten splits; the colour
+scale is logarithmic. At B10 the retrieval of every family returns zero on at least five percent of
+the states.}
+\label{fig:lrt-bands}
+\end{figure}

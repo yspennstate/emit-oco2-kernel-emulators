@@ -36,7 +36,7 @@ a wide feature kernel by only $0.0006$ radiance percentage points, yet its 95th-
 reflectance error is larger at every partition, three times larger on average. We prove that on the physical domain
 the constrained retrieval error is at most the retrieval-weighted component error divided by
 the transmission, with constant one, that the rate this implies is sharp, and that errors
-proportional to the transmission lose no rate. [[TQ-ABSTRACT]]
+proportional to the transmission lose no rate. The reversal persists on the physical domain of the retrieval and when every family is retrained on physically admissible targets only; on a second radiative-transfer code, whose transmissions stay away from zero outside one opaque band, it is much weaker.
 \end{abstract}
 
 \section{Introduction}
@@ -71,7 +71,8 @@ accurate as the input-scaled kernel. A wider network is a worse emulator but a b
 map: from width 512 to width 2{,}000 the network's own radiance error doubles while the error
 of a kernel on its features falls by a fifth. Concatenating the hidden features of five
 networks and solving one kernel on them improves on the features of a single network at every
-partition and gives the lowest radiance error of all the ten-partition comparisons.
+partition, and among the models fitted to every row of the table on all ten partitions it has the
+lowest radiance error. Refitting after dropping every training state with an entry outside the physical domain improves the kernel on the network's features on every partition at both widths, and at width 512 it does so while the network itself gets worse, as widening does (Section~\ref{sec:tq-policy}).
 
 The central empirical result concerns the inverse. The stack built on the wide network
 improves mean radiance error over its own feature kernel by $0.0006$ percentage points, while
@@ -79,8 +80,8 @@ its mean within-split 95th-percentile reflectance error rises from $7.57$ to $22
 and the tail is worse at all ten partitions. Small forward gains can therefore coexist with
 large changes in the tail of the retrieval error. The reversal is not produced by the few
 entries where the inverse is undefined: it persists on the physical domain of the retrieval,
-with coverage and failure counts reported, [[TQ-INTRO]] and on a fresh partition evaluated
-once under a hypothesis fixed in advance.
+with coverage and failure counts reported, after retraining on physically admissible targets only, and on a fresh partition evaluated
+once under a hypothesis fixed in advance. On a second radiative-transfer code, whose transmissions stay above $0.14$ away from one opaque band, it is much weaker (Section~\ref{sec:lrt}).
 
 The analysis has three levels. Exact finite-perturbation identities relate radiance and
 reflectance errors through the inverse denominator. A transfer inequality with constant one
@@ -302,8 +303,9 @@ opaque bands.
 All models are trained per component and evaluated in physical units after undoing the
 standardization. Unless stated otherwise they regress the 64 leading principal coefficients of
 the standardized component. Every hyperparameter named below is selected on the validation
-rows of the split at hand. The comparisons of Sections~\ref{sec:results}--\ref{sec:retune}
-run on CPUs; most diagnostics of Sections~\ref{sec:results-transfer}--\ref{sec:results-benchmarks}
+rows of the split at hand. The comparisons of Sections~\ref{sec:results}--\ref{sec:scaling} and
+of Section~\ref{sec:retune} run on CPUs; most of the diagnostics of Sections~\ref{sec:results-transfer}
+and~\ref{sec:results-stacks} and of Sections~\ref{sec:results-representation}--\ref{sec:results-benchmarks}
 train their networks on one T4 GPU.
 
 \paragraph{Reference family.} Cubic polynomial ridge regression \cite{hoerl} on all monomials of
@@ -620,8 +622,8 @@ residual fitting cuts the network's error by almost a factor of three; and a ker
 features matches the input-scaled kernel with one network and beats it with several. The width
 experiment separates the two roles of a network: the width-2{,}000 network is the worse emulator
 and the better feature map. Concatenating the features of an ensemble and solving one kernel on
-them gives the lowest radiance error and the smallest reflectance tail of the ten-partition
-comparisons, with one solve in place of a stack.
+them gives the lowest radiance error of the models fitted to every row and the smallest reflectance
+tail of the ten-partition comparisons, with one solve in place of a stack.
 
 Forward and inverse rankings still differ. The input-scaled kernel has the smallest median
 reflectance error of the main comparison, while the feature kernels have the smallest
@@ -631,9 +633,9 @@ accompanies an increase from $7.57$ to $22.71$ points in the mean within-split 9
 reflectance error. Neither a single forward score nor a reflectance median describes this.
 Section~\ref{sec:domain} shows that the effect is a property of the emulators: it holds on the
 physical domain of the retrieval, with coverage and failures reported,
-[[TQ-DISCUSSION]] and on a fresh partition read once under a hypothesis fixed beforehand, where
+after every family is retrained on physically admissible targets only, and on a fresh partition read once under a hypothesis fixed beforehand, where
 the stack-to-feature-kernel ratios of the tail are $6.60$ over all bands and $5.54$ on the
-admissible domain.
+admissible domain. Retraining on those targets improves the components and not the retrieval: it lowers the albedo error of every family and, at width 512, raises the retrieval tail of every family on average, since the states it removes hold a third of the training entries with the smallest transmissions. On libRadtran, where the transmission stays above $0.14$ away from one opaque band, the reversal is much weaker, and what remains of it comes from that band. Both findings fit the account that follows, in which the tail of the retrieval error is set by the component errors at the smallest transmissions.
 
 Theorem~\ref{thm:transfer} explains why such a reversal is possible. On the physical domain the
 constrained retrieval error is at most $e_R/t$, capped at $R$, with constant one, and a

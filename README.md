@@ -18,16 +18,28 @@ networks reaches 0.076%.
 
 Forward and inverse rankings disagree. The convex stack built on the width-2,000 network improves on its own feature
 kernel by 0.0006 radiance percentage points, while its mean within-split 95th-percentile reflectance error is 22.71
-points against 7.57, larger at every partition. [[README-DOMAIN]]
+points against 7.57, larger at every partition.
+On the physical domain of the retrieval, scored with its coverage and failed inversions, the order persists at a
+smaller ratio: at the transmission floor 1e-12 the stack's 95th percentile is 1.6 to 1.9 times the feature kernel's at
+width 512, and the ratio is above one at every floor, on every split. On a fresh partition evaluated once under a
+hypothesis fixed in advance, the ratio is 6.60 over all bands and 5.54 on the screened entries.
 
 The analysis proves that on the physical domain the constrained retrieval error is at most the retrieval-weighted
 component error divided by the transmission, with constant one; that the rate this implies is sharp; and that
 component errors proportional to the transmission lose no rate. Applied band by band, the bound marks in advance the
 bands where the retrieval error is large.
 
-[[README-TQ]]
+Retraining every family only on physically admissible targets lowers the albedo error of every family and, at both
+widths, the radiance error of the feature kernel and the stack (the wide stack to 0.061%); the network itself gets
+worse at width 512 and is mixed at width 2000. At width 512 it also raises the 95th-percentile retrieval error on the
+physical domain for every family on average, and for each family on at least 8 of 10 splits: the filter moves
+component error toward the smallest transmissions, where the retrieval divides by them.
 
-[[README-LRT]]
+On a second radiative-transfer code, libRadtran over the thirteen Sentinel-2 bands (9,722 states, ten splits), the
+reversal is much weaker: the hypothesis that the stack is no worse on radiance and worse in the tail holds on 5 of 10
+splits, and the stack's all-band tail is 0.92 to 1.13 times the feature kernel's, against 2.6 to 4.9 on the EMIT
+table. Away from band B10, which is nearly opaque and where the remaining difference lies, every transmission exceeds
+0.14, so the division by the transmission amplifies component error by at most about seven times.
 
 ## Layout
 

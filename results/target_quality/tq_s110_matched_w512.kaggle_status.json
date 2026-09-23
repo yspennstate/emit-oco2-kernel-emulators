@@ -1,0 +1,11 @@
+{
+ "stage": "done",
+ "ok": true,
+ "train_min": 94.3,
+ "score_rc": 0,
+ "tag": "tq_s110_matched_w512",
+ "seed": 110,
+ "policy": "matched-unfiltered",
+ "config": "w512",
+ "elapsed_min": 95.4
+}

@@ -1,0 +1,141 @@
+{
+ "tag": "lrtc_s106_w512",
+ "rho": 0.7,
+ "R": 0.9,
+ "S": 1.0,
+ "domain_fraction": 1.0,
+ "families": {
+  "ridge3": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 11,
+   "walls_bound": 12,
+   "bound_walls_not_actual": 1,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 2.0476034757447716,
+   "p95_ratio_on_actual_walls_median": 2.147180442295013,
+   "p95_ratio_on_actual_walls_max": 2.5758506791142888,
+   "failures_on_domain": 273,
+   "walls_actual_bands": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "walls_bound_bands": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ]
+  },
+  "dnn": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 1,
+   "walls_bound": 4,
+   "bound_walls_not_actual": 3,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 1.90938806382946,
+   "p95_ratio_on_actual_walls_median": 1.2857142857142858,
+   "p95_ratio_on_actual_walls_max": 1.2857142857142858,
+   "failures_on_domain": 199,
+   "walls_actual_bands": [
+    10
+   ],
+   "walls_bound_bands": [
+    0,
+    1,
+    2,
+    10
+   ]
+  },
+  "dnn_corr": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 1,
+   "walls_bound": 3,
+   "bound_walls_not_actual": 2,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 2.0549261918052246,
+   "p95_ratio_on_actual_walls_median": 1.2857142857142858,
+   "p95_ratio_on_actual_walls_max": 1.2857142857142858,
+   "failures_on_domain": 150,
+   "walls_actual_bands": [
+    10
+   ],
+   "walls_bound_bands": [
+    0,
+    1,
+    10
+   ]
+  },
+  "ard": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 1,
+   "walls_bound": 1,
+   "bound_walls_not_actual": 0,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 2.257502315660663,
+   "p95_ratio_on_actual_walls_median": 1.2857142857142858,
+   "p95_ratio_on_actual_walls_max": 1.2857142857142858,
+   "failures_on_domain": 124,
+   "walls_actual_bands": [
+    10
+   ],
+   "walls_bound_bands": [
+    10
+   ]
+  },
+  "dkr": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 1,
+   "walls_bound": 1,
+   "bound_walls_not_actual": 0,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 2.127014460219349,
+   "p95_ratio_on_actual_walls_median": 1.2857142857142858,
+   "p95_ratio_on_actual_walls_max": 1.2857142857142858,
+   "failures_on_domain": 123,
+   "walls_actual_bands": [
+    10
+   ],
+   "walls_bound_bands": [
+    10
+   ]
+  },
+  "stack": {
+   "pointwise_violations_on_domain": 0,
+   "walls_actual": 1,
+   "walls_bound": 1,
+   "bound_walls_not_actual": 0,
+   "actual_walls_not_bound": 0,
+   "p95_ratio_bound_over_actual_median": 2.122359462524883,
+   "p95_ratio_on_actual_walls_median": 1.2857142857142858,
+   "p95_ratio_on_actual_walls_max": 1.2857142857142858,
+   "failures_on_domain": 115,
+   "walls_actual_bands": [
+    10
+   ],
+   "walls_bound_bands": [
+    10
+   ]
+  }
+ },
+ "core_actual": 1,
+ "core_bound": 1,
+ "core_bound_not_actual": 0,
+ "core_actual_not_bound": 0
+}

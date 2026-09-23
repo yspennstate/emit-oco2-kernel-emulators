@@ -1,0 +1,11 @@
+{
+ "stage": "done",
+ "ok": true,
+ "train_min": 107.7,
+ "score_rc": 0,
+ "tag": "tq_s110_admissible_w512",
+ "seed": 110,
+ "policy": "admissible",
+ "config": "w512",
+ "elapsed_min": 109.2
+}
