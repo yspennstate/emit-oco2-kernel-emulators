@@ -72,7 +72,8 @@ for k in FAMILIES:
                               p95_ratio_bound_over_actual_median=float(np.median(ratio)),
                               p95_ratio_on_actual_walls_median=float(np.median(ratio[sorted(wa)])) if wa else None,
                               p95_ratio_on_actual_walls_max=float(np.max(ratio[sorted(wa)])) if wa else None,
-                              failures_on_domain=int(np.sum((den <= 0) & DOM)))
+                              failures_on_domain=int(np.sum((den <= 0) & DOM)),
+                              walls_actual_bands=sorted(wa), walls_bound_bands=sorted(wb))
 core_a = set.intersection(*walls_actual.values())
 core_b = set.intersection(*walls_bound.values())
 out.update(core_actual=len(core_a), core_bound=len(core_b), core_bound_not_actual=len(core_b - core_a),
