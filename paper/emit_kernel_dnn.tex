@@ -379,15 +379,15 @@ component error to $0.63\%$ and the median reflectance error to $0.036$ percenta
 fitted scales reflect the weak azimuth dependence of the flux components: the relative-azimuth
 length scale is sixteen to thirty-two times the others, with median factors of sixteen for
 direct flux and albedo and thirty-two for diffuse flux, on every split for the flux components
-and on nine of ten for albedo. The view-zenith scales are two to sixteen times longer, and the
-path-radiance metric is nearly isotropic.
+and on nine of ten for albedo. The view-zenith scales are four to sixteen times longer for the
+fluxes and the albedo, and the path-radiance metric is nearly isotropic.
 
 \paragraph{Networks and kernel corrections.}
 The network has $1.22\%$ mean component error and $0.387\%$ radiance error; averaging five
 initializations gives $0.96\%$ and $0.251\%$. Residual kernel regression reduces the radiance
 error of the single network to $0.141\%$ and that of the ensemble to $0.123\%$. The feature
 kernel has $0.61\%$ mean component error and $0.098\%$ radiance error, level with the
-input-scaled kernel: it is lower on six of ten splits, though its mean is slightly higher. Its
+input-scaled kernel: it is lower on four of ten splits, and its mean is slightly higher. Its
 median reflectance error, $0.054$ points against $0.036$, is larger on every split.
 
 \paragraph{Selection and stacking.}
@@ -401,13 +401,14 @@ the input-scaled kernel at nine splits, by $0.06\pm0.05$ points, and on the feat
 ten, by $0.047\pm0.006$ points.
 
 The residual second moments show why a combination can help. On path radiance, the residuals
-of the isotropic kernel and of the five-network ensemble have correlation $0.27\pm0.09$, below
-their error ratio of about $0.34$ at every split; for a quadratic loss this is the classical
+of the isotropic kernel and of the five-network ensemble, each divided by the norm of the true
+spectrum, have correlation $0.27\pm0.10$, below their error ratio of about $0.34$ at every
+split; for a quadratic loss this is the classical
 condition under which a convex combination improves on its better member
 \cite{bates-granger,nmkc}. The stack minimizes a mean relative norm instead, and the reflectance
 is a nonlinear function of the components, so the condition is suggestive rather than
 decisive for those metrics. The two residual-corrected predictors are far more strongly
-correlated, about $0.88$ on path radiance and $0.99$ on albedo.
+correlated, about $0.88$ on path radiance and $0.995$ on albedo.
 
 \paragraph{Spherical albedo.}
 Albedo has the largest relative error for every family: its small values in the short-wave

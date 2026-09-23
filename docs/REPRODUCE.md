@@ -54,6 +54,13 @@ quantile of the pooled errors. `make_emit_tables.py` also writes `results/emit_t
 and the digests of the records it read; `make_tables.py` prints the paired counts and replication figures quoted in
 the text.
 
+The residual correlations of Section 5 are in `results/emit/emit_secmom.json`, written from the test predictions of
+the ten main runs by
+
+```sh
+EMIT_DATA=/path/to/emit python code/residual_moments.py /path/to/predictions
+```
+
 The round-trip errors on the exact components in Section 6.1 are printed by `results/confirmation/domain_audit.py`;
 its output is `domain_audit.log` beside it.
 
