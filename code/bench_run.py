@@ -190,9 +190,9 @@ def krr_fit_predict(Ftr, Fva, Fte, Ytr_, val_fn, w=None, label="krr"):
     With --tune_refine k the scale is then refined on VALIDATION against the solve that actually runs, over k octaves
     either side of the subsample winner. The tuning subsample is a third to a twentieth of the solve, and a tuning set
     smaller than its solve supports a LONGER length scale than the solve does, so the subsample protocol over-smooths:
-    measured on the EMIT table (paper 2, Section 5.1), the subsample picks twice the median pairwise distance where the
-    full block picks once it in 17 of 36 cells and never the other way, and correcting it lowered the isotropic
-    kernel's error by a factor 0.885 and removed the flattening at the top of its learning curve."""
+    on the EMIT table (the manuscript's paragraph on tuning with every row in the solve) the full block picks a shorter
+    length scale than the subsample in 26 of 40 component-split cells and a longer one in 2, and tuning on the full
+    block lowers the isotropic kernel's radiance error by a factor of 0.882 on average."""
     if w is not None:
         Ftr, Fva, Fte = Ftr * w, Fva * w, Fte * w
     Fs = Ftr[sub_tune]; D2s, D2vs = sqd(Fs, Fs), sqd(Fva, Fs)

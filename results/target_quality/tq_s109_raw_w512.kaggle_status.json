@@ -1,0 +1,11 @@
+{
+ "stage": "done",
+ "ok": true,
+ "train_min": 118.3,
+ "score_rc": 0,
+ "tag": "tq_s109_raw_w512",
+ "seed": 109,
+ "policy": "raw",
+ "config": "w512",
+ "elapsed_min": 119.4
+}
