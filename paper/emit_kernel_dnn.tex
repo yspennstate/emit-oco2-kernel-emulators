@@ -115,8 +115,12 @@ parameterizations behave when the host model is stepped forward \cite{rasp,breno
 spectroscopy and land-surface inference the same idea appears as emulator toolboxes for
 radiative-transfer models \cite{rivera,verrelst}, Gaussian-process emulation for parameter
 retrieval \cite{gomezdans}, and the wider use of Gaussian processes in earth observation
-\cite{campsvalls}; \cite{srtmnet} places an emulator inside a reflectance retrieval and
-\cite{lamminpaa} fits a cross-validated Gaussian process to the OCO-2 forward model. Replacing an
+\cite{campsvalls}. For the transfer functions of atmospheric correction, \cite{vicentmodtran}
+compared regression algorithms on MODTRAN simulations, found Gaussian processes and kernel ridge
+regression the most accurate, and used the best emulator for the correction itself, with its
+largest reflectance errors in the absorption bands; \cite{srtmnet} places an emulator inside a
+reflectance retrieval and \cite{lamminpaa} fits a cross-validated Gaussian process to the OCO-2
+forward model. Replacing an
 expensive simulator by a statistical model is a classical problem \cite{sacks}, as are calibrating
 it against observations \cite{kennedycalib} and using a cheap model to inform an expensive one
 \cite{kennedyohagan,perdikaris}, surveyed for

@@ -29,6 +29,7 @@ seeds = [r["seed"] for r in runs]
 fig, axes = plt.subplots(1, 2, figsize=(13, 4.6), sharey=True)
 out = {"config": CFG, "seeds": seeds, "median_ratio": {}}
 x = np.arange(len(BINS))
+yr = [np.inf, 0.0]
 for ax, arm in zip(axes, ("admissible", "matched")):
     for j, (k, lab) in enumerate(FAMILIES):
         R = np.array([[v if v else np.nan for v in r["families"][k][f"{arm}_over_raw_eR2"]] for r in runs
@@ -40,11 +41,16 @@ for ax, arm in zip(axes, ("admissible", "matched")):
         out["median_ratio"][f"{arm}/{k}"] = [float(v) for v in med]
         off = (j - len(FAMILIES) / 2) * 0.06
         ax.errorbar(x + off, med, yerr=[med - lo, hi - med], marker="o", ms=4, lw=1.2, capsize=2, label=lab)
+        pos = lo[np.isfinite(lo) & (lo > 0)]
+        if len(pos):
+            yr[0] = min(yr[0], float(pos.min()))
+        yr[1] = max(yr[1], float(np.nanmax(hi)))
     ax.axhline(1.0, color="k", lw=0.6, ls=":")
     ax.set_yscale("log")
     ax.set_xticks(x, BINS)
     ax.set_xlabel("transmission quantile bin [%]")
     ax.set_title(f"{arm} / raw")
+axes[0].set_ylim(min(yr[0], 1.0) / 1.5, max(yr[1], 1.0) * 1.5)   # the axes share y
 axes[0].set_ylabel(r"$\mathbb{E}[e_R^2\mid t]$ ratio")
 axes[1].legend(fontsize=9, loc="upper right")
 fig.tight_layout()

@@ -116,7 +116,10 @@ tables evaluate; the last needs no power law. Both are computable on a finite te
 statement whose tail hypothesis a finite table cannot establish down to $t=0$. The exponent in (iii) cannot be
 improved from its hypotheses. Item (i) holds entry by entry, so it passes to quantiles: on any set of entries, a
 single band for instance, every quantile of $|\bar\rho-\rho|$ is at most the same quantile of $\min\{R,e_R/t\}$,
-which depends only on the component errors and the true transmission.
+which depends only on the component errors and the true transmission. In Bayesian inversion the corresponding
+statements bound the Hellinger distance between the true posterior and one built on a Gaussian-process emulator by
+moments of the emulator's error \cite{stuartteckentrup}; here the inverse is deterministic and the weight of each
+entry, $1/t$, is explicit.
 
 \begin{proposition}[the exponent is attained]\label{prop:attained}
 For every $\beta>0$, every $0<c<r_0<R$ and every $\tau\in(0,1)$ there are an evaluation distribution and a predictor
