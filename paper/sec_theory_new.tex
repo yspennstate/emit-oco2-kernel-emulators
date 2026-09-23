@@ -332,10 +332,13 @@ which tends to $1+c^2/b^2$ as $\delta\to0$ and equals $(1+\delta^2)^2/(4\delta^2
 $c=b/\delta$. For every $\tau\le\delta$ the transmission-weighted objective $J_\tau$ of
 \eqref{eq:Jtau} equals $E$.
 \item Suppose instead that $s=0$ at every entry, that every head predicts $t$ and $s$ exactly,
-that $t_{\min}\le t\le t_{\max}$ $P$-almost surely, and that the retrieval of every combination
-lies in $[0,R]$. Then
+and that the retrieval of every combination lies in $[0,R]$. Let $\mathcal L$ be the linear span of
+the heads' path-radiance errors, and let $\lambda_{\max}$ and $\lambda_{\min}$ be the supremum and the
+infimum of $\E_P[r^2/t^2]/\E_P[r^2]$ over $r\in\mathcal L$ with $\E_Pr^2>0$. Then
 \[
-E(w_f)\le\Bigl(\frac{t_{\max}}{t_{\min}}\Bigr)^2E(w_r).
+E(w_f)\le\frac{\lambda_{\max}}{\lambda_{\min}}\,E(w_r),\qquad
+\frac{\lambda_{\max}}{\lambda_{\min}}\le\Bigl(\frac{t_{\max}}{t_{\min}}\Bigr)^2
+\ \text{ if }\ t_{\min}\le t\le t_{\max}\ P\text{-almost surely.}
 \]
 \end{enumerate}
 \end{proposition}
@@ -345,12 +348,16 @@ The weights that minimize the forward error put almost all their mass on the hea
 sits at the opaque entry, because there it costs little radiance; the retrieval divides that
 error by $\delta$ and pays for it in full. With $c/b$ large the forward-optimal stack is better
 than either head in radiance and worse than the retrieval-optimal stack by any factor in the
-inverse, which is the pattern of Table~\ref{tab:tails} in miniature. Item (ii) bounds the loss by
-the squared dynamic range of the transmission, and item (i) at $c=b/\delta$ comes within a
-factor of four of the bound. On the physical domain of the EMIT table the transmission spans
-about twenty-four decades, and thirteen above the floor $10^{-12}T_{\rm train}$ of
-Section~\ref{sec:tq-domain}, so the bound gives no control of the retrieval for weights fitted
-on a forward loss; the bound \eqref{eq:Jtau-bound} for $J_\tau$ does not involve the range.
+inverse, which is the pattern of Table~\ref{tab:tails} in miniature. Item (ii) says when this can
+happen. The ratio $\lambda_{\max}/\lambda_{\min}$ measures how unequally the transmission weights
+the directions of error available to the combination: it equals one when every error in
+$\mathcal L$ has the same transmission profile, and it is large only when the heads put their
+errors at different transmissions, as the two heads of item (i) do. In that example it equals
+$\delta^{-2}$, and the ratio $E(w_f)/E(w_r)$ at $c=b/\delta$ comes within a factor of four of it.
+Without such structure the bound falls back on the squared dynamic range of the transmission,
+which on the physical domain of the EMIT table spans about twenty-four decades, and thirteen above
+the floor $10^{-12}T_{\rm train}$ of Section~\ref{sec:tq-domain}. The bound \eqref{eq:Jtau-bound}
+for $J_\tau$ involves neither quantity.
 
 \paragraph{Numerical weights and threshold convention.}
 The driver solves a nonnegative least-squares problem with a heavily weighted row penalizing

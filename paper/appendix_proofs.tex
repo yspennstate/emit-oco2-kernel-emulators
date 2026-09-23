@@ -110,14 +110,17 @@ $\widetilde e_t=\widetilde e_s=0$ and $\tau\le\delta\le1$, the weights $(t_i\vee
 (ii) With $s=\widehat s=0$ and $\widehat t=t$, the predicted radiance at $\rho$ is
 $\widehat a+\rho t$, so its error is the path-radiance error $r_w$ of the combination, and the
 retrieval evaluates $(L-\widehat a)/t=\rho-r_w/t$, which lies in $[0,R]$ by hypothesis. Hence
-$F(w)=\E_Pr_w^2$ and $E(w)=\E_P[r_w^2/t^2]$. Pointwise
-$r_w^2/t_{\max}^2\le r_w^2/t^2\le r_w^2/t_{\min}^2$, so $F\le t_{\max}^2E$ and
-$E\le t_{\min}^{-2}F$ for every $w$, and
+$F(w)=\E_Pr_w^2$ and $E(w)=\E_P[r_w^2/t^2]$. Since the weights sum to one, $r_w$ lies in
+$\mathcal L$, so $\lambda_{\min}F(w)\le E(w)\le\lambda_{\max}F(w)$ for every $w$ (both sides vanish
+when $\E_Pr_w^2=0$), and
 \[
-E(w_f)\le t_{\min}^{-2}F(w_f)\le t_{\min}^{-2}F(w_r)\le\Bigl(\frac{t_{\max}}{t_{\min}}\Bigr)^2E(w_r).
+E(w_f)\le\lambda_{\max}F(w_f)\le\lambda_{\max}F(w_r)\le\frac{\lambda_{\max}}{\lambda_{\min}}\,E(w_r).
 \]
-In the example of (i), $t_{\max}/t_{\min}=1/\delta$, and the ratio at $c=b/\delta$ is at least
-$\delta^{-2}/4$.
+If $t_{\min}\le t\le t_{\max}$ almost surely, then
+$r^2/t_{\max}^2\le r^2/t^2\le r^2/t_{\min}^2$ pointwise, so $\lambda_{\max}\le t_{\min}^{-2}$ and
+$\lambda_{\min}\ge t_{\max}^{-2}$. In the example of (i), $\mathcal L=\mathbb R^2$ and the ratio
+$\tfrac12(r_1^2+r_2^2/\delta^2)/\tfrac12(r_1^2+r_2^2)$ runs from $1$ to $\delta^{-2}$, while
+$E(w_f)/E(w_r)$ at $c=b/\delta$ is at least $\delta^{-2}/4$.
 \end{proof}
 
 \begin{proof}[Proof of Proposition~\ref{prop:perturb}]
