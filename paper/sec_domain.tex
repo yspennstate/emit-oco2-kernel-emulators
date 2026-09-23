@@ -140,6 +140,15 @@ larger tail, over all bands and at $\tau_0=10^{-12}$.}
 \label{tab:tq-reversal}
 \end{table}
 
+The filter is not neutral. The states it removes, $18.8$ to $19.3\%$ of each training block, are wet,
+low and oblique: at split 101 their median water-vapour column is $5.1$\,cm against $3.0$\,cm for the
+states kept, their median elevation $1.1$\,km against $3.4$\,km and their median solar zenith angle
+$41.7^\circ$ against $30.5^\circ$, and the smallest transmission of the median removed state is
+$2\times10^{-15}$ against $1\times10^{-5}$. On every split they hold a third of the training entries
+with transmission below $10^{-3}T_{\rm train}$ ($32.7$ to $33.4\%$). In the test blocks $18$ to $20\%$
+of the states are of the kind the filter removes, and their entries inside the physical domain are
+scored like any others.
+
 [[TQ-POLICY]]
 
 \subsection{Where the reflectance error sits}
