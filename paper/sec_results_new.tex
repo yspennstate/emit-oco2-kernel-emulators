@@ -71,8 +71,8 @@ buys much more.
 \section{Representation, correction and combination}\label{sec:results-representation}
 
 \paragraph{Concatenated features.}
-Table~\ref{tab:v2-replication} repeats the three-member width-2000 experiment of
-Section~\ref{sec:scaling} on splits 104--107, with the networks trained on one GPU.
+Table~\ref{tab:v2-replication} gives the three-member width-2000 experiment of
+Section~\ref{sec:scaling} split by split, with the networks trained on one GPU.
 
 \begin{table}[p]
 \centering
@@ -88,7 +88,7 @@ The concatenated-feature kernel has mean radiance error $0.0688\%$, against $0.0
 features of one network; the paired gain is $0.0076\pm0.0053$ percentage points, positive on
 three splits and $-0.0002$ on the fourth. Its mean within-split 95th-percentile reflectance error
 is $5.99$ points, against $7.51$ for single-member features and $14.35$ for the stack. With the
-ten width-512 splits of Section~\ref{sec:scaling} this makes three settings, with different
+ten width-512 splits of Section~\ref{sec:scaling} this makes two settings, with different
 networks on overlapping splits, in which concatenation lowers both the radiance error and the
 reflectance tail.
 

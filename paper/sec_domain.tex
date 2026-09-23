@@ -223,14 +223,14 @@ trained with Adam, not the network of Table~\ref{tab:results}.}
 \end{table}
 
 The reversal reproduces (Table~\ref{tab:confirm}). The convex stack has the lowest radiance error of
-the six, $0.0687\%$, and the fourth-lowest reflectance tail; the kernel on learned features has a
+the six, $0.0687\%$, and the second-lowest reflectance tail; the kernel on learned features has a
 larger radiance error, $0.0828\%$, and an all-band 95th percentile smaller by a factor of $6.60$, and
 by $5.54$ on the screened entries. Both factors are close to the $6.13$ and $4.99$ of the same
 pipeline on its development split, seed 101. The second clause of the hypothesis fails: the stack's
 all-band 95th percentile is $25.82$ points and the corrected network's $26.07$, smaller by $0.25$
 points where the hypothesis required it to be larger. The qualitative statement survives a single
-read of a fresh partition, while the order among the four intermediate families does not separate at
-this sample size.
+read of a fresh partition, while the stack, the corrected network and the input-scaled kernel, whose
+tails lie within about a point of one another, do not separate at this sample size.
 
 \subsection{A second radiative-transfer code}\label{sec:lrt}
 Every comparison so far concerns one simulator and one table. The corpus of \cite{pkan} pairs 6S

@@ -377,9 +377,11 @@ $2.3$--$2.9\%$: steadier than the subset fit, but larger than that fit on its se
 splits. A separate length scale for each input brings the radiance error to $0.095\%$, the mean
 component error to $0.63\%$ and the median reflectance error to $0.036$ percentage points. The
 fitted scales reflect the weak azimuth dependence of the flux components: the relative-azimuth
-length scale is sixteen to thirty-two times the others, with median factors of sixteen for
-direct flux and albedo and thirty-two for diffuse flux, on every split for the flux components
-and on nine of ten for albedo. The view-zenith scales are four to sixteen times longer for the
+length scale is sixteen to thirty-two times the median of the other five, with median factors of
+sixteen for direct flux and albedo and thirty-two for diffuse flux, on every split for the flux
+components and on nine of ten for albedo. In each of these twenty-nine cells the search has
+lengthened that scale sixteenfold, the most its two sweeps allow, so the true factors may be
+larger. The view-zenith scales are four to sixteen times longer for the
 fluxes and the albedo, and the path-radiance metric is nearly isotropic.
 
 \paragraph{Networks and kernel corrections.}
@@ -562,10 +564,10 @@ this describes the trained networks rather than width as such. The exact kernel 
 last-layer features reaches $0.079\%$ on radiance against $0.098\%$ on the $512$-unit features;
 it is below the per-input kernel's $0.095\%$ on all ten splits and below the stack of
 Table~\ref{tab:results} on nine, and on the two flux components, at $0.13\%$ and $0.08\%$, it is at
-or below every row of that table. The convex stack over the wide pipeline's heads has the lowest
-mean radiance error of the ten-split comparisons, $0.078\%$, with a median reflectance error of
-$0.043$ points, below the stack of Table~\ref{tab:results} on nine of ten splits; the
-per-coordinate selection over the same heads again does not help. The residual correction of the
+or below every row of that table. The convex stack over the wide pipeline's heads reaches
+$0.078\%$, below the stack of Table~\ref{tab:results} on nine of ten splits, with a median
+reflectance error of $0.043$ points; the per-coordinate selection over the same heads again does
+not help. The residual correction of the
 wider network is slightly worse than that of the narrower one. A $3\times1000$ network on the same
 ten splits sits between the two: the network at $0.72\%$, the kernel on its features at $0.088\%$.
 From $512$ to $2{,}000$ units the network's own error rises with width while the error of a kernel
@@ -581,10 +583,11 @@ every split by $0.022\pm0.003$ points, and $0.039$ against $0.054$ points of med
 error. Its mean within-split 95th-percentile reflectance error is $5.93$ points against $7.75$.
 One kernel solve on concatenated features therefore beats the six-head stack of
 Table~\ref{tab:results} on radiance, $0.076\%$ against $0.087\%$, and has a far smaller reflectance
-tail (Table~\ref{tab:tails}). On three splits the same construction with three width-2{,}000
-networks, $6{,}000$ coordinates, reaches $0.074\%$ against $0.083\%$ for a single member's features
-on those splits, lower on all three, and $0.043$ against $0.051$ reflectance points; there it is
-level with the six-head stack fitted on the same splits ($0.074\%$).
+tail (Table~\ref{tab:tails}). On splits 104--107 the same construction with three width-2{,}000
+networks, $6{,}000$ coordinates, reaches $0.069\%$ against $0.076\%$ for a single member's
+features, lower on three of the four, and $0.033$ against $0.040$ reflectance points; there it is
+level with the six-head stack fitted on the same splits ($0.069\%$), whose reflectance tail is
+more than twice as large (Table~\ref{tab:v2-replication}).
 
 Concatenation averages metrics, where a stack or an ensemble averages predictions. After
 standardization, the squared distance between two states in the concatenated features is the sum
@@ -639,8 +642,8 @@ block selects.
 five multipliers, twice, per component and split. The alternative fixes the metric before any
 kernel is fitted: the multiplier of coordinate $j$ is the root-mean-square gradient of the fitted
 cubic surrogate along $j$ over the training rows, raised to a power $p$, normalized to geometric
-mean one and clipped to the search's range $[1/16, 4]$, so that weakly varying coordinates receive
-longer length scales. It costs one cubic fit and six finite differences.
+mean one and clipped to $[1/16, 4]$, the range of the multipliers the search selected, so that
+weakly varying coordinates receive longer length scales. It costs one cubic fit and six finite differences.
 
 At $p=1$ the radiance error is $0.159\%$, below the isotropic kernel on every split, by a factor
 $0.669$ on average, and above the searched metric on every split, by a factor $1.680$. The
@@ -651,7 +654,7 @@ of the gap between the isotropic and searched kernels on radiance and $82\%$ on 
 reflectance error, for one cubic fit and a choice among three numbers.
 
 The components prefer different exponents: $Y_2$ and $Y_3$ are best at $1/2$, the albedo at $1$
-($2.18\%$ against $2.27\%$), and the path radiance at $1/4$. On path radiance the isotropic kernel
+($2.17\%$ against $2.27\%$), and the path radiance at $1/4$. On path radiance the isotropic kernel
 already reads $0.084\%$ and the searched metric $0.085\%$, while the proportional metric reads
 $0.34\%$, four times the isotropic error. The gradient of the surrogate along a coordinate
 measures how fast the map moves with it, not how much that coordinate helps predict, and on this
