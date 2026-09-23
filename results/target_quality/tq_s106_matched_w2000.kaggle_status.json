@@ -1,0 +1,11 @@
+{
+ "stage": "done",
+ "ok": true,
+ "train_min": 123.9,
+ "score_rc": 0,
+ "tag": "tq_s106_matched_w2000",
+ "seed": 106,
+ "policy": "matched-unfiltered",
+ "config": "w2000",
+ "elapsed_min": 125.0
+}
