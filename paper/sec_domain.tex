@@ -1,11 +1,12 @@
-\section{The physical domain, the training targets and a fresh partition}\label{sec:domain}
+\section{The physical domain, the training targets and two tests fixed in advance}\label{sec:domain}
 
 The all-band scores of Table~\ref{tab:tails} mix three things: the error of the emulator, entries
 where the retrieval is not defined, and entries where it is defined but badly conditioned. This
 section separates them. It describes the physical domain of the retrieval and the entries of the
 table that fall outside it, scores the main pipeline on that domain with its coverage and failures,
 asks whether the out-of-domain entries matter when they are used as training targets, and repeats
-the forward--inverse comparison on a fresh partition fixed in advance.
+the forward--inverse comparison on a fresh partition and on a second radiative-transfer code, both
+fixed in advance.
 
 \subsection{The physical domain}
 Write $t=Y_2+Y_3$, $s=Y_4$ and $q=1-\rho s$, with $\rho=0.7$. The retrieval analysis of
@@ -220,3 +221,37 @@ all-band 95th percentile is $25.82$ points and the corrected network's $26.07$, 
 points where the hypothesis required it to be larger. The qualitative statement survives a single
 read of a fresh partition, while the order among the four intermediate families does not separate at
 this sample size.
+
+\subsection{A second radiative-transfer code}\label{sec:lrt}
+Every comparison so far concerns one simulator and one table. The corpus of \cite{pkan} pairs 6S
+\cite{vermote} with libRadtran \cite{mayer,emde} over the thirteen Sentinel-2 bands and gives, for each
+atmospheric state and band, the path reflectance $\rho_{\rm path}$, the total transmittance $T$ and the
+spherical albedo $S$ computed by libRadtran. The top-of-atmosphere reflectance is
+$\rho_{\rm path}+\rho T/(1-\rho S)$, which is \eqref{eq:fwd} with $Y_1=\rho_{\rm path}$, $t=T$ and
+$Y_4=S$, so the retrieval \eqref{eq:inv}, the physical domain and Theorem~\ref{thm:transfer} apply
+without change. We use the 9{,}722 of its 50{,}000 states that carry all thirteen bands; the others lack
+band B10 at 1372\,nm, which lies in a strong water-vapour absorption band and is nearly opaque. Its
+median transmittance is $9\times10^{-6}$ and a third of its entries lie below $10^{-6}$, while the
+first percentile of every other band is above $0.2$. The seven state variables are the inputs, and the
+driver's four components are filled with $Y_2=T$ and a negligible $Y_3=10^{-6}T$.
+
+The pipeline of Section~\ref{sec:methods} was run on these arrays with no change to any family or
+hyperparameter grid, at output rank 13 (all bands), on ten splits of the same form (7{,}875 training,
+875 validation and 972 test states), and scored as in Section~\ref{sec:tq-domain}. None of these states
+played a part in developing the families. Three hypotheses and their decision rule were fixed in a
+written protocol before the first fit: (H1) the family with the lowest radiance error does not have the
+lowest all-band 95th-percentile reflectance error; (H2) the convex stack is no worse than the kernel on
+features in radiance and has the larger all-band tail; (H3) restricting the evaluation to
+transmissions above $10^{-3}T_{\rm train}$ brings the families' reflectance tails into closer rank
+agreement with their radiance errors, measured by Kendall's $\tau$. Each was to be accepted if it held
+on at least nine of the ten splits.
+
+\begin{table}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{table_lrt}}
+\caption{The pipeline on libRadtran, mean $\pm$ sample standard deviation over [[LRT-SEEDS]] splits,
+with the columns of Table~\ref{tab:tq-domain}.}
+\label{tab:lrt}
+\end{table}
+
+[[LRT-RESULTS]]
