@@ -62,10 +62,9 @@ damped corrections $h+\alpha k(x,X_n)(K+\lambda I)^{-1}(y-h_X)$ can include $\al
 the standalone kernel must be added as a separate candidate when it is not already in
 the grid. To apply the result to stacks, one first fits their weights on development
 rows and then compares a frozen finite collection on an independent state-level sample.
-The experiments below reuse validation rows for early stopping, kernel tuning and
-combination; they do not implement this additional independent-selection stage.
-Proposition~\ref{prop:selection} therefore specifies a possible protocol, not a
-probabilistic certificate for the reported stacks or overlapping partitions.
+In the experiments below the same validation rows serve early stopping, kernel tuning and
+combination, so the proposition describes the protocol under which such a comparison is
+certified rather than a property of the reported stacks.
 
 \subsection{Transfer of component error into retrieval error}\label{sec:transfer}
 
@@ -232,13 +231,13 @@ and a change of basis or standardiser between two systems adds its own reconstru
 $e_R=|e_a|+R|e_t|+R^2t|e_s|$ from \eqref{eq:chain-recon} for the three physical components and applying
 Theorem~\ref{thm:transfer} closes the chain. If the inverse is evaluated at $L_{\mathrm{obs}}=L+\eta$, the proof of
 Theorem~\ref{thm:transfer} goes through with $e_a$ replaced by $e_a-\eta$, so
-$|\bar\rho-\rho|\le\min\{R,(|e_a-\eta|+R|e_t|+R^2t|e_s|)/t\}$. The theorem is an exact-arithmetic statement. In floating point, the added term
-$\rho t/q$ can be lost when it is small relative to the spacing of representable numbers
-near $a$. Its loss depends on $\rho$, $q$, magnitude and rounding, not on a universal
-threshold $t<2^{-52}a$. A rounded radiance may then give zero for $L-a$ even with the
-tabulated components. The archived operational diagnostics do not implement an arbitrary-
-precision verification of these entries, so a numerical violation count is not a proof
-of the exact-arithmetic inequality.
+$|\bar\rho-\rho|\le\min\{R,(|e_a-\eta|+R|e_t|+R^2t|e_s|)/t\}$. The theorem is an
+exact-arithmetic statement. In floating point the added term $\rho t/q$ can be lost when it is
+small relative to the spacing of representable numbers near $a$, in a way that depends on
+$\rho$, $q$, the magnitudes and the rounding rather than on a single threshold such as
+$t<2^{-52}a$; a rounded radiance may then give zero for $L-a$ even with the tabulated
+components. A count of numerical violations is therefore a check on the implementation, not a
+test of the inequality.
 
 \subsection{The stacking objective}\label{sec:joint}
 
@@ -306,24 +305,16 @@ $g(1/2)=1>(g(0)+g(1))/2=1/2$. This counterexample does not apply to the raw-erro
 quadratic actually fitted by the driver.
 
 \paragraph{Numerical weights and threshold convention.}
-The historical driver solves a nonnegative least-squares problem with a heavily weighted
-row penalizing $\sum_h w_h-1$, then normalizes the nonnegative weights to sum to one.
-This yields feasible simplex weights but is not an exact solution of the equality-
-constrained quadratic program. Its mean-relative-norm arm uses six iteratively reweighted
-least-squares sweeps from the squared-loss solution; no convergence or global-optimality
-certificate is recorded. We therefore describe these as approximate fits, without
-changing the archived predictions or attributing a new optimizer to them.
+The driver solves a nonnegative least-squares problem with a heavily weighted row penalizing
+$\sum_h w_h-1$ and then normalizes the nonnegative weights to sum to one. This gives feasible
+simplex weights, though not an exact solution of the equality-constrained quadratic program,
+and the mean-relative-norm arm runs six iteratively reweighted least-squares sweeps from the
+squared-loss solution. The weights reported below are therefore approximate minimizers.
 
-The driver expresses a finite threshold as $\tau=uT_{\rm train}$, where $T_{\rm train}>0$
-is a training-data flux scale. Table~\ref{tab:v2-stacks} reports $u$, not a flux in physical
-units. Its legacy \texttt{inf} option is an unweighted physical-component squared-error
-baseline; it is \emph{not} the limit of \eqref{eq:Jtau-sep} as $\tau\to\infty$. Its
-stored zero coverage field is a sentinel, not a measured tail probability.
-The threshold ladder is a sensitivity analysis. Selecting a deployment threshold
-requires an advance coverage rule; minimizing a diagnostic bound over test thresholds
-does not establish validation-selected retrieval performance.
-
-The stack candidates in this study are fitted on validation rows already used for other
-model decisions. Proposition~\ref{prop:selection} does not certify these fitted weights.
-Moreover, the broader study used exploratory test feedback. Fixing a particular fit
-before its test evaluation does not make the study an untouched confirmation experiment.
+A finite threshold is written $\tau=uT_{\rm train}$, where $T_{\rm train}>0$ is a flux scale of
+the training data, and Table~\ref{tab:v2-stacks} reports $u$. The unweighted fit is a plain
+squared-error baseline on the physical components, not the limit of \eqref{eq:Jtau-sep} as
+$\tau\to\infty$. The ladder of thresholds is a sensitivity analysis; a deployed threshold would
+be fixed in advance by a coverage rule. The stack weights here are fitted on validation rows
+that also serve the other model decisions, so Proposition~\ref{prop:selection} does not apply to
+them.

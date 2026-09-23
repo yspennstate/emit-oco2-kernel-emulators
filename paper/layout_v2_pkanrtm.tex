@@ -5,7 +5,7 @@
 \setlength{\tabcolsep}{4pt}
 \setlength{\LTcapwidth}{0.95\linewidth}
 \begin{longtable}{lllrrrr}
-\caption{Matched correction-coefficient benchmark \cite{pkan}. The standard split uses 35,000 / 7,500 / 7,500 states. OOD test states exceed the 0.85 aerosol or water-vapor quantile; remaining states are split 85/15. Cells average three seeds or initializations; published reference rows are not rerun. RMSE, MAE and SMAPE are pooled; $R^2$ is uniformly averaged across the three coefficients, reconstructed and checked from archived summary identities. Model keys: dkr, feature kernel; krr, input kernel; mlp, network; ens, ensemble; resid, residual correction; lowfi, the low-fidelity mean. The categorical inputs follow the benchmark protocol.}\label{tab:v2-pkanrtm}\\
+\caption{Matched correction-coefficient benchmark \cite{pkan}. The standard split uses 35,000 / 7,500 / 7,500 states. OOD test states exceed the 0.85 aerosol or water-vapor quantile; remaining states are split 85/15. Cells average three seeds or initializations; the reference rows are the published values. RMSE, MAE and SMAPE are pooled; $R^2$ is the uniform average over the three coefficients. Model keys: dkr, feature kernel; krr, input kernel; mlp, network; ens, ensemble; resid, residual correction; lowfi, the low-fidelity mean. The categorical inputs follow the benchmark protocol.}\label{tab:v2-pkanrtm}\\
 \toprule
 split & inputs & head & RMSE & MAE & $R^2$ & SMAPE [\%] \\
 \midrule

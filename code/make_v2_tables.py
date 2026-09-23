@@ -1,9 +1,7 @@
 """Regenerate supported supplementary tables from public JSON records.
 
-Default output is paper/. Missing campaign inputs are reported and existing historical
-aggregate tables are retained, never deleted or silently replaced by fewer runs.
-The transmission comparison uses the common float64 cohort, seeds 104--107.
-The legacy seed-101 float32 experiment is recorded separately in the publication manifest.
+Default output is paper/. A table whose input records are missing is left as it is and reported,
+never rebuilt from fewer runs. The transmission comparison uses the float64 records of seeds 104--107.
 Use code/format_publication_tables.py after this command for readable table layouts.
 """
 import glob, io, json, os, re, sys
@@ -130,7 +128,7 @@ if st_files:
         L = per[k]
         if k[0] == "theorem":
             name = ("stack, unweighted component square" if k[1] == "inf"
-                    else "stack, $J'_\\tau$ at $\\tau = " + k[1] + "$")
+                    else "stack, $J'_\\tau$, $u=" + k[1] + "$")
         else:
             name = {"single": FAM_NAMES.get(k[1], k[1]),
                     "paper_norm": "stack, mean relative norm",

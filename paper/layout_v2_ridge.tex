@@ -5,7 +5,7 @@
 \setlength{\tabcolsep}{4pt}
 \setlength{\LTcapwidth}{0.95\linewidth}
 \begin{longtable}{llrrrrrrrrr}
-\caption{Ridge-path diagnostics, seed 101, 4,000 fitting and 1,000 query rows. The bias and noise factor refer to Proposition~\ref{prop:sensitivity}(iii); the factor multiplies a hypothetical noise variance and is not an estimate of simulator noise. Corrected and kernel-only test columns are mean relative errors of a physical spectral component, in percent. The final column uses retained PCA coordinates on the held-out half and compares same-half fitting with split-half fitting; it is a different metric and sample. Each ridge is evaluated descriptively, not selected on these test values.}\label{tab:v2-ridge}\\
+\caption{Ridge-path diagnostics, seed 101, 4,000 fitting and 1,000 query rows. The bias and noise factor refer to Proposition~\ref{prop:sensitivity}(iii); the factor multiplies a hypothetical noise variance and is not an estimate of simulator noise. Corrected and kernel-only test columns are mean relative errors of a physical spectral component, in percent. The final column uses retained PCA coordinates on the held-out half and compares same-half fitting with split-half fitting; it is a different metric and sample. No ridge is selected on these test values.}\label{tab:v2-ridge}\\
 \toprule
 component & kernel & $\gamma$ & $\mathrm{tr}S_\lambda$ & bias & \thead{noise\\factor} & \thead{median\\$\|a_\lambda\|^2$} & \thead{median\\$\widetilde P_\lambda$} & \thead{corrected\\{[\%]}} & \thead{kernel only\\{[\%]}} & \thead{same / split half\\PCA error [\%]} \\
 \midrule

@@ -59,10 +59,9 @@ forward formula is defined, so reflectance is unidentifiable from this band. The
 are exact-arithmetic statements; floating-point cancellation in $L-a$ can further affect an
 implemented inverse.
 
-For empirical comparison, a common application passband and conditioning threshold should
-be fixed before model evaluation. The utility \path{code/conditioned_reflectance.py}
-uses a positive flux scale determined on training data and a common truth-based mask,
-which is available in simulation benchmarks. It reports retained coverage, non-finite
-inversions and denominator failures separately. Masked errors require sample-level arrays
-and cannot be recovered from aggregate summaries. The EMIT comparisons in
-Section~\ref{sec:paired-tails} therefore use the all-band statistics.
+An empirical comparison should therefore fix its passband and conditioning threshold before
+the models are evaluated. The scorer used in Section~\ref{sec:domain} takes a positive flux
+scale from the training rows and a mask computed from the true components alone, common to all
+families, so that a failing model cannot change its own coverage; it reports the coverage, the
+non-finite inversions and the denominator failures separately from the error on the successful
+inversions.

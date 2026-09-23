@@ -1,0 +1,209 @@
+{
+ "tag": "emit_s108_kfk",
+ "kind": "kf_kernels",
+ "problem": "emit",
+ "comp": "Y2",
+ "band": "o2",
+ "seed": 108,
+ "ntrain": 18884,
+ "smoke": false,
+ "results": {
+  "val_iso": {
+   "val": 0.424799861621133,
+   "test": 0.42628822843321784
+  },
+  "kf_ard": {
+   "val": 0.30237668608005813,
+   "test": 0.3046552596670246
+  },
+  "kf_mahal": {
+   "val": 0.35269598303335453,
+   "test": 0.35003031873577356
+  },
+  "eb_ard": {
+   "val": 0.19543196040146824,
+   "test": 0.1876378893297588
+  },
+  "eb_ard_val": {
+   "val": 0.22469259037439354,
+   "test": 0.22348604107744002
+  },
+  "add_kf": {
+   "val": 0.24492243873837768,
+   "test": 0.25140965801360643
+  },
+  "rfm": {
+   "val": 0.19370125198252464,
+   "test": 0.1825877689501294
+  }
+ },
+ "hyper": {
+  "val_iso": {
+   "nu": 2.5,
+   "scale": 6.736826010916669,
+   "nugget": 1e-08,
+   "val_sub": 0.004922255289884966
+  },
+  "kf_ard": {
+   "nu": 1.5,
+   "scale": 14.462805367539053,
+   "nugget": 1e-08,
+   "val_sub": 0.00398712397555854,
+   "ell_rel": {
+    "aod": 0.3486,
+    "elev": 0.8921,
+    "h2o": 0.4634,
+    "azim": 5.7685,
+    "solzen": 0.233,
+    "viewzen": 5.1641
+   },
+   "rho_first": 0.0073391408584126535,
+   "rho_last": 0.0012473906708383752
+  },
+  "kf_mahal": {
+   "nu": 2.5,
+   "scale": 7.758775962737708,
+   "nugget": 1e-08,
+   "val_sub": 0.004208969799644261,
+   "ell_rel": [
+    0.3509,
+    0.9734,
+    0.3617,
+    6.1297,
+    0.2249,
+    5.8706
+   ],
+   "L_norm": 0.0,
+   "rho_last": 0.0012492149093434265
+  },
+  "eb_ard": {
+   "ell": {
+    "aod": 14.8328,
+    "elev": 3.5489,
+    "h2o": 7.376,
+    "azim": 14.2384,
+    "solzen": 10.2898,
+    "viewzen": 136.2394
+   },
+   "nugget_abs": 4.526933237827672e-07,
+   "nll": 7546703.5016833525
+  },
+  "eb_ard_val": {
+   "nu": 2.5,
+   "scale": 5.80138906200437,
+   "nugget": 1e-08,
+   "val_sub": 0.0029087642074388646
+  },
+  "add_kf": {
+   "weights": {
+    "aod": 0.0035,
+    "elev": 0.0008,
+    "h2o": 0.0008,
+    "azim": 0.0017,
+    "solzen": 0.4333,
+    "viewzen": 0.0015,
+    "aod*elev": 0.0044,
+    "aod*h2o": 0.0028,
+    "aod*azim": 0.0026,
+    "aod*solzen": 0.3361,
+    "aod*viewzen": 0.0024,
+    "elev*h2o": 0.0007,
+    "elev*azim": 0.0011,
+    "elev*solzen": 0.0651,
+    "elev*viewzen": 0.001,
+    "h2o*azim": 0.0012,
+    "h2o*solzen": 0.0917,
+    "h2o*viewzen": 0.0011,
+    "azim*solzen": 0.0069,
+    "azim*viewzen": 0.002,
+    "solzen*viewzen": 0.0094,
+    "full": 0.03
+   },
+   "energy": {
+    "aod": 0.0,
+    "elev": 0.0001,
+    "h2o": 0.0042,
+    "azim": 0.0,
+    "solzen": 0.0035,
+    "viewzen": 0.0,
+    "aod*elev": 0.0022,
+    "aod*h2o": 0.0211,
+    "aod*azim": 0.0004,
+    "aod*solzen": 0.0145,
+    "aod*viewzen": 0.0002,
+    "elev*h2o": 0.024,
+    "elev*azim": 0.0002,
+    "elev*solzen": 0.012,
+    "elev*viewzen": 0.0002,
+    "h2o*azim": 0.0075,
+    "h2o*solzen": 0.3267,
+    "h2o*viewzen": 0.0055,
+    "azim*solzen": 0.0004,
+    "azim*viewzen": 0.0,
+    "solzen*viewzen": 0.0004,
+    "full": 0.5768
+   },
+   "ell": {
+    "aod": 1.8164,
+    "elev": 2.3636,
+    "h2o": 0.9376,
+    "azim": 9.9128,
+    "solzen": 2.2733,
+    "viewzen": 9.723
+   },
+   "ell_full": 2.0045737936383974,
+   "nugget": 1e-08,
+   "rho_last": 0.0006948464109285989
+  },
+  "rfm": {
+   "nu": 2.5,
+   "scale": 2.9781420133243475,
+   "nugget": 1e-08,
+   "val_sub": 0.002231092864789054,
+   "iters": 3,
+   "chosen_iter": 3,
+   "power": 0.5,
+   "damp": 1.0,
+   "points": 2000,
+   "val_sub_path": [
+    [
+     "iso",
+     0.4922
+    ],
+    [
+     "iter1",
+     0.2819
+    ],
+    [
+     "iter2",
+     0.2416
+    ],
+    [
+     "iter3",
+     0.2231
+    ]
+   ],
+   "M_eigs": [
+    3.98993,
+    1.05902,
+    0.52117,
+    0.35832,
+    0.04026,
+    0.0313
+   ],
+   "M_diag": {
+    "aod": 0.4058,
+    "elev": 0.549,
+    "h2o": 3.9798,
+    "azim": 0.0399,
+    "solzen": 0.9935,
+    "viewzen": 0.032
+   }
+  }
+ },
+ "kf_steps": 400,
+ "kf_batch": 600,
+ "kf_loss": "l2",
+ "objective": "phys",
+ "minutes": 42.6
+}

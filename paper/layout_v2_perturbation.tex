@@ -5,7 +5,7 @@
 \setlength{\tabcolsep}{4pt}
 \setlength{\LTcapwidth}{0.95\linewidth}
 \begin{longtable}{llrrrrrrr}
-\caption{Same-data perturbation diagnostics for Proposition~\ref{prop:perturb}. Movement is a Euclidean prediction change in retained coordinates. The four ratio columns are \emph{medians of entrywise bound/movement ratios}, not ratios of medians. The fourteen state-input rows are retained historical values whose JSON is absent. The feature rows are regenerated from four component records at seed 101 and four at seed 104, each with 4,000 fitting and 1,000 query rows. The signed minimum eigenvalue is rounded: a displayed $-1.000$ does not assert exact equality to $-1$. A dash means the corresponding bound is not applicable.}\label{tab:v2-perturbation}\\
+\caption{Same-data perturbation diagnostics for Proposition~\ref{prop:perturb}. Movement is a Euclidean prediction change in retained coordinates. The four ratio columns are \emph{medians of entrywise bound/movement ratios}, not ratios of medians. The fourteen state-input rows use the direct flux $Y_2$ at seed 101 with 2,000 fitting rows; the feature rows use four component records at seed 101 and four at seed 104, each with 4,000 fitting and 1,000 query rows. The signed minimum eigenvalue is rounded: a displayed $-1.000$ does not assert exact equality to $-1$. A dash means the corresponding bound is not applicable.}\label{tab:v2-perturbation}\\
 \toprule
 source & perturbation & $\lambda_{\min}(B)$ & $\|B\|$ & \thead{median\\movement} & \thead{residual-action\\ratio} & \thead{signed-spectrum\\ratio} & \thead{$\|B\|<1$\\ratio} & \thead{ridge\\ratio} \\
 \midrule
@@ -20,20 +20,20 @@ source & perturbation & $\lambda_{\min}(B)$ & $\|B\|$ & \thead{median\\movement}
 \endfoot
 \bottomrule
 \endlastfoot
-state (archive) & Nystr\"om 50 & -0.941 & 0.941 & 2.01 & 57.3 & 4.05e+03 & 4.05e+03 & -- \\
-state (archive) & Nystr\"om 100 & -0.872 & 0.872 & 1.05 & 82.1 & 3.05e+03 & 3.05e+03 & -- \\
-state (archive) & Nystr\"om 200 & -0.642 & 0.642 & 0.498 & 136 & 1.65e+03 & 1.65e+03 & -- \\
-state (archive) & Nystr\"om 400 & -0.411 & 0.411 & 0.2 & 178 & 1.54e+03 & 1.54e+03 & -- \\
-state (archive) & Nystr\"om 800 & -0.193 & 0.193 & 0.0702 & 264 & 1.47e+03 & 1.47e+03 & -- \\
-state (archive) & Nystr\"om 1600 & -0.078 & 0.078 & 0.0103 & 408 & 3.51e+03 & 3.51e+03 & -- \\
-state (archive) & ridge $\times$0.5 & -0.500 & 0.500 & 0.304 & 517 & 1.34e+03 & 1.34e+03 & -- \\
-state (archive) & ridge $\times$2.0 & +0.000 & 0.999 & 0.372 & 835 & 550 & 1.32e+06 & 550 \\
-state (archive) & ridge $\times$10.0 & +0.002 & 8.993 & 1.36 & 1.98e+03 & 271 & -- & 271 \\
-state (archive) & ridge $\times$100.0 & +0.018 & 98.918 & 3.67 & 7.38e+03 & 111 & -- & 111 \\
-state (archive) & PCA inputs 2 & -0.998 & 3.600 & 10.5 & 14.3 & 4.81e+04 & -- & -- \\
-state (archive) & PCA inputs 3 & -0.998 & 2.523 & 9.8 & 14.2 & 4.49e+04 & -- & -- \\
-state (archive) & PCA inputs 4 & -0.998 & 1.581 & 5.24 & 25.3 & 6.52e+04 & -- & -- \\
-state (archive) & PCA inputs 5 & -0.997 & 0.997 & 1.9 & 64.3 & 1.39e+05 & 1.39e+05 & -- \\
+state & Nystr\"om 50 & -0.941 & 0.941 & 2.01 & 57.3 & 4.05e+03 & 4.05e+03 & -- \\
+state & Nystr\"om 100 & -0.872 & 0.872 & 1.05 & 82.1 & 3.05e+03 & 3.05e+03 & -- \\
+state & Nystr\"om 200 & -0.642 & 0.642 & 0.498 & 136 & 1.65e+03 & 1.65e+03 & -- \\
+state & Nystr\"om 400 & -0.411 & 0.411 & 0.2 & 178 & 1.54e+03 & 1.54e+03 & -- \\
+state & Nystr\"om 800 & -0.193 & 0.193 & 0.0702 & 264 & 1.47e+03 & 1.47e+03 & -- \\
+state & Nystr\"om 1600 & -0.078 & 0.078 & 0.0103 & 408 & 3.51e+03 & 3.51e+03 & -- \\
+state & ridge $\times$0.5 & -0.500 & 0.500 & 0.304 & 517 & 1.34e+03 & 1.34e+03 & -- \\
+state & ridge $\times$2.0 & +0.000 & 0.999 & 0.372 & 835 & 550 & 1.32e+06 & 550 \\
+state & ridge $\times$10.0 & +0.002 & 8.993 & 1.36 & 1.98e+03 & 271 & -- & 271 \\
+state & ridge $\times$100.0 & +0.018 & 98.918 & 3.67 & 7.38e+03 & 111 & -- & 111 \\
+state & PCA inputs 2 & -0.998 & 3.600 & 10.5 & 14.3 & 4.81e+04 & -- & -- \\
+state & PCA inputs 3 & -0.998 & 2.523 & 9.8 & 14.2 & 4.49e+04 & -- & -- \\
+state & PCA inputs 4 & -0.998 & 1.581 & 5.24 & 25.3 & 6.52e+04 & -- & -- \\
+state & PCA inputs 5 & -0.997 & 0.997 & 1.9 & 64.3 & 1.39e+05 & 1.39e+05 & -- \\
 s101, $Y_1$ & PCA features 1000 & -0.192 & 0.192 & 0.00383 & 4.01e+03 & 3.8e+04 & 3.8e+04 & -- \\
 s101, $Y_1$ & PCA features 500 & -0.503 & 0.503 & 0.0107 & 4.41e+03 & 5.82e+04 & 5.82e+04 & -- \\
 s101, $Y_1$ & PCA features 250 & -0.764 & 0.764 & 0.0185 & 4.3e+03 & 1.1e+05 & 1.1e+05 & -- \\

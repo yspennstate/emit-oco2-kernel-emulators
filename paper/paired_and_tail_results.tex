@@ -1,57 +1,47 @@
 \subsection{Paired comparisons and the radiance--reflectance trade-off}\label{sec:paired-tails}
 
-Paired differences compare candidate and reference errors on the same split. Table~\ref{tab:paired}
-reports those differences for the main and wide pipelines. Positive gains favor the candidate.
-The wide feature kernel improves on the input-scaled kernel at all ten splits, by
-$0.0165\pm0.0066$ radiance percentage points. By contrast, the wide stack's improvement over
-its own feature kernel is only $0.0006\pm0.0026$ points, with eight wins and two losses.
-The mean improvement is small relative to the variability of the paired differences. These are descriptive paired summaries: repeated
-splits of one finite table, overlapping test rows and adaptive study development do not supply
-ten independent external validation experiments.
+Paired differences compare two families on the same split. Table~\ref{tab:paired} reports them
+for the main and wide pipelines, with positive gains favoring the candidate. The wide feature
+kernel improves on the input-scaled kernel at all ten splits, by $0.0165\pm0.0066$ radiance
+percentage points. The wide stack's improvement over its own feature kernel is $0.0006\pm0.0026$
+points, with eight wins and two losses: small against the split-to-split variation of the
+difference itself.
 
 \begin{table}[t]
 \centering\small
 \resizebox{\textwidth}{!}{\input{table_emit_paired}}
 \caption{Paired radiance contrasts on seeds 101--110. Gain is the reference error minus the
 candidate error, in percentage points (pp). SD is the sample standard deviation of the ten
-paired differences; the range and win count describe those same ten differences. They are not
-confidence intervals or tests of a population-level superiority claim.}
+paired differences; the range and the win count describe the same ten differences.}
 \label{tab:paired}
 \end{table}
 
-Radiance and reflectance also order the heads differently. Table~\ref{tab:tails} reports the
-all-band reflectance tails alongside the medians. Each entry averages a
-within-split statistic; the mean of ten 95th percentiles is not a pooled 95th percentile.
-For the width-512 pipeline, the convex stack lowers radiance error relative to the feature
-kernel, but raises the average 95th-percentile reflectance error from $7.75$ to $29.44$
-percentage points. The tail is worse at all ten splits, by factors between $2.63$ and $4.94$.
-The width-2000 comparison repeats the reversal: the feature kernel has $7.57$ points at the
-95th percentile and the stack $22.71$, with the stack worse at all ten splits by factors
-between $2.36$ and $3.79$. Thus the near-tie at $0.079\%$ versus $0.078\%$ radiance error
-conceals a substantial difference in the inverse metric.
+Radiance and reflectance order the families differently. Table~\ref{tab:tails} reports the
+all-band reflectance tails beside the medians; each entry averages a within-split statistic, so
+the mean of ten 95th percentiles is not a pooled 95th percentile. For the width-512 pipeline the
+convex stack lowers the radiance error relative to the feature kernel but raises the mean 95th
+percentile of the reflectance error from $7.75$ to $29.44$ points, and the tail is worse at all
+ten splits, by factors between $2.63$ and $4.94$. The width-2000 pipeline repeats the reversal:
+$7.57$ points for the feature kernel and $22.71$ for the stack, worse at all ten splits by
+factors between $2.36$ and $3.79$. The near-tie at $0.079\%$ against $0.078\%$ radiance error
+hides a threefold difference in the inverse.
 
 \begin{table}[t]
 \centering\small
 \resizebox{\textwidth}{!}{\input{table_emit_tails}}
-\caption{All-band metrics from the complete ten-seed main and wide campaign records. Radiance
-is mean relative $L^2$ error. Reflectance median, 95th-percentile absolute error and RMSE are in
-percentage points at $\rho=0.7$. The first three columns show mean $\pm$ sample SD across
-splits; RMSE shows its mean only, with its spread retained in the machine-readable summary.
-The inverse is neither physically clipped nor conditioned on an application passband.
-All inverses in these records are finite, so their zero-fill branch does not explain the large
-errors. Large finite values near denominator zeros dominate RMSE. These are diagnostic
-all-band errors, not operational retrieval accuracy.}
+\caption{All-band retrieval metrics over the ten splits of the main, concatenated-feature and
+wide pipelines. Radiance is the mean relative $L^2$ error; the reflectance median, 95th
+percentile and RMSE are in percentage points at $\rho=0.7$. The first three columns show mean
+$\pm$ sample standard deviation across splits and RMSE its mean. The inverse is neither
+clipped nor restricted to the physical domain; every inverse in these runs is finite, and the
+RMSE is dominated by large finite values near zeros of the denominator.
+Section~\ref{sec:domain} gives the same comparison on the physical domain.}
 \label{tab:tails}
 \end{table}
 
-The input-scaled kernel illustrates the same distinction: its median error is only $0.0365$
-points but its mean 95th percentile is $31.16$ points. Conversely, the feature kernels have
-slightly larger medians and appreciably smaller tails. Model rankings depend on the metric and spectral domain. The identities of
-Section~\ref{sec:stability} relate inverse error to the predicted denominator as well as
-forward error. This explains why optimizing componentwise or radiance error alone need not
-control reflectance tails; it does not identify the component-error correlations responsible
-for a particular observed tail.
-
-The tables are generated from the twenty individual records. The generator checks split configurations, agreement of recorded array digests,
-and equality of common deterministic baselines. These checks establish consistency of
-the summaries; reproducing model training requires the raw arrays.
+The input-scaled kernel shows the same split between center and tail: its median error is only
+$0.0365$ points but its mean 95th percentile is $31.16$ points, while the feature kernels have
+slightly larger medians and much smaller tails. The kernel on concatenated features has the
+smallest tail of all, $5.93$ points. The identities of Section~\ref{sec:stability} tie the
+inverse error to the predicted denominator as well as to the forward error, which is why
+optimizing a component or radiance error alone need not control the reflectance tail.

@@ -1,8 +1,7 @@
-"""Reanalyse public EMIT records without training models or reading raw predictions.
+"""Build the main EMIT tables from the per-split records.
 
-Regenerates the main EMIT and wide-pipeline tables, adds paired contrasts and all-band
-retrieval tails, and writes a provenance-bearing JSON summary. Sample SD uses ddof=1.
-Learning-curve/rank/retuning aggregates remain distinct from available individual records.
+Writes the main and wide-pipeline tables, the paired contrasts and the all-band retrieval tails, and a JSON
+summary with the source digests. Sample SD uses ddof=1.
 Run from any directory: python code/make_revision_tables.py
 """
 from __future__ import annotations
@@ -17,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SEEDS = tuple(range(101, 111))
 BASE_FILES = [ROOT / f"results/emit/emit_s{s}.json" for s in SEEDS]
 WIDE_FILES = [ROOT / f"results/scaling/per_seed/emit_s{s}_wide.json" for s in SEEDS]
+CAT_FILES = [ROOT / f"results/scaling/per_seed/emit_s{s}_cat.json" for s in SEEDS]
 METRICS = ("rel_l2_Y1", "rel_l2_Y2", "rel_l2_Y3", "rel_l2_Y4", "rel_l2_radiance", "refl_mae_median")
 NAMES = [("ridge3", "Cubic ridge"), ("krr4k", "Mat\\'ern KRR, 4000-point fit"),
          ("krr", "Mat\\'ern KRR, exact on all rows"), ("ard", "Mat\\'ern KRR, per-input scales"),
@@ -57,6 +57,7 @@ def write_table(filename, lines):
 def main() -> None:
     base = {s: read(p) for s, p in zip(SEEDS, BASE_FILES)}
     wide = {s: read(p) for s, p in zip(SEEDS, WIDE_FILES)}
+    cat = {s: read(p) for s, p in zip(SEEDS, CAT_FILES)}
     reference_hashes = base[101]["data_sha"]
     for records, width in ((base, 512), (wide, 2000)):
         for s, record in records.items():
@@ -118,7 +119,8 @@ def main() -> None:
 
     tail_rows = [("Cubic ridge", base, "ridge3"), ("Isotropic KRR", base, "krr"),
                  ("Input-scaled KRR", base, "ard"), ("Narrow feature kernel", base, "dkr"),
-                 ("Narrow convex stack", base, "stack"), ("Wide feature kernel", wide, "dkr"),
+                 ("Narrow convex stack", base, "stack"),
+                 ("Concatenated features, 5$\\times$512", cat, "dkr_cat"), ("Wide feature kernel", wide, "dkr"),
                  ("Wide convex stack", wide, "stack")]
     tail_metrics = ("rel_l2_radiance", "refl_mae_median", "refl_p95_abs", "refl_rmse")
     tails = {}
@@ -150,7 +152,7 @@ def main() -> None:
         expected = [f"results/scaling/per_seed/emit_s{s}_{suffix}.json" for s in SEEDS]
         groups[suffix] = {"expected": 10, "available": sum((ROOT / p).exists() for p in expected),
                           "missing": [p for p in expected if not (ROOT / p).exists()]}
-    sources = BASE_FILES + WIDE_FILES + [ROOT / f"results/scaling/{name}.json" for name in
+    sources = BASE_FILES + WIDE_FILES + CAT_FILES + [ROOT / f"results/scaling/{name}.json" for name in
                                        ("scaling_numbers", "retune_numbers", "width_numbers")]
     summary = {"analysis": "reanalysis of stored metrics, not new training or a raw-array rerun",
                "spread": "sample standard deviation (ddof=1); descriptive, not confidence intervals",

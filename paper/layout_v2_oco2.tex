@@ -4,7 +4,7 @@
 \setlength{\tabcolsep}{4pt}
 \setlength{\LTcapwidth}{0.95\linewidth}
 \begin{longtable}{llrr}
-\caption{OCO-2 selection comparison, seeds 0--2 on each of three bands. Each record uses 2,000 validation and 2,000 test rows. Both reported columns are \emph{mean relative norms} in percent; the stack fitting objectives are row-relative \emph{squared} errors. The radiance quadratic uses the exact affine reconstruction Gram matrix. Model keys: dkr, feature kernel; mean, trained network; ridge, linear readout; raw/ard, input kernels. Flat, radx and wnum distinguish the three archived training losses. Selection is per coordinate, with the radiance variant using greedy coordinate updates, not exhaustive global search.}\label{tab:v2-oco2}\\
+\caption{OCO-2 selection comparison, seeds 0--2 on each of three bands. Each record uses 2,000 validation and 2,000 test rows. Both reported columns are \emph{mean relative norms} in percent; the stack fitting objectives are row-relative \emph{squared} errors. The radiance quadratic uses the exact affine reconstruction Gram matrix. Model keys: dkr, feature kernel; mean, trained network; ridge, linear readout; raw/ard, input kernels. Flat, radx and wnum are the three training losses. Selection is per coordinate, with the radiance variant using greedy coordinate updates, not exhaustive global search.}\label{tab:v2-oco2}\\
 \toprule
 band & head / rule & reduced error [\%] & radiance error [\%] \\
 \midrule

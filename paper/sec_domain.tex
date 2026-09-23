@@ -1,0 +1,133 @@
+\section{The physical domain, the training targets and a fresh partition}\label{sec:domain}
+
+The all-band scores of Table~\ref{tab:tails} mix three things: the error of the emulator, entries
+where the retrieval is not defined, and entries where it is defined but badly conditioned. This
+section separates them. It describes the physical domain of the retrieval and the entries of the
+table that fall outside it, scores the main pipeline on that domain with its coverage and failures,
+asks whether the out-of-domain entries matter when they are used as training targets, and repeats
+the forward--inverse comparison on a fresh partition fixed in advance.
+
+\subsection{The physical domain}
+Write $t=Y_2+Y_3$, $s=Y_4$ and $q=1-\rho s$, with $\rho=0.7$. The retrieval analysis of
+Section~\ref{sec:theory} holds on
+\[
+  \mathcal A=\{t>0,\ 0\le s<1\},
+\]
+which is a sufficient domain for the physical retrieval rather than the largest set on which the
+rational formulas are defined: a negative albedo with $t>0$ gives $q>0$ and a well-defined inverse,
+and $q<0$ violates the physical hypothesis without being a zero of a denominator. At $q=0$ the
+forward formula is undefined, and at $t=0$, wherever it is defined, $L=Y_1$ does not depend on the
+reflectance, so the band carries no information about it. A small positive transmission makes the
+inverse ill-conditioned but not undefined.
+
+\begin{table}[t]
+\centering
+\input{table_domain_audit}
+\caption{The table against the physical domain, over all $23{,}313\times285=6{,}644{,}205$
+state--band entries. The categories overlap. Small positive transmission is a conditioning
+property, not a violation of $t>0$; an albedo outside $[0,1)$ violates the physical domain
+without necessarily leaving the algebraic domain of the inverse.}
+\label{tab:domain}
+\end{table}
+
+Table~\ref{tab:domain} counts the entries of the table outside $\mathcal A$. There are 438
+nonpositive transmissions, the smallest $-4.5\times10^{-20}$, and $32{,}130$ transmissions below
+$10^{-12}$; $9{,}858$ negative albedos, the smallest $-0.0724$; and 454 albedos at or above one,
+214 of which equal $2$ exactly, which can only be a fill value. At 448 entries $q\le0$, the
+smallest $-0.4$. In all, $10{,}356$ entries ($0.156\%$) lie outside $\mathcal A$. They occupy 227
+bands but are concentrated near 1841--1908 and 2485--2493\,nm, and $18{,}859$ of the $23{,}313$
+states are admissible at every band.
+
+A stricter domain adds a conditioning floor,
+\[
+ \mathcal C=\mathcal A\cap\{t\ge\tau,\ q\ge\kappa\},
+ \qquad \tau=10^{-12},\quad\kappa=0.3,
+\]
+with $\tau$ in the flux units of the table; at $\rho=0.7$ the albedo condition already gives
+$q>0.3$. Inverting the exact tabulated components returns the reflectance to within
+floating-point error, and that error is informative:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+domain & round-trip RMSE (reflectance) & coverage \\
+\midrule
+all entries & $7.38\times10^{-3}$ & $100\%$ \\
+$\mathcal A$ & $4.27\times10^{-3}$ & $99.844\%$ \\
+$\mathcal C$ & $1.08\times10^{-9}$ & $99.516\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+In exact arithmetic the round trip is exact wherever it is defined. In floating point, adding
+$\rho t/q$ to $Y_1$ and subtracting $Y_1$ again loses the added term when it is small relative to
+the spacing of numbers near $Y_1$, which is what happens at the smallest transmissions. Removing
+$0.33\%$ of the entries takes the round-trip error from $4\times10^{-3}$ to $10^{-9}$; what remains
+of the all-band reflectance tail on $\mathcal C$ belongs to the emulators.
+
+\subsection{The main pipeline on the physical domain}\label{sec:tq-domain}
+[[TQ-DOMAIN]]
+
+\subsection{Training on physically admissible targets}\label{sec:tq-policy}
+The training pipeline standardizes, compresses and fits the targets as they come, including the
+$0.156\%$ of entries outside $\mathcal A$ and the fill values among them. Scoring on $\mathcal A$
+cannot tell whether those entries shaped the fitted representations, the principal components or
+the albedo plateau of Section~\ref{sec:scaling}; only refitting can. We therefore ran the pipeline
+under three training policies: the original one (\emph{raw}); removal of every training state with
+an entry outside $\mathcal A$ at any band (\emph{admissible}), with no clipping or imputation; and
+an unfiltered random subset of the raw training rows of the same size as the admissible set
+(\emph{matched}), which separates the effect of the filter from that of losing rows. Whole states
+are removed so that every remaining spectrum is complete for the principal-component step; this
+changes the training distribution, and the matched arm measures how much of any difference is
+only the loss of $19\%$ of the rows. The validation rows, the validation loss and the test blocks
+are those of the raw pipeline in all three arms, and every arm is scored on the same test entries
+with a flux scale taken from the original training block.
+
+The arms, the two network configurations of Table~\ref{tab:results} and Table~\ref{tab:wide}, the
+seeds 101--110, the scoring and the summaries reported below were fixed in a written protocol
+before the first run, and every run was completed and is reported. Each run records the digests of
+its data and of its split indices, and saves the float64 predictions of every family.
+
+[[TQ-POLICY]]
+
+\subsection{Where the reflectance error sits}
+[[TQ-BANDS]]
+
+\subsection{A fresh partition, fixed in advance}\label{sec:confirm}
+The comparisons above use partitions that were in view while the families were developed. To test
+the reversal against that selection, a simplified pipeline was frozen together with one hypothesis
+and evaluated once on a new partition. Its six families are the cubic ridge, a $3\times512$ network
+(GELU activations, Adam) trained on the 285 standardized bands, the residual kernel of that
+network, the input-scaled Mat\'ern kernel, the Mat\'ern kernel on the network's last hidden layer,
+and a convex stack of the cubic, the corrected network, the input-scaled kernel and the feature
+kernel. Every hyperparameter was copied from development on seed 101 and none was re-tuned. The
+partition holds out 3{,}497 states, $15\%$ of the table, drawn with a seed used in no earlier run;
+the remaining 19{,}816 states train the families, 1{,}982 of them serving only as the network's
+early-stopping set. The held-out states belong to the same table as every other split, so this
+evaluation guards against the choice of split and of hypothesis rather than testing
+generalization to new states.
+
+The hypothesis was that the family with the lowest radiance error does not have the lowest
+all-band 95th-percentile reflectance error, and that its all-band 95th percentile is strictly larger
+than that of the residual-corrected network.
+
+\IfFileExists{table_confirmation.tex}{%
+\begin{table}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{table_confirmation}}
+\caption{The fresh partition: 3{,}497 held-out states, evaluated once. The screened columns use
+$t\ge10^{-12}$ and $q\ge0.3$, which covers $99.5327\%$ of the $996{,}645$ entries; no inversion is
+non-finite in any family. The network here is the $3\times512$ GELU network of the frozen pipeline,
+trained with Adam, not the network of Table~\ref{tab:results}.}
+\label{tab:confirm}
+\end{table}}{}
+
+The reversal reproduces (Table~\ref{tab:confirm}). The convex stack has the lowest radiance error of
+the six, $0.0687\%$, and the fourth-lowest reflectance tail; the kernel on learned features has a
+larger radiance error, $0.0828\%$, and an all-band 95th percentile smaller by a factor of $6.60$, and
+by $5.54$ on the screened entries. Both factors are close to the $6.13$ and $4.99$ of the same
+pipeline on its development split, seed 101. The second clause of the hypothesis fails: the stack's
+all-band 95th percentile is $25.82$ points and the corrected network's $26.07$, smaller by $0.25$
+points where the hypothesis required it to be larger. The qualitative statement survives a single
+read of a fresh partition, while the order among the four intermediate families does not separate at
+this sample size.

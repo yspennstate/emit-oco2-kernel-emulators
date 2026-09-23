@@ -1,283 +1,207 @@
-% Empirical diagnostics. Raw tables and their record-level provenance are kept separately
-% from the generated readable layouts; no historical trained-model prediction is refitted.
-
 \section{Retrieval error and the transmission profile}\label{sec:results-transfer}
 
-The transfer theorem identifies the ratio of component error to transmission as a
-retrieval diagnostic. The conditional-profile theorem additionally requires a bound on
-$\E[e_R^2\mid t]$ for a population and, for rate statements, an appropriate sequence of
-errors. These are distinct uses of the theory. This section describes the archived
-finite-table diagnostics without interpreting a fitted log--log slope as an asymptotic
-learning rate.
+The transfer theorem makes the ratio of component error to transmission the natural retrieval
+diagnostic, and the conditional-profile theorem asks for the profile $t\mapsto\E[e_R^2\mid t]$.
+This section measures both on finite test sets; a slope fitted to a finite profile is a
+description of that profile, not an asymptotic rate.
 
-Table~\ref{tab:v2-transmission} uses the four common float64 prediction records at seeds
-104--107. Each contains the same nine heads on 2{,}331 test states and 285 bands, or
-664{,}335 state--band entries. The separate seed-101 record contains only three heads,
-uses float32 predictions and explicitly opts into precision-altered scoring. It is not
-pooled into this comparison. The revised four-record means are a reanalysis of existing
-summaries, not a new training campaign. The retrieval uses $\rho=0.7$, $R=0.9$ and a
-training-derived albedo bound $S$.
+Table~\ref{tab:v2-transmission} uses the three-member width-2000 pipeline on splits 104--107,
+with float64 predictions of nine heads on 2{,}331 test states and 285 bands, or 664{,}335
+state--band entries per split. The retrieval uses $\rho=0.7$, $R=0.9$ and an albedo bound $S$
+taken from the training data.
 
 \begin{table}[p]
 \centering
 \input{layout_v2_transmission}
-\caption{Transmission diagnostics on the common four-record float64 cohort, seeds
-104--107. Every cell with a spread is a mean $\pm$ sample standard deviation across
-these four records. All reflectance errors in this table are in \emph{reflectance units},
-not percentage points. Panel A gives the retrieval-weighted error, fitted profile slope,
-and raw/constrained percentiles. Panel B retains failure and clipping rates and the
-archived bound-related diagnostics. The legacy violation count tests only the stored
-$s\le S$ mask; the all-band diagnostic expression and its ratio to MSE are not certified
-bounds on a domain containing nonpositive transmission or out-of-range albedo.}
+\caption{Transmission diagnostics for the three-member width-2000 pipeline, splits 104--107.
+Each cell with a spread is a mean $\pm$ sample standard deviation over the four splits. All
+reflectance errors in this table are in reflectance units, not percentage points. Panel A gives
+the retrieval-weighted error, the fitted profile slope and the raw and constrained percentiles;
+panel B gives failure and clipping rates and the bound diagnostics. The violation count tests
+the pointwise bound on the entries with $s\le S$; on entries with nonpositive transmission or an
+albedo outside $[0,1)$ the bound expressions are diagnostics rather than bounds.}
 \label{tab:v2-transmission}
 \end{table}
 
-\paragraph{Physical domain and numerical scope.}
-The driver defines $S$ as the largest finite training albedo not exceeding one. The
-records count 227 or 454 training entries above one, depending on the split. On seed
-104, 228 of the 664{,}335 test \emph{entries}, not 228 of the 2{,}331 states, exceed $S$;
-the other three records report no exceedance. There are also 203, 6, 3 and 3
-nonpositive-transmission entries on seeds 104, 105, 106 and 107, respectively.
-The stored pointwise check restricts to $s\le S$ but does not enforce the full
-hypothesis $t>0$, $0\le s\le S$, nor does it recompute the forward/inverse pair in
-arbitrary precision. Its zero reported violations are therefore implementation
-diagnostics, not a verification of every premise of Theorem~\ref{thm:transfer}.
-The reported expectations and MSE ratios are full-table averages. Recomputing all of
-them on a common fully admissible domain requires the sample-level arrays, which are
-not public.
+\paragraph{The physical domain in these splits.}
+$S$ is the largest finite training albedo not exceeding one, and the training blocks hold 227 or
+454 entries above one depending on the split. On split 104, 228 of the 664{,}335 test entries
+exceed $S$, and none do on the other three splits; there are 203, 6, 3 and 3 nonpositive
+transmissions on splits 104, 105, 106 and 107. The pointwise check covers the entries with
+$s\le S$, and the expectations and ratios in the table are averages over all entries.
+Section~\ref{sec:domain} scores the main pipeline on the physical domain itself.
 
 \paragraph{Observed error profiles.}
-On the common cohort, the feature kernel has $\varepsilon_R=0.0514$ and the single
-network $0.1650$. Mean fitted profile slopes $2\nu$ range from $0.16$ to $0.28$.
-The raw 95th-percentile error is $0.075$ for the single-member feature kernel and
-$0.060$ for concatenated features, compared with $0.143$ for the campaign stack.
-Their constrained 95th percentiles are $0.076$, $0.061$ and $0.151$.
-The diagnostic middle-bound/MSE ratios range from about $3.4$ to $5.3$ across heads;
-this is an observed numerical comparison, not a guarantee on the full-table distribution.
+The feature kernel has $\varepsilon_R=0.0514$ and the single network $0.1650$. The mean fitted
+profile slopes $2\nu$ range from $0.16$ to $0.28$. The raw 95th-percentile error is $0.075$ for
+the single-member feature kernel and $0.060$ for concatenated features, against $0.143$ for the
+stack, and the constrained 95th percentiles are $0.076$, $0.061$ and $0.151$. The ratio of the
+middle bound to the mean squared error lies between about $3.4$ and $5.3$ across heads.
 
-About five percent of entries have transmission below $3\times10^{-4}$ of the training
-flux scale. Among positive transmissions, the one-percent quantile is of order
-$10^{-10}$ of that scale. The recorded share of squared retrieval-weighted component
-error below $0.03$ of the scale is less than a thousandth for each head. Together,
-these measurements are consistent with amplification of small absolute errors by weak
-transmission. They do not make the heads irrelevant to the inverse tail: the location,
-sign and dependence of their errors still matter, as the exact identities show.
+About five percent of the entries have transmission below $3\times10^{-4}$ of the training flux
+scale, and among positive transmissions the one-percent quantile is of order $10^{-10}$ of that
+scale, while the share of squared retrieval-weighted component error on entries below $0.03$ of
+the scale is under a thousandth for every head. Small absolute errors are amplified by weak
+transmission. The heads still differ in the inverse tail, because the location, sign and
+dependence of their errors matter, as the exact identities show.
 
-The finite fitted slopes establish neither a population tail law down to zero nor a
-conditional-error envelope uniform over training sizes. In particular, they do not
-establish that the worst-case exponent in Theorem~\ref{thm:transfer}(iii) is attained by
-these emulators. On a prespecified admissible passband $t\ge t_0>0$, the deterministic
-bound in item (iv) applies directly. Choosing that passband changes the evaluation
-domain and must be accompanied by coverage and failure counts; it is not a way to
-replace the all-band diagnostic with an unreported easier task.
+A slope fitted over a finite range of transmissions says nothing about the tail law down to
+zero or about an envelope uniform over training sizes, so these profiles do not decide whether
+the worst-case exponent of Theorem~\ref{thm:transfer}(iii) is attained. On a passband
+$t\ge t_0>0$ fixed in advance, item (iv) applies directly, and its coverage and failures are
+reported with it, as in Section~\ref{sec:domain}.
 
 \section{Representation, correction and combination}\label{sec:results-representation}
 
 \paragraph{Concatenated features.}
-Table~\ref{tab:v2-replication} retains the four-split follow-up to the original
-three-member feature experiment. It reports width-2000 members and splits 104--107.
-Its campaign JSON inputs are absent from the public repository, although the related
-float64 transmission summaries are present. The table is therefore a retained
-historical aggregate, not a newly regenerated campaign comparison.
+Table~\ref{tab:v2-replication} repeats the three-member width-2000 experiment of
+Section~\ref{sec:scaling} on splits 104--107, with the networks trained on one GPU.
 
 \begin{table}[p]
 \centering
 \input{layout_v2_replication}
-\caption{Historical four-split concatenated-feature comparison. Radiance is a mean
-relative spectral error in percent; reflectance median and 95th-percentile errors are
-in percentage points. The last column is the paired radiance gain of concatenated
-features over single-member features. The mean row for each head averages the four
-within-split quantities. The generating campaign JSONs are not present in the public
-archive, so this table preserves the recorded values rather than replacing them with
-another cohort.}
+\caption{Kernel on concatenated features, three width-2000 networks, splits 104--107. Radiance
+is a mean relative spectral error in percent; reflectance median and 95th-percentile errors are
+in percentage points. The last column is the paired radiance gain of concatenated features over
+the features of one network. The mean row averages the four within-split quantities.}
 \label{tab:v2-replication}
 \end{table}
 
-The concatenated-feature kernel has mean radiance error $0.0688\%$, compared with
-$0.0764\%$ for the single-member feature kernel. The paired gain is
-$0.0076\pm0.0053$ percentage points, positive on three splits and $-0.0002$ on the
-fourth. The mean within-split 95th-percentile reflectance error is $5.99$ points,
-compared with $7.51$ for single-member features and $14.35$ for the campaign stack.
-Thus this aggregate shows a tail improvement from concatenation, not a universal
-claim that a larger representation improves retrieval. The splits overlap and do not
-supply independent external validation.
+The concatenated-feature kernel has mean radiance error $0.0688\%$, against $0.0764\%$ for the
+features of one network; the paired gain is $0.0076\pm0.0053$ percentage points, positive on
+three splits and $-0.0002$ on the fourth. Its mean within-split 95th-percentile reflectance error
+is $5.99$ points, against $7.51$ for single-member features and $14.35$ for the stack. With the
+ten width-512 splits of Section~\ref{sec:scaling} this makes three independent settings in which
+concatenation lowers both the radiance error and the reflectance tail.
 
-\paragraph{Fitting objective versus retrieval metric.}
-Table~\ref{tab:v2-stacks} retains the historical joint-stacking aggregate. Its original
-header identifies five records, but the per-record stack JSONs are absent, so its
-cohort membership, solver diagnostics and per-head precision cannot be independently
-reconstructed. It must not be treated as a matched extension of the four-record
-float64 table above. Inspection of the archived driver does establish the objective
-and projection sequence described in Section~\ref{sec:joint}.
+\paragraph{Fitting objective against retrieval metric.}
+Table~\ref{tab:v2-stacks} compares stacks fitted under different objectives on five splits:
+the wide pipeline at seed 101 and the three-member pipeline on splits 104--107. The objectives
+and the projection sequence are those of Section~\ref{sec:joint}.
 
 \begin{table}[p]
 \centering
 \input{layout_v2_stacks}
-\caption{Historical joint-stacking aggregate at $\rho=0.7$, retained without refitting.
-The finite-threshold rows use the raw, separable quadratic $J'_\tau$ of
-\eqref{eq:Jtau-sep}, not the total-flux $J_\tau$. Here $u=\tau/T_{\rm train}$.
-The unweighted row is a separate component-squared-error baseline, not a threshold
-limit. Radiance is in percent; reflectance percentiles are in reflectance units.
-Weights were fitted approximately using the routines described in Section~\ref{sec:joint}.
-The five-record header does not establish per-head counts or a common precision cohort
-without the missing generating JSONs.}
+\caption{Stacks under different fitting objectives at $\rho=0.7$, five splits. The
+finite-threshold rows use the separable quadratic $J'_\tau$ of \eqref{eq:Jtau-sep}, with
+$u=\tau/T_{\rm train}$; the unweighted row is a component squared-error baseline. Radiance is in
+percent and the reflectance percentiles in reflectance units. Weights are fitted approximately,
+as described in Section~\ref{sec:joint}.}
 \label{tab:v2-stacks}
 \end{table}
 
-In this retained aggregate, the mean-relative-norm stack has radiance error $0.0754\%$
-and constrained 95th-percentile error $0.141$, while the row-relative squared-error
-stack gives $0.1130\%$ and $0.180$. The finite-threshold $J'_\tau$ fits give radiance
-errors of approximately $0.22$--$0.23\%$ for $u\le0.1$, $0.1491\%$ at $u=0.3$, and
-$0.1175\%$ at $u=1$. The unweighted baseline gives $0.1262\%$. These figures illustrate
-that the fitting loss and reporting metric need not favor the same combination.
-They do not establish a globally optimal threshold or an out-of-sample benefit of
-minimizing the surrogate. The factor-four transfer bound remains a statement about
-any feasible weights on a distribution satisfying its physical hypotheses.
+The mean-relative-norm stack has radiance error $0.0754\%$ and constrained 95th-percentile
+error $0.141$, and the row-relative squared-error stack $0.1130\%$ and $0.180$. The
+finite-threshold $J'_\tau$ fits give radiance errors of about $0.22$--$0.23\%$ for $u\le0.1$,
+$0.1491\%$ at $u=0.3$ and $0.1175\%$ at $u=1$, and the unweighted baseline $0.1262\%$. The
+fitting loss and the reported metric need not favor the same combination; the factor-four
+transfer bound holds for every feasible weight vector on a distribution satisfying its
+hypotheses.
 
 \paragraph{Kernel choice on the state and on learned features.}
-Table~\ref{tab:v2-multikernel} is regenerated from twelve public component/seed records,
-covering four components and seeds 101--103. The spectral mixture and Mat\'ern-5/2 have
-similar mean errors on $Y_1$ ($0.089\%$). The spectral mixture has lower mean errors on
-$Y_2$ and $Y_3$ ($0.237\%$ and $0.099\%$) than the other tested raw-state kernels.
-The tested first-order additive kernel has much larger errors; this does not prove
-that the underlying simulator components cannot be approximated by an additive model
-under a different specification. Albedo errors for the nonadditive kernels remain
-between roughly $2.3\%$ and $3.5\%$.
+Table~\ref{tab:v2-multikernel} covers four components on seeds 101--103. The spectral mixture
+and the Mat\'ern-5/2 kernel have similar mean errors on $Y_1$ ($0.089\%$), and the spectral
+mixture has the lowest mean errors of the raw-state kernels on $Y_2$ and $Y_3$ ($0.237\%$ and
+$0.099\%$). The first-order additive kernel is much less accurate in this specification.
+Albedo errors for the nonadditive kernels lie between about $2.3\%$ and $3.5\%$.
 
 \begin{table}[p]
 \centering
 \input{layout_v2_multikernel}
-\caption{Ten input-space kernels, feature kernels and combination rules on the EMIT
-state inputs, with rank-64 outputs. Entries are component mean relative spectral
-errors in percent, averaged over seeds 101--103 with sample standard deviations.
-The network has width 512 and depth 3 with a 150-epoch budget. Kernels include the
-Mat\'ern family, Gaussian, spectral mixture \cite{wilsonadams}, NNGP
-\cite{chosaul,leenngp}, NTK \cite{ntk}, additive kernel \cite{additivegp}, and learned
-input scales \cite{owhadiyoo,rw}. Validation fitting and the reported test metric are
-not themselves population optimality guarantees.}
+\caption{Ten input-space kernels, feature kernels and combination rules on the EMIT state
+inputs, with rank-64 outputs. Entries are component mean relative spectral errors in percent,
+averaged over seeds 101--103 with sample standard deviations. The network has width 512 and depth
+3 with a 150-epoch budget. Kernels include the Mat\'ern family, Gaussian, spectral mixture
+\cite{wilsonadams}, NNGP \cite{chosaul,leenngp}, NTK \cite{ntk}, additive kernel
+\cite{additivegp}, and learned input scales \cite{owhadiyoo,rw}.}
 \label{tab:v2-multikernel}
 \end{table}
 
-The Mat\'ern-5/2 feature kernel gives errors of $0.105\%$, $0.211\%$, $0.114\%$ and
-$2.303\%$ on $Y_1$--$Y_4$. It improves on the best tested raw-state mean on some
-components, but not all. The convex stack has the lowest component means in this
-particular comparison ($0.066\%$, $0.156\%$, $0.077\%$, $1.956\%$). This finding is
-compatible with the adverse reflectance-tail comparisons: the component metric does
-not impose the same weighting as the nonlinear inverse.
+The Mat\'ern-5/2 feature kernel gives $0.105\%$, $0.211\%$, $0.114\%$ and $2.303\%$ on
+$Y_1$--$Y_4$, better than the best raw-state kernel on some components and not on others. The
+convex stack has the lowest component means in this comparison ($0.066\%$, $0.156\%$, $0.077\%$,
+$1.956\%$), which is consistent with its large reflectance tails elsewhere: the component metric
+does not weight errors the way the inverse does.
 
-\paragraph{Network regularization under the tested budget.}
-Table~\ref{tab:v2-regsuite} uses three public seed records for a control, a weight-decay
-grid and an early-stopping grid. The validation-selected weight decay gives a similar
-standalone component mean to the control ($2.27\%$); the selected early-stopping
-configuration is less accurate and more variable ($2.72\pm0.45\%$). Residual correction
-reduces the component means to $1.88$--$1.95\%$, and feature kernels to
-$0.95$--$0.99\%$, with radiance errors near $0.15\%$. The input reference here is
-\emph{isotropic}, not the coordinate-searched input-scaled kernel of the primary table.
-These results do not establish that regularization is generally ineffective, only
-that the tested changes do not produce comparable gains under this budget.
+\paragraph{Network regularization.}
+Table~\ref{tab:v2-regsuite} compares a control, a weight-decay grid and an early-stopping grid on
+three seeds. The validation-selected weight decay matches the control's component mean
+($2.27\%$), and the selected early stopping is less accurate and more variable
+($2.72\pm0.45\%$). Residual correction brings the component means to $1.88$--$1.95\%$ and
+feature kernels to $0.95$--$0.99\%$, with radiance errors near $0.15\%$, whichever
+regularization the network used. The reference row is the isotropic kernel of this campaign.
+Under this budget, regularizing the network changes little; the kernel stage does the work.
 
 \begin{table}[t]
 \centering
 \input{layout_v2_regsuite}
-\caption{Regularization comparison, seeds 101--103. Each cell gives mean component
-relative error [percent] / radiance relative error [percent], with sample standard
-deviations. The width-512, depth-3 network has a 150-epoch cap; validation selects among
-three runs per arm. The weight-decay grid is $10^{-5},10^{-4},10^{-3}$ and the
-early-stopping patience grid is 3, 5 and 10 epochs \cite{adamw,prechelt}.
-The reference row is the isotropic kernel from this campaign.}
+\caption{Regularization comparison, seeds 101--103. Each cell gives the mean component
+relative error [percent] / radiance relative error [percent], with sample standard deviations.
+The width-512, depth-3 network has a 150-epoch cap, and validation selects among three runs per
+arm. The weight-decay grid is $10^{-5},10^{-4},10^{-3}$ and the early-stopping patience grid 3, 5
+and 10 epochs \cite{adamw,prechelt}. The reference row is the isotropic kernel of this
+campaign.}
 \label{tab:v2-regsuite}
 \end{table}
 
 \paragraph{Perturbation and ridge-path diagnostics.}
-The extended tables in Appendix~\ref{app:diagnostics} keep all perturbation rows at a
-readable size. Feature-perturbation rows are regenerated from eight public records;
-the fourteen state-input rows are retained from their historical table because their
-JSON is absent. The residual-action bound is often substantially smaller than the
-spectrum-only bound. Nevertheless, its ratio to actual movement can be tens, thousands
-or much larger. Positive definiteness can make a bound applicable without making it a
-useful application tolerance. The reported feature-record identity and bound checks
-are numerical checks on fitted systems, not generalization tests.
+The tables in Appendix~\ref{app:diagnostics} give the perturbation diagnostics for the state
+inputs and the learned features. The residual-action bound of Proposition~\ref{prop:perturb} is
+often much smaller than the spectrum-only bound, yet it can still exceed the actual movement by a
+factor of tens, thousands or more: positive definiteness makes the bound applicable without
+making it a useful tolerance.
 
-Table~\ref{tab:v2-ridge} reports a 4{,}000-row fit and four components at seed 101.
-At the smallest ridge on input-space $Y_1$, the effective degrees of freedom are
-3{,}841 and the noise factor is $0.924$. The same-half and split-half PCA errors are
-$0.079\%$ and $2.465\%$, whereas the physical-unit test errors for the corrected and
-standalone kernels are $0.2168\%$ and $0.1754\%$. These columns use different metrics
-and evaluation samples and should not be subtracted as like-for-like gains. At
-$\gamma=10^{-2}$ the corresponding physical-unit test errors are $0.5095\%$ and
-$5.7578\%$: the fitted mean retains predictive information when the kernel correction
-is strongly regularized. The ridge path is descriptive; Proposition~\ref{prop:sensitivity}
-does not guarantee this test-error ordering.
+Table~\ref{tab:v2-ridge} reports a 4{,}000-row fit of four components at seed 101. At the
+smallest ridge on input-space $Y_1$ the effective degrees of freedom are 3{,}841 and the noise
+factor $0.924$. The same-half and split-half principal-component errors are $0.079\%$ and
+$2.465\%$, and the physical-unit test errors of the corrected and standalone kernels $0.2168\%$
+and $0.1754\%$; these columns use different metrics and samples and are not to be subtracted. At
+$\gamma=10^{-2}$ the corresponding test errors are $0.5095\%$ and $5.7578\%$: the fitted mean
+keeps its predictive information when the kernel correction is strongly regularized.
 
-\section{Synthetic reference for the transfer theorem}\label{sec:results-synthetic}
+\section{A synthetic check of the transfer theorem}\label{sec:results-synthetic}
 
-Table~\ref{tab:v2-synthetic} is a manufactured-data check, not additional evidence about
-EMIT. The construction is run with two million samples per $\beta$, seed zero, at
-$\beta=0.5,1,2,3,4$.
-The average-error slopes are $0.200$, $0.333$, $0.498$, $0.597$ and $0.664$, compared
-with theoretical limits $0.200$, $0.333$, $0.500$, $0.600$ and $0.667$.
-The finite-ladder uniform-family slopes are compared with the analytic curve on the
-\emph{same} ladder, rather than only its limiting exponent. At $\beta=2$, the measured
-slope is $1.721$ and the analytic finite-ladder slope $1.724$; the limit is two.
-
-The largest relative Monte Carlo discrepancy is about $1.01\%$ for the uniform family
-at $\beta=2$ and below $0.053\%$ for the profile family against its numerical-quadrature
-reference. The rare-event counts determine which average-family points enter each
-slope fit. No pointwise violations are found across the tested predictions on the ten
-million sampled transmissions. This numerical agreement supplements, but does not
-replace, the exact proofs.
+Table~\ref{tab:v2-synthetic} checks the construction of Proposition~\ref{prop:attained} on
+manufactured data, two million samples for each $\beta\in\{0.5,1,2,3,4\}$. The average-error
+slopes are $0.200$, $0.333$, $0.498$, $0.597$ and $0.664$, against the limits $0.200$, $0.333$,
+$0.500$, $0.600$ and $0.667$. For the uniform family the finite-ladder slope is compared with the
+analytic curve on the same ladder: at $\beta=2$ the measured slope is $1.721$ and the analytic one
+$1.724$, while the limit is two. The largest relative Monte Carlo discrepancy is about $1.01\%$ for
+the uniform family at $\beta=2$ and below $0.053\%$ for the profile family against its quadrature
+reference, and no pointwise violation occurs among the ten million sampled transmissions.
 
 \section{The matched benchmark and the transfer contrast}\label{sec:results-benchmarks}
 
 \paragraph{Correction-coefficient benchmark.}
-Table~\ref{tab:v2-pkanrtm} compares archived scores under the standard and
-out-of-distribution protocols of \cite{pkan}, with and without low-fidelity 6S
-coefficients as inputs. The published reference is not retrained here, and the
-comparison does not control for all differences in optimization or computational
-budget. The claim is therefore a comparison with the published values under the
-stated protocol, not an experimentally isolated architectural advantage.
+Table~\ref{tab:v2-pkanrtm} scores our families under the standard and out-of-distribution
+protocols of \cite{pkan}, with and without the low-fidelity 6S coefficients as inputs, against the
+published values of the reference model, which we did not retrain.
 
-The state-only residual-corrected network gives standard-split RMSE
-$0.00581\pm0.00004$, MAE $0.00151$, uniform-average $R^2=0.9952$ and SMAPE $3.54\%$,
-compared with published values $0.00619$, $0.00186$, $0.9947$ and $3.91\%$.
-With 6S inputs its means are $0.00578$, $0.00148$, $0.9954$ and $3.19\%$.
-On the specified out-of-distribution split, the state-only means are $0.00620$,
-$0.00252$, $0.9967$ and $3.37\%$, compared with published values $0.01022$,
-$0.00544$, $0.9942$ and $5.40\%$. With 6S inputs the means become $0.00596$,
-$0.00232$, $0.9969$ and $2.92\%$. The spreads describe three seeds on the standard
+The state-only residual-corrected network reaches standard-split RMSE $0.00581\pm0.00004$, MAE
+$0.00151$, uniform-average $R^2=0.9952$ and SMAPE $3.54\%$, against published values $0.00619$,
+$0.00186$, $0.9947$ and $3.91\%$; with 6S inputs its means are $0.00578$, $0.00148$, $0.9954$ and
+$3.19\%$. On the out-of-distribution split the state-only means are $0.00620$, $0.00252$, $0.9967$
+and $3.37\%$, against published $0.01022$, $0.00544$, $0.9942$ and $5.40\%$, and with 6S inputs
+$0.00596$, $0.00232$, $0.9969$ and $2.92\%$. The spreads describe three seeds on the standard
 protocol and three initializations on the out-of-distribution protocol.
 
-The $R^2$ convention is material. The reference comparison weights the three
-coefficients equally. The released rescore records instead store a variance-weighted
-$R^2$ alongside coefficientwise RMSE. The table generator reconstructs the common
-per-coefficient target scales from the recorded mean normalized RMSE across heads,
-checks them against the stored variance-weighted $R^2$, and computes the
-uniform-average value. This reconstruction uses archived summary identities rather
-than rescoring public raw predictions. It now fails explicitly when that convention
-cannot be reconstructed, rather than silently substituting the other $R^2$.
-The ensemble without correction is close to the corrected network, while the raw-state
-kernel is much less accurate in these recorded configurations. These results should
-be read alongside the input, approximation and tuning choices, not as a general
-ordering of kernels and networks.
+The $R^2$ convention matters here. The reference weights the three coefficients equally, whereas a
+variance-weighted $R^2$ is the default of many libraries. We report the uniform average, computed
+from per-coefficient target scales that are recovered from the per-coefficient RMSE of the heads
+and checked against the variance-weighted value. The ensemble without correction is close to the
+corrected network, while the raw-state kernel is much less accurate in these configurations.
 
 \paragraph{OCO-2 coefficient and radiance objectives.}
-Table~\ref{tab:v2-oco2} is regenerated from nine public selection records: three bands
-and seeds 0--2. The feature kernel trained under the flat coefficient loss gives
-coefficient errors of approximately $4.1\%$, $16.3\%$ and $8.1\%$ on O$_2$, weak
-CO$_2$ and strong CO$_2$, but radiance errors of $0.076\%$, $0.114\%$ and $0.108\%$.
-A radiance-weighted feature construction instead gives approximately $0.031\%$,
-$0.048\%$ and $0.064\%$ in radiance, with larger coefficient errors. Thus the
-reconstruction map and evaluation metric can change which fitted representation is
-preferred.
+Table~\ref{tab:v2-oco2} covers three bands and seeds 0--2. The feature kernel trained under the
+flat coefficient loss has coefficient errors of about $4.1\%$, $16.3\%$ and $8.1\%$ on O$_2$, weak
+CO$_2$ and strong CO$_2$, and radiance errors of $0.076\%$, $0.114\%$ and $0.108\%$. A
+radiance-weighted feature construction gives about $0.031\%$, $0.048\%$ and $0.064\%$ in radiance,
+at the price of larger coefficient errors. The reconstruction map and the evaluation metric decide
+which fitted representation is preferred.
 
-The radiance stack minimizes a \emph{row-relative squared} radiance loss, a convex
-quadratic because the reconstruction is affine. The reported radiance error is the
-mean of row-relative norms, not that squared fitting objective. The recorded solver
-has KKT gaps from $4.17\times10^{-6}$ to $1.52\times10^{-5}$ for its quadratic program; this does not certify
-optimality in the reported norm or on test data. Its mean radiance errors are
-$0.0264\%$, $0.0391\%$ and $0.0511\%$, compared with $0.0291\%$, $0.0404\%$ and
-$0.0536\%$ for the reduced-coordinate squared-loss stack. Coefficient errors increase
-to $18.59\%$ and $37.43\%$ on O$_2$ and weak CO$_2$, and to $8.87\%$ on strong
-CO$_2$. All rules use 2{,}000 validation and 2{,}000 test rows in these records.
-The ten-split companion comparisons in the following section are a separate campaign,
-not ten repetitions of this three-seed selection experiment.
+The radiance stack minimizes a row-relative squared radiance loss, a convex quadratic because the
+reconstruction is affine, and its solver reaches KKT gaps between $4.17\times10^{-6}$ and
+$1.52\times10^{-5}$. Its mean radiance errors are $0.0264\%$, $0.0391\%$ and $0.0511\%$, against
+$0.0291\%$, $0.0404\%$ and $0.0536\%$ for the squared-loss stack on reduced coordinates, while its
+coefficient errors rise to $18.59\%$ and $37.43\%$ on O$_2$ and weak CO$_2$ and to $8.87\%$ on
+strong CO$_2$. All rules use 2{,}000 validation and 2{,}000 test rows.

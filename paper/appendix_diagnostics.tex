@@ -1,11 +1,8 @@
 \clearpage
 \section{Extended diagnostic tables}\label{app:diagnostics}
 
-The following tables preserve the detailed perturbation, ridge, synthetic and external
-comparison results without compressing long tables onto a single page. The public
-record inventory and regeneration limitations are documented separately. Numerical
-bounds are distinguished from approximation tolerances, and fitting objectives from
-reporting metrics.
+This appendix collects the perturbation, ridge-path, synthetic and external-benchmark tables
+referred to in Sections~\ref{sec:results-representation}--\ref{sec:results-benchmarks}.
 
 \input{layout_v2_perturbation}
 \input{layout_v2_ridge}
@@ -14,13 +11,11 @@ reporting metrics.
 \begin{table}[p]
 \centering
 \input{layout_v2_synthetic}
-\caption{Manufactured transfer families, regenerated with seed zero and two million
-samples for each $\beta$. The first panel compares finite-ladder slopes, including the
-analytic curve on that same ladder. The second reports maximum relative discrepancies
-between Monte Carlo MSE and the uniform-family analytic or profile-family quadrature
-reference, and total pointwise violation counts. These are numerical checks of the
-construction, not fitted EMIT rates. The source JSON also records rare-event counts and
-the points retained in each average-family slope fit.}
+\caption{Manufactured transfer families, seed zero, two million samples for each $\beta$. The
+first panel compares finite-ladder slopes with the analytic curve on the same ladder. The
+second reports the largest relative discrepancies between the Monte Carlo mean squared error and
+the analytic value (uniform family) or the quadrature value (profile family), and the total
+number of pointwise violations.}
 \label{tab:v2-synthetic}
 \end{table}
 \clearpage
