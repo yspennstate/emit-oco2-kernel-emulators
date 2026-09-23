@@ -243,7 +243,8 @@ without change. We use the 9{,}722 of its 50{,}000 states that carry all thirtee
 band B10 at 1372\,nm, which lies in a strong water-vapour absorption band and is nearly opaque. Its
 median transmittance is $9\times10^{-6}$ and a third of its entries lie below $10^{-6}$, while the
 first percentile of every other band is above $0.2$. The seven state variables are the inputs, and the
-driver's four components are filled with $Y_2=T$ and a negligible $Y_3=10^{-6}T$.
+transmission enters as $Y_2=T$ with a negligible $Y_3=10^{-6}T$, so that the pipeline runs
+unchanged.
 
 The pipeline of Section~\ref{sec:methods} was run on these arrays with no change to any family or
 hyperparameter grid, at output rank 13 (all bands), on ten splits of the same form (7{,}875 training,

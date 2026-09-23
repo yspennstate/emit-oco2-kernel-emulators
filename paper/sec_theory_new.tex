@@ -223,7 +223,7 @@ where, writing $k_x=k(X_n,x)$ and $a_x=(K+\lambda I)^{-1}k_x$,
 \]
 This follows by applying the RKHS Cauchy--Schwarz inequality to the residual and
 $k(x,\cdot)-\sum_i(a_x)_i k(x_i,\cdot)$.
-Here $B_\ell$ is a bound on the residual RKHS norm, a hypothesis and not an observed certificate, and the second term zero for
+Here $B_\ell$ is a bound on the residual RKHS norm, a hypothesis and not an observed certificate, and the second term is zero for
 deterministic simulator targets, which is the form used for EMIT. A perturbed system adds the bound
 $\Delta_\ell(x)$ of Proposition~\ref{prop:perturb}. If $|\widehat z_{j,\ell}-z_{j,\ell}|\le u_{j,\ell}$, then
 \begin{equation}\label{eq:chain-recon}
@@ -271,11 +271,11 @@ $e_R\le|\widetilde e_a|+R|\widetilde e_t|+R^2t|\widetilde e_s|$; split the
 expectation at $t=\tau$ and apply the three-term square bound on $\{t>\tau\}$.
 This inequality holds for every feasible $w$, not only an optimizer.
 
-\paragraph{The implemented separable surrogate.}
-The diagnostic driver \texttt{code/joint\_stack.py} combines $Y_2$ and $Y_3$ with
-separate weight vectors. It projects each base albedo onto $[0,S]$ before fitting but
-leaves the base fluxes unprojected. With
-$\widetilde e_j=\widetilde Y_j-Y_j$ for $j=2,3$, its finite-threshold fitting objective is
+\paragraph{A separable surrogate.}
+The stacks of Table~\ref{tab:v2-stacks} combine $Y_2$ and $Y_3$ with separate weight
+vectors. Each base albedo is projected onto $[0,S]$ before fitting, and the base fluxes are
+not projected. With
+$\widetilde e_j=\widetilde Y_j-Y_j$ for $j=2,3$, their finite-threshold fitting objective is
 \begin{equation}\label{eq:Jtau-sep}
 J'_\tau(w)=\E_P\!\left[
 \frac{\widetilde e_a^2+R^2\widetilde e_2^2+R^2\widetilde e_3^2
@@ -295,7 +295,7 @@ The same argument now uses four squared terms and gives
 \begin{equation}\label{eq:Jtau-sep-bound}
 \E_P|\bar\rho_w-\rho|^2\le R^2F_t(\tau)+4J'_\tau(w).
 \end{equation}
-The factor-three statement is therefore not the bound for the reported separable fit.
+For the separable fit the factor is therefore four rather than three.
 Both statements require the physical hypotheses on the distribution being averaged;
 full-table statistics that include entries outside those hypotheses are not certificates
 of either bound.
@@ -303,8 +303,8 @@ of either bound.
 Putting projection \emph{inside} a squared fitting loss is a different problem and need
 not preserve convexity. On $0\le w\le1$, for example,
 $g(w)=(\max\{2w-1,0\}-1)^2$ satisfies
-$g(1/2)=1>(g(0)+g(1))/2=1/2$. This counterexample does not apply to the raw-error
-quadratic actually fitted by the driver.
+$g(1/2)=1>(g(0)+g(1))/2=1/2$. The raw-error quadratic \eqref{eq:Jtau-sep} is not of
+this kind.
 
 \paragraph{Forward-optimal weights.}
 A stack fitted on a forward objective weights every band alike, while the retrieval divides the
@@ -360,8 +360,8 @@ the floor $10^{-12}T_{\rm train}$ of Section~\ref{sec:tq-domain}. The bound \eqr
 for $J_\tau$ involves neither quantity.
 
 \paragraph{Numerical weights and threshold convention.}
-The driver solves a nonnegative least-squares problem with a heavily weighted row penalizing
-$\sum_h w_h-1$ and then normalizes the nonnegative weights to sum to one. This gives feasible
+The weights are computed by nonnegative least squares with a heavily weighted row penalizing
+$\sum_h w_h-1$, and are then normalized to sum to one. This gives feasible
 simplex weights, though not an exact solution of the equality-constrained quadratic program,
 and the mean-relative-norm arm runs six iteratively reweighted least-squares sweeps from the
 squared-loss solution. The weights reported below are therefore approximate minimizers.
