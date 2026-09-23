@@ -73,7 +73,7 @@ its output is `domain_audit.log` beside it.
 | `fig:curves` | `emit_curves.png` | `make_scaling_tables.py` | the records |
 | `fig:bands` | `emit_quantiles_top_models.png` | `make_band_figure.py` | the arrays and the float64 test predictions of `tq_s101_raw_w512` |
 | `fig:tq-profile` | `tq_profile_w512.png` (and `tq_profile_w2000.png`) | `make_profile_figure.py w512` | `results/target_quality/profile_by_arm_s*_w512.json`, written by `profile_by_arm.py` |
-| `fig:lrt-bands` | `lrt_band_p95.png` | `make_lrt_band_figure.py` | the libRadtran arrays and the float64 test predictions of the `lrtc_*` lanes; the values are in `results/libradtran/lrt_band_p95.json` |
+| `fig:lrt-bands` | `lrt_band_p95.png` | `make_lrt_band_figure.py` | the libRadtran arrays and the float64 test predictions of the `lrtc_*` runs; the values are in `results/libradtran/lrt_band_p95.json` |
 
 ```sh
 EMIT_DATA=/path/to/emit python code/make_data_figures.py --predictions /path/to/predictions
@@ -89,12 +89,12 @@ two figure scripts are available on request.
 ### Training on admissible targets
 
 The protocol is `results/target_quality/PREREGISTRATION_TQ_20260923.md` with its first addendum; their SHA-256 are in
-`PREREGISTRATION.sha256` beside them, as are the second addendum and its withdrawal. Each of the sixty lanes (ten
+`PREREGISTRATION.sha256` beside them, as are the second addendum and its withdrawal. Each of the sixty runs (ten
 splits, three training policies, two configurations) runs `code/emit_campaign.py` with `--training-policy raw`,
 `admissible` or `matched-unfiltered`, then scores the float64 test predictions with `code/conditioned_reflectance.py`
 and `code/band_transfer_check.py`. Seeds 101 to 105 ran with `code/lanes/tq_lane_dgx.py` and seeds 106 to 110 with
-`code/lanes/tq_kaggle_lane.py` (one Kaggle kernel per lane, written by `make_tq_kernels.py`). The float64
-predictions, about 150 MB per lane, are available on request.
+`code/lanes/tq_kaggle_lane.py` (one Kaggle kernel per run, written by `make_tq_kernels.py`). The float64
+predictions, about 150 MB per run, are available on request.
 
 `code/check_tq_reproduction.py` compares each raw-arm record with the record of the same split in the main campaign:
 the kernel and cubic families are deterministic given the split and agree to rounding, and the networks and every
@@ -117,9 +117,9 @@ python code/make_libradtran_arrays.py /path/to/data/pkanrtm/paired_arrays.npz /p
 The first command caches the numeric rows (`paired_arrays.npz`) and the aerosol model and atmosphere profile of every
 row (`paired_cats.npz`). The digests of the sources and of every array are in `results/libradtran/MANIFEST_cats.json`.
 
-The sixteen-input lanes run `code/lanes/lrtc_kaggle_lane.py` through `make_lrtc_kernels.py` on Kaggle and
+The sixteen-input runs use `code/lanes/lrtc_kaggle_lane.py` through `make_lrtc_kernels.py` on Kaggle and
 `code/lanes/lrtc_lane_dgx.py` on the Caltech DGX, with the same commit and package versions;
-`results/libradtran/MACHINES.json` records which seed ran where. The seven-input lanes run `lrt_kaggle_lane.py` through
+`results/libradtran/MACHINES.json` records which seed ran where. The seven-input runs use `lrt_kaggle_lane.py` through
 `make_lrt_kernels.py`. `make_lrt_tables.py` evaluates the three hypotheses of the protocol on every seed and writes
 `results/libradtran/lrt_summary.json` (or `lrt_summary_numeric.json`). The transmission statistics quoted in the
 section (the median of band B10, the share of its entries below 1e-6, the smallest transmission of the other
@@ -188,8 +188,8 @@ not included. The two correction-coefficient configurations of the corpora table
 `pkanrtm_s*_lowfi_bench.json`, are different experiments and are not pooled.
 
 The correction-coefficient table `tab:v2-pkanrtm` follows the benchmark's own protocol: the categorical inputs
-(`--pkan_cats 1`), the release's standard split (`--pkan_split official`) and its out-of-distribution split. Its lanes
-ran on Kaggle with `code/lanes/pkanrtm_bench.py` and `code/lanes/pkanrtm_std.py`, which download the release, add the
+(`--pkan_cats 1`), the release's standard split (`--pkan_split official`) and its out-of-distribution split. It was
+run on Kaggle with `code/lanes/pkanrtm_bench.py` and `code/lanes/pkanrtm_std.py`, which download the release, add the
 out-of-distribution split to `bench_data.py` at run time and call `bench_run.py`; `code/rescore_saved.py` computes the
 benchmark's metrics from the saved predictions into `results/pkanrtm/rescored_pkanrtm.json`. The turbulent-radiative-layer row uses
 the three rank-256 runs. The runs of The Well share the supplied split, so their spread measures initialization rather

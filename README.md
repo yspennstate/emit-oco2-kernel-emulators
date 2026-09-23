@@ -31,8 +31,8 @@ bands where the retrieval error is large.
 ## Layout
 
 - `paper/`: the manuscript, its tables (generated from the records) and the compiled PDF.
-- `code/`: drivers, scoring, table and figure scripts, and tests. `code/lanes/` holds the exact lane scripts of the
-  training-target experiment, the libRadtran comparison and the correction-coefficient benchmark.
+- `code/`: drivers, scoring, table and figure scripts, and tests. `code/lanes/` holds the scripts that ran each fit of
+  the training-target experiment, the libRadtran comparison and the correction-coefficient benchmark.
 - `results/`: one JSON record per run, with the digests of its data and split indices. `results/target_quality/` and
   `results/libradtran/` also hold the protocols of those two experiments with the SHA-256 of each, recorded before the
   first fit; `results/confirmation/` holds the protocol, the frozen hyperparameters with their SHA-256, the scripts
