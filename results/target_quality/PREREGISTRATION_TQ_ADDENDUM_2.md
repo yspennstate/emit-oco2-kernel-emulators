@@ -1,6 +1,6 @@
 # Addendum 2 to the training-target sensitivity protocol (PREREGISTRATION_TQ_20260923.md, sha256 47e61ba922e19a53..; Addendum 1, sha256 0aab57aa0c1cabe3..)
 
-Written 2026-09-23 06:2xZ. At this time the three seed-101 lanes at width 512 have finished on the DGX and one Kaggle
+Written 2026-09-23 06:1xZ. At this time the three seed-101 lanes at width 512 have finished on the DGX and one Kaggle
 lane (seed 106, admissible, width 2000) has finished, and their scores had been seen. Nothing below depends on them.
 The change concerns where one seed runs, not what is fitted, scored or reported.
 
