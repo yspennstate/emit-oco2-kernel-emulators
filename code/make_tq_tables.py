@@ -25,7 +25,7 @@ RES = os.path.join(W, "results", "target_quality")
 OUT = os.path.join(W, "paper")
 ARMS = ("raw", "admissible", "matched")
 FLOORS = (1e-12, 1e-3, 1e-2)
-MACHINE = {s: "DGX" for s in range(101, 105)} | {s: "Kaggle" for s in range(105, 111)}   # addenda 1 and 2
+MACHINE = {s: "DGX" for s in range(101, 106)} | {s: "Kaggle" for s in range(106, 111)}   # addendum 1 (addendum 2 withdrawn)
 NAMES = {"ridge3": "cubic ridge", "krr": "isotropic kernel", "ard": "input-scaled kernel", "dnn": "network",
          "dnn_corr": "network + residual kernel", "dkr": "kernel on features", "stack": "convex stack"}
 ORDER = ("ridge3", "krr", "ard", "dnn", "dnn_corr", "dkr", "stack")
