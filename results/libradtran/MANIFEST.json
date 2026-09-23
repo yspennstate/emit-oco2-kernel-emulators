@@ -1,0 +1,59 @@
+{
+ "source": "paired_arrays.npz",
+ "source_sha256": "5eea45a235e3b31e93e885833e0d3a4a685728118d15c58701c05678c6f21b3a",
+ "states_total": 50000,
+ "states_kept": 9722,
+ "rule": "states with all thirteen bands",
+ "bands": [
+  "B1",
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "B8",
+  "B8A",
+  "B9",
+  "B10",
+  "B11",
+  "B12"
+ ],
+ "wavelength_nm": {
+  "B1": 445.0,
+  "B2": 520.0,
+  "B3": 560.0,
+  "B4": 654.0,
+  "B5": 701.0,
+  "B6": 743.0,
+  "B7": 779.0,
+  "B8": 789.0,
+  "B8A": 871.0,
+  "B9": 942.0,
+  "B10": 1372.0,
+  "B11": 1639.0,
+  "B12": 2256.0
+ },
+ "inputs": [
+  "sza_deg",
+  "vza_deg",
+  "raa_deg",
+  "aod550",
+  "cwv_cm",
+  "o3_cm",
+  "elev_km"
+ ],
+ "components": {
+  "Y1": "rho_path",
+  "Y2": "T_total",
+  "Y3": "1e-06 * T_total",
+  "Y4": "spher_alb"
+ },
+ "sha256": {
+  "X": "f02293c76ae8fc244c9ab2e83901f4033f3db19c0cfa436a333abe69f59af3f6",
+  "Y1": "6789c57d0c88f1d336bc4576b93f5b4a53a933c142c62301e558eabcb3db481c",
+  "Y2": "faf0af8ee5e5c6c56e34b830307714ebb4e85c6e23c54a8154cb2979b7cbc12b",
+  "Y3": "15c24d29a063631479496924c5c053d76831446d302119787ef7171159add765",
+  "Y4": "68701724a682b6b6e060b1f6cff59c99bc4f4283437202c812fedc1ef85c89fd"
+ }
+}
