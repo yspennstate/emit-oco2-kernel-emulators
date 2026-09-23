@@ -508,9 +508,10 @@ $-0.435$, is the steeper. On the albedo the per-input slope is $+0.01$.
 
 The corrected network is below both of its parents on radiance at every split from $2{,}000$
 rows on, and at no split at $500$ or $1{,}000$ rows, where its error lies between the network's
-and the kernel's. On $Y_2$ and $Y_3$ it is below both at every split at the two largest sizes; on
-$Y_1$ it never is, the isotropic kernel alone being the better head at every size ($0.084\%$
-against $0.099\%$ at the full block). Its exponent is close to the network's and its level close
+and the kernel's. On $Y_2$ and $Y_3$ it is below both at every split at the two largest sizes. On
+$Y_1$ the isotropic kernel has the lower mean at every size ($0.084\%$ against $0.099\%$ at the
+full block), and the corrected network is below both parents at no split short of the full block
+and at two of ten there. Its exponent is close to the network's and its level close
 to the kernel's. Section~\ref{sec:identity} gives the exact residual decomposition behind this
 behavior.
 
