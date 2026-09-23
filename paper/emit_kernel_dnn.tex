@@ -577,6 +577,15 @@ networks, $6{,}000$ coordinates, reaches $0.074\%$ against $0.083\%$ for a singl
 on those splits, lower on all three, and $0.043$ against $0.051$ reflectance points; there it is
 level with the six-head stack fitted on the same splits ($0.074\%$).
 
+Concatenation averages metrics, where a stack or an ensemble averages predictions. After
+standardization, the squared distance between two states in the concatenated features is the sum
+of their squared distances in the features of the individual networks, so a kernel of the Euclidean
+distance on the concatenation is a function of the members' mean squared distance; for a Gaussian
+kernel it is the product of the members' kernels at a common bandwidth. If the members' squared
+distances differ from a common metric by fluctuations that are independent across initializations,
+the mean divides the variance of those fluctuations by the number of members, and the kernel is
+fitted on a steadier metric than any single network provides.
+
 \subsection{Full-data tuning and gradient-based metrics}\label{sec:retune}
 
 We compare hyperparameter selection on a 6{,}000-row subsample with selection on all
