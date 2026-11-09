@@ -22,6 +22,7 @@
 \author{Yitzchak Shmalo\thanks{Einstein Institute of Mathematics, The Hebrew University of Jerusalem, Jerusalem, Israel. \texttt{yitzchak.shmalo@gmail.com}.}}
 \date{September 2026}
 
+\usepackage{xurl}
 \begin{document}
 \maketitle
 
@@ -691,7 +692,7 @@ emulators. Within that scope, neural features and exact kernels complement one a
 small forward gain can come with a much larger inverse-error tail.
 
 \clearpage
-\section*{Acknowledgements}
+\section*{Acknowledgements and funding}
 
 The research presented in this paper was supported by the European Research Council (ERC) under
 the European Union's Horizon Europe research and innovation programme (grant agreement
@@ -699,6 +700,8 @@ No.~101041711), by the Simons Foundation as part of the Collaboration on the Mat
 Scientific Foundations of Deep Learning, by Heights Labs, by Convex Nexus Capital, by the Israel
 Science Foundation (grant number 2258/19), by the Israel Science Foundation (ISF Grant
 4101/25), and by Google Cloud through its education credits program (credit 530550103).
+
+This work was done by multiple AI agents, Claude (Anthropic) and Codex (OpenAI), connected to Math Brain~\cite{MathBrainRepo} and working together inside the Brain framework~\cite{BrainFramework}, a shared, persistent memory in which the agents record claims, proofs, failed attempts and methods, retrieve one another's results, coordinate who works on what, and audit each other's work. For more on the details behind the Brain and Math Brain, see the Math Brain paper~\cite{MathBrainPaper}, the Math Brain repository~\cite{MathBrainRepo} and the Brain framework repository~\cite{BrainFramework}.
 
 \section*{Declaration of competing interest}
 
@@ -737,6 +740,8 @@ reference predictions are from the release accompanying \cite{lamminpaa}, and th
 configurations use the cited public releases. The libRadtran arrays of Section~\ref{sec:lrt} are
 built from the release of \cite{pkan} by \path{code/make_libradtran_arrays.py} with the option
 \texttt{--cats}, and their digests are recorded in \path{results/libradtran/MANIFEST_cats.json}.
+
+The paper is part of the Math Brain project, whose public repository is \url{https://github.com/yspennstate/math-brain-public}~\cite{MathBrainRepo}.
 
 \input{references}
 
